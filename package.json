@@ -1,0 +1,17 @@
+{
+  "name": "careervector",
+  "version": "1.0.0",
+  "description": "CareerVector – Bridging the Employability Gap for Engineering Graduates",
+  "scripts": {
+    "install:all": "npm install && cd backend && npm install && cd ../frontend && npm install",
+    "dev": "concurrently \"npm run ml\" \"npm run backend\" \"npm run frontend\"",
+    "ml": "cd ml-service && python app.py",
+    "backend": "cd backend && node server.js",
+    "frontend": "cd frontend && npm run dev",
+    "build": "cd frontend && npm run build",
+    "start": "concurrently \"npm run ml\" \"npm run backend\""
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}

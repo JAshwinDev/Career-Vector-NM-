@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <title>CareerVector</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+
+<body>
+  <div class="popup-shell">
+    <header class="header">
+      <div class="brand">
+        <div class="logo">CV</div>
+        <div class="brand-copy">
+          <div class="header-title">CareerVector</div>
+          <div class="header-sub">Resume + LinkedIn job match engine</div>
+        </div>
+      </div>
+      <div class="header-actions">
+        <button class="pill" id="openDashboardBtn">Open dashboard</button>
+        <span class="header-badge">v1.0</span>
+      </div>
+    </header>
+
+    <div class="tabs">
+      <button class="tab active" data-tab="analysis">Analysis</button>
+      <button class="tab" data-tab="upload">Upload</button>
+    </div>
+
+    <main class="content">
+      <section class="panel active" id="panel-analysis">
+        <div class="hero-card">
+          <div>
+            <div class="hero-pretitle">LinkedIn match</div>
+            <h1>Analyze job fit in one click</h1>
+            <p>Open any LinkedIn job listing, then use this extension to compare the role against your uploaded resume and skill profile.</p>
+          </div>
+          <button class="btn btn-primary" id="analyzeJobBtn">Analyze current job</button>
+        </div>
+
+        <div class="info-grid">
+          <div class="info-card">
+            <span class="info-label">Step 1</span>
+            <p>Upload your resume and extract skills.</p>
+          </div>
+          <div class="info-card">
+            <span class="info-label">Step 2</span>
+            <p>Complete the quick skill quiz for better matching.</p>
+          </div>
+          <div class="info-card">
+            <span class="info-label">Step 3</span>
+            <p>Run analysis on a LinkedIn job listing.</p>
+          </div>
+        </div>
+
+        <div class="status" id="analysis-status"></div>
+      </section>
+
+      <section class="panel" id="panel-upload">
+        <div class="upload-card">
+          <label for="resumeFile">Resume upload</label>
+          <div class="dropzone" id="dropzone" tabindex="0">
+            <div class="dropzone-icon">📄</div>
+            <div class="dropzone-title">Drop PDF here</div>
+            <div class="dropzone-sub">or click to browse — max 10MB</div>
+          </div>
+          <input type="file" id="resumeFile" accept=".pdf" hidden />
+          <div class="file-info" id="fileInfo"></div>
+        </div>
+        <button class="btn btn-primary" id="uploadBtn" disabled>Upload resume</button>
+        <div class="status" id="upload-status"></div>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-status">
+        <span class="status-dot" id="server-dot"></span>
+        <span id="server-label">Checking backend</span>
+      </div>
+      <a class="footer-link" href="#" id="footer-dashboard-link">Go to dashboard</a>
+    </footer>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+
+</html>

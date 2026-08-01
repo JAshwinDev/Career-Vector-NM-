@@ -1,0 +1,311 @@
+{
+  "roles": {
+    "Software Developer": {
+      "description": "Build and maintain software applications across web, desktop, or mobile platforms.",
+      "required_skills": {
+        "Python": 0.8, "Java": 0.7, "JavaScript": 0.9, "Data Structures": 0.9,
+        "Algorithms": 0.8, "Git": 0.9, "REST API": 0.8, "SQL": 0.6,
+        "HTML": 0.7, "CSS": 0.7, "React": 0.7, "Node.js": 0.6,
+        "OOP": 0.9, "Linux": 0.6, "Docker": 0.5, "Unit Testing": 0.6
+      },
+      "roadmap": {
+        "Power BI": {"duration": "2 weeks", "resources": [{"title": "Power BI Full Course", "url": "https://www.youtube.com/watch?v=TmhQCQr_ECg", "type": "video"}]},
+        "Docker": {"duration": "3 weeks", "resources": [{"title": "Docker Crash Course", "url": "https://www.youtube.com/watch?v=3c-iBn73dDE", "type": "video"}, {"title": "Docker Docs", "url": "https://docs.docker.com/get-started/", "type": "docs"}]},
+        "React": {"duration": "4 weeks", "resources": [{"title": "React Full Course – freeCodeCamp", "url": "https://www.youtube.com/watch?v=bMknfKXIFA8", "type": "video"}, {"title": "React Official Docs", "url": "https://react.dev/learn", "type": "docs"}]},
+        "Data Structures": {"duration": "4 weeks", "resources": [{"title": "DSA in Python – freeCodeCamp", "url": "https://www.youtube.com/watch?v=pkYVOmU3MgA", "type": "video"}]},
+        "REST API": {"duration": "2 weeks", "resources": [{"title": "REST API Crash Course", "url": "https://www.youtube.com/watch?v=-MTSQjw5DrM", "type": "video"}]},
+        "Unit Testing": {"duration": "2 weeks", "resources": [{"title": "Python Unit Testing", "url": "https://www.youtube.com/watch?v=6tNS--WetLI", "type": "video"}]},
+        "Linux": {"duration": "2 weeks", "resources": [{"title": "Linux Command Line Basics", "url": "https://www.youtube.com/watch?v=ZtqBQ68cfJc", "type": "video"}]}
+      }
+    },
+    "Data Analyst": {
+      "description": "Analyze data to extract business insights using statistical and visualization tools.",
+      "required_skills": {
+        "Python": 0.8, "SQL": 0.9, "Excel": 0.8, "Power BI": 0.8,
+        "Tableau": 0.7, "Statistics": 0.9, "Data Cleaning": 0.9,
+        "Pandas": 0.9, "NumPy": 0.7, "Data Visualization": 0.8,
+        "Business Acumen": 0.6, "Communication": 0.7, "R": 0.5, "Matplotlib": 0.7
+      },
+      "roadmap": {
+        "Power BI": {"duration": "3 weeks", "resources": [{"title": "Power BI Tutorial – Alex the Analyst", "url": "https://www.youtube.com/watch?v=TmhQCQr_ECg", "type": "video"}, {"title": "Microsoft Learn – Power BI", "url": "https://learn.microsoft.com/en-us/training/powerplatform/power-bi", "type": "docs"}]},
+        "Tableau": {"duration": "3 weeks", "resources": [{"title": "Tableau Full Tutorial", "url": "https://www.youtube.com/watch?v=jEgVto5QME8", "type": "video"}, {"title": "Tableau Public Training", "url": "https://public.tableau.com/en-us/s/resources", "type": "docs"}]},
+        "SQL": {"duration": "3 weeks", "resources": [{"title": "SQL for Beginners – freeCodeCamp", "url": "https://www.youtube.com/watch?v=HXV3zeQKqGY", "type": "video"}]},
+        "Pandas": {"duration": "2 weeks", "resources": [{"title": "Pandas Full Course", "url": "https://www.youtube.com/watch?v=vmEHCJofslg", "type": "video"}]},
+        "Statistics": {"duration": "4 weeks", "resources": [{"title": "Statistics for Data Science – Khan Academy", "url": "https://www.khanacademy.org/math/statistics-probability", "type": "course"}]},
+        "Data Visualization": {"duration": "2 weeks", "resources": [{"title": "Matplotlib & Seaborn Tutorial", "url": "https://www.youtube.com/watch?v=a9UrKTVEeZA", "type": "video"}]}
+      }
+    },
+    "ML Engineer": {
+      "description": "Design and deploy machine learning models to solve real-world problems at scale.",
+      "required_skills": {
+        "Python": 0.9, "Machine Learning": 0.9, "Deep Learning": 0.8,
+        "TensorFlow": 0.7, "PyTorch": 0.7, "Scikit-learn": 0.8,
+        "Statistics": 0.8, "Linear Algebra": 0.8, "SQL": 0.6,
+        "Feature Engineering": 0.8, "Model Deployment": 0.7,
+        "Docker": 0.6, "MLflow": 0.5, "Git": 0.8, "NumPy": 0.8, "Pandas": 0.8
+      },
+      "roadmap": {
+        "Deep Learning": {"duration": "6 weeks", "resources": [{"title": "Deep Learning Specialization – Coursera (Audit Free)", "url": "https://www.coursera.org/specializations/deep-learning", "type": "course"}, {"title": "fast.ai – Practical Deep Learning", "url": "https://course.fast.ai", "type": "course"}]},
+        "PyTorch": {"duration": "4 weeks", "resources": [{"title": "PyTorch Full Course – freeCodeCamp", "url": "https://www.youtube.com/watch?v=V_xro1bcAuA", "type": "video"}]},
+        "TensorFlow": {"duration": "4 weeks", "resources": [{"title": "TensorFlow 2.0 Complete Course", "url": "https://www.youtube.com/watch?v=tPYj3fFJGjk", "type": "video"}]},
+        "Model Deployment": {"duration": "3 weeks", "resources": [{"title": "Deploy ML Models with Flask", "url": "https://www.youtube.com/watch?v=UbCWoMf80PY", "type": "video"}]},
+        "Feature Engineering": {"duration": "2 weeks", "resources": [{"title": "Feature Engineering for ML – Kaggle", "url": "https://www.kaggle.com/learn/feature-engineering", "type": "course"}]},
+        "Linear Algebra": {"duration": "3 weeks", "resources": [{"title": "Linear Algebra – 3Blue1Brown", "url": "https://www.youtube.com/playlist?list=PLZHQObOWTQDPD3MizzM2xVFitgF8hE_ab", "type": "video"}]}
+      }
+    },
+    "Frontend Developer": {
+      "description": "Build responsive, accessible, and visually engaging web interfaces.",
+      "required_skills": {
+        "HTML": 0.9, "CSS": 0.9, "JavaScript": 0.9, "React": 0.9,
+        "TypeScript": 0.7, "Tailwind CSS": 0.7, "Git": 0.8, "REST API": 0.7,
+        "Responsive Design": 0.9, "Figma": 0.6, "Testing": 0.6,
+        "Performance Optimization": 0.6, "Accessibility": 0.6, "Next.js": 0.6
+      },
+      "roadmap": {
+        "React": {"duration": "5 weeks", "resources": [{"title": "React Full Course", "url": "https://www.youtube.com/watch?v=bMknfKXIFA8", "type": "video"}]},
+        "TypeScript": {"duration": "3 weeks", "resources": [{"title": "TypeScript Full Course – freeCodeCamp", "url": "https://www.youtube.com/watch?v=30LWjhZzg50", "type": "video"}]},
+        "Next.js": {"duration": "3 weeks", "resources": [{"title": "Next.js Crash Course", "url": "https://www.youtube.com/watch?v=mTz0GXj8NN0", "type": "video"}]},
+        "Tailwind CSS": {"duration": "2 weeks", "resources": [{"title": "Tailwind CSS Full Course", "url": "https://www.youtube.com/watch?v=ft30zcMlFa8", "type": "video"}]},
+        "Figma": {"duration": "2 weeks", "resources": [{"title": "Figma Tutorial for Beginners", "url": "https://www.youtube.com/watch?v=FTFaQWZBqQ8", "type": "video"}]}
+      }
+    },
+    "Backend Developer": {
+      "description": "Build scalable server-side systems, APIs, and database architectures.",
+      "required_skills": {
+        "Python": 0.7, "Node.js": 0.8, "Java": 0.6, "SQL": 0.9,
+        "NoSQL": 0.7, "REST API": 0.9, "GraphQL": 0.5, "Docker": 0.7,
+        "Microservices": 0.6, "AWS": 0.6, "Redis": 0.5,
+        "Authentication": 0.8, "Git": 0.9, "Linux": 0.7, "Algorithms": 0.7
+      },
+      "roadmap": {
+        "Docker": {"duration": "3 weeks", "resources": [{"title": "Docker Full Course", "url": "https://www.youtube.com/watch?v=3c-iBn73dDE", "type": "video"}]},
+        "NoSQL": {"duration": "2 weeks", "resources": [{"title": "MongoDB Tutorial – freeCodeCamp", "url": "https://www.youtube.com/watch?v=c2M-rlkkT5o", "type": "video"}]},
+        "GraphQL": {"duration": "3 weeks", "resources": [{"title": "GraphQL Full Course", "url": "https://www.youtube.com/watch?v=ed8SzALpx1Q", "type": "video"}]},
+        "AWS": {"duration": "4 weeks", "resources": [{"title": "AWS Free Tier + Tutorial", "url": "https://www.youtube.com/watch?v=ulprqHHWlng", "type": "video"}]},
+        "Microservices": {"duration": "3 weeks", "resources": [{"title": "Microservices Architecture", "url": "https://www.youtube.com/watch?v=lTAcCNbJ7KE", "type": "video"}]}
+      }
+    },
+    "DevOps Engineer": {
+      "description": "Automate infrastructure, manage CI/CD pipelines, and ensure system reliability.",
+      "required_skills": {
+        "Linux": 0.9, "Docker": 0.9, "Kubernetes": 0.8, "AWS": 0.8,
+        "CI/CD": 0.9, "Terraform": 0.7, "Ansible": 0.6, "Python": 0.7,
+        "Bash": 0.8, "Monitoring": 0.7, "Git": 0.9,
+        "Networking": 0.7, "Security": 0.6, "Jenkins": 0.7
+      },
+      "roadmap": {
+        "Kubernetes": {"duration": "5 weeks", "resources": [{"title": "Kubernetes Full Course – TechWorld with Nana", "url": "https://www.youtube.com/watch?v=X48VuDVv0do", "type": "video"}]},
+        "Terraform": {"duration": "3 weeks", "resources": [{"title": "Terraform Course for Beginners", "url": "https://www.youtube.com/watch?v=SLB_c_ayRMo", "type": "video"}]},
+        "CI/CD": {"duration": "3 weeks", "resources": [{"title": "GitHub Actions Full Course", "url": "https://www.youtube.com/watch?v=R8_veQiYBjI", "type": "video"}]},
+        "AWS": {"duration": "4 weeks", "resources": [{"title": "AWS Solutions Architect – freeCodeCamp", "url": "https://www.youtube.com/watch?v=Ia-UEYYR44s", "type": "video"}]},
+        "Monitoring": {"duration": "2 weeks", "resources": [{"title": "Prometheus & Grafana Tutorial", "url": "https://www.youtube.com/watch?v=h4Sl21AKiDg", "type": "video"}]}
+      }
+    },
+    "Data Scientist": {
+      "description": "Use statistical models and ML to extract actionable insights from complex datasets.",
+      "required_skills": {
+        "Python": 0.9, "R": 0.6, "Machine Learning": 0.9, "Statistics": 0.9,
+        "SQL": 0.8, "Pandas": 0.9, "NumPy": 0.8, "Scikit-learn": 0.8,
+        "Data Visualization": 0.8, "Feature Engineering": 0.8,
+        "Experiment Design": 0.7, "Deep Learning": 0.6,
+        "Communication": 0.8, "Jupyter": 0.8, "Matplotlib": 0.7
+      },
+      "roadmap": {
+        "Machine Learning": {"duration": "6 weeks", "resources": [{"title": "ML Course – Andrew Ng (Coursera, Audit Free)", "url": "https://www.coursera.org/learn/machine-learning", "type": "course"}]},
+        "Feature Engineering": {"duration": "2 weeks", "resources": [{"title": "Feature Engineering – Kaggle", "url": "https://www.kaggle.com/learn/feature-engineering", "type": "course"}]},
+        "R": {"duration": "3 weeks", "resources": [{"title": "R for Data Science – R4DS", "url": "https://r4ds.had.co.nz/", "type": "docs"}]},
+        "Experiment Design": {"duration": "3 weeks", "resources": [{"title": "A/B Testing – Udacity", "url": "https://www.udacity.com/course/ab-testing--ud979", "type": "course"}]},
+        "Deep Learning": {"duration": "6 weeks", "resources": [{"title": "Deep Learning Specialization (Audit)", "url": "https://www.coursera.org/specializations/deep-learning", "type": "course"}]}
+      }
+    },
+    "Cybersecurity Analyst": {
+      "description": "Protect systems and networks from threats through monitoring, analysis, and response.",
+      "required_skills": {
+        "Networking": 0.9, "Linux": 0.8, "Python": 0.7, "Security Protocols": 0.9,
+        "Penetration Testing": 0.7, "SIEM": 0.7, "Cryptography": 0.7,
+        "Incident Response": 0.8, "Firewall Management": 0.7,
+        "OWASP": 0.7, "Risk Assessment": 0.8, "Ethical Hacking": 0.6
+      },
+      "roadmap": {
+        "Penetration Testing": {"duration": "5 weeks", "resources": [{"title": "Ethical Hacking Full Course – freeCodeCamp", "url": "https://www.youtube.com/watch?v=3Kq1MIfTWCE", "type": "video"}]},
+        "SIEM": {"duration": "3 weeks", "resources": [{"title": "Splunk Fundamentals 1 (Free)", "url": "https://www.splunk.com/en_us/training/free-courses/splunk-fundamentals-1.html", "type": "course"}]},
+        "Cryptography": {"duration": "3 weeks", "resources": [{"title": "Cryptography – Khan Academy", "url": "https://www.khanacademy.org/computing/computer-science/cryptography", "type": "course"}]},
+        "OWASP": {"duration": "2 weeks", "resources": [{"title": "OWASP Top 10 Explained", "url": "https://www.youtube.com/watch?v=1A6GN9Xg3_8", "type": "video"}]}
+      }
+    },
+    "Cloud Engineer": {
+      "description": "Design and manage scalable cloud infrastructure on AWS, GCP, or Azure.",
+      "required_skills": {
+        "AWS": 0.9, "Azure": 0.7, "GCP": 0.6, "Docker": 0.8,
+        "Kubernetes": 0.7, "Terraform": 0.8, "Linux": 0.8,
+        "Networking": 0.8, "Security": 0.7, "Python": 0.6,
+        "CI/CD": 0.7, "Git": 0.8, "Cost Optimization": 0.6
+      },
+      "roadmap": {
+        "AWS": {"duration": "5 weeks", "resources": [{"title": "AWS Certified Cloud Practitioner – freeCodeCamp", "url": "https://www.youtube.com/watch?v=SOTamWNgDKc", "type": "video"}]},
+        "Terraform": {"duration": "4 weeks", "resources": [{"title": "Terraform for Beginners", "url": "https://www.youtube.com/watch?v=SLB_c_ayRMo", "type": "video"}]},
+        "Kubernetes": {"duration": "5 weeks", "resources": [{"title": "Kubernetes Course – TechWorld with Nana", "url": "https://www.youtube.com/watch?v=X48VuDVv0do", "type": "video"}]},
+        "Networking": {"duration": "3 weeks", "resources": [{"title": "Computer Networking – freeCodeCamp", "url": "https://www.youtube.com/watch?v=qiQR5rTSshw", "type": "video"}]}
+      }
+    },
+    "Android Developer": {
+      "description": "Build native Android mobile applications using Kotlin or Java.",
+      "required_skills": {
+        "Kotlin": 0.9, "Java": 0.7, "Android Studio": 0.9, "XML": 0.8,
+        "Jetpack Compose": 0.7, "Firebase": 0.7, "REST API": 0.7,
+        "Git": 0.8, "OOP": 0.9, "SQLite": 0.6,
+        "Material Design": 0.7, "Testing": 0.6
+      },
+      "roadmap": {
+        "Kotlin": {"duration": "4 weeks", "resources": [{"title": "Kotlin Full Course – freeCodeCamp", "url": "https://www.youtube.com/watch?v=F9UC9DY-vIU", "type": "video"}]},
+        "Jetpack Compose": {"duration": "4 weeks", "resources": [{"title": "Jetpack Compose Course", "url": "https://www.youtube.com/watch?v=6_wK_Ud8--0", "type": "video"}]},
+        "Firebase": {"duration": "2 weeks", "resources": [{"title": "Firebase for Android", "url": "https://www.youtube.com/watch?v=9kRgVxULbag", "type": "video"}]},
+        "SQLite": {"duration": "1 week", "resources": [{"title": "Android SQLite Tutorial", "url": "https://www.youtube.com/watch?v=312RhjfetP8", "type": "video"}]}
+      }
+    },
+    "iOS Developer": {
+      "description": "Build high-quality applications for iPhone and iPad using Swift.",
+      "required_skills": {
+        "Swift": 0.9, "Xcode": 0.9, "SwiftUI": 0.8, "UIKit": 0.7,
+        "Core Data": 0.6, "REST API": 0.7, "Git": 0.8,
+        "OOP": 0.9, "Design Patterns": 0.7, "Firebase": 0.6
+      },
+      "roadmap": {
+        "Swift": {"duration": "4 weeks", "resources": [{"title": "Swift Full Course – Paul Hudson (Hacking with Swift)", "url": "https://www.hackingwithswift.com/read", "type": "docs"}]},
+        "SwiftUI": {"duration": "4 weeks", "resources": [{"title": "SwiftUI Masterclass", "url": "https://www.youtube.com/watch?v=bqu6BquVi2M", "type": "video"}]},
+        "Core Data": {"duration": "2 weeks", "resources": [{"title": "Core Data Tutorial", "url": "https://www.youtube.com/watch?v=O7u9nYWjvKk", "type": "video"}]}
+      }
+    },
+    "Full Stack Developer": {
+      "description": "Build complete web applications covering both frontend and backend systems.",
+      "required_skills": {
+        "JavaScript": 0.9, "React": 0.8, "Node.js": 0.9, "SQL": 0.8,
+        "NoSQL": 0.7, "REST API": 0.9, "HTML": 0.9, "CSS": 0.8,
+        "Git": 0.9, "Docker": 0.6, "TypeScript": 0.6,
+        "Authentication": 0.7, "Testing": 0.6, "Linux": 0.6
+      },
+      "roadmap": {
+        "Node.js": {"duration": "4 weeks", "resources": [{"title": "Node.js Full Course – freeCodeCamp", "url": "https://www.youtube.com/watch?v=Oe421EPjeBE", "type": "video"}]},
+        "TypeScript": {"duration": "3 weeks", "resources": [{"title": "TypeScript Full Course", "url": "https://www.youtube.com/watch?v=30LWjhZzg50", "type": "video"}]},
+        "Docker": {"duration": "3 weeks", "resources": [{"title": "Docker Crash Course", "url": "https://www.youtube.com/watch?v=3c-iBn73dDE", "type": "video"}]},
+        "Authentication": {"duration": "2 weeks", "resources": [{"title": "JWT Authentication Tutorial", "url": "https://www.youtube.com/watch?v=7Q17ubqLfaM", "type": "video"}]},
+        "NoSQL": {"duration": "2 weeks", "resources": [{"title": "MongoDB Tutorial", "url": "https://www.youtube.com/watch?v=c2M-rlkkT5o", "type": "video"}]}
+      }
+    },
+    "Embedded Systems Engineer": {
+      "description": "Design and program software for microcontrollers and hardware systems.",
+      "required_skills": {
+        "C": 0.9, "C++": 0.8, "Embedded C": 0.9, "RTOS": 0.7,
+        "Microcontrollers": 0.9, "Arduino": 0.7, "Raspberry Pi": 0.6,
+        "Electronics": 0.8, "UART/SPI/I2C": 0.8, "Linux": 0.6, "Git": 0.7
+      },
+      "roadmap": {
+        "RTOS": {"duration": "4 weeks", "resources": [{"title": "FreeRTOS Tutorial", "url": "https://www.freertos.org/FreeRTOS-quick-start-guide.html", "type": "docs"}]},
+        "C++": {"duration": "4 weeks", "resources": [{"title": "C++ Full Course – freeCodeCamp", "url": "https://www.youtube.com/watch?v=vLnPwxZdW4Y", "type": "video"}]},
+        "Raspberry Pi": {"duration": "2 weeks", "resources": [{"title": "Raspberry Pi Beginner Course", "url": "https://www.youtube.com/watch?v=RpseX2ylEuw", "type": "video"}]}
+      }
+    },
+    "Business Analyst": {
+      "description": "Bridge business and technology by analyzing requirements and improving processes.",
+      "required_skills": {
+        "Excel": 0.9, "SQL": 0.7, "Power BI": 0.8, "Communication": 0.9,
+        "Requirements Analysis": 0.9, "JIRA": 0.7, "UML": 0.6,
+        "Data Analysis": 0.8, "Presentation": 0.8, "Process Modeling": 0.7,
+        "Agile": 0.7, "Stakeholder Management": 0.7
+      },
+      "roadmap": {
+        "SQL": {"duration": "3 weeks", "resources": [{"title": "SQL for Business Analysts", "url": "https://www.youtube.com/watch?v=HXV3zeQKqGY", "type": "video"}]},
+        "JIRA": {"duration": "1 week", "resources": [{"title": "JIRA Tutorial for Beginners", "url": "https://www.youtube.com/watch?v=GWxMTvRGIpc", "type": "video"}]},
+        "Agile": {"duration": "2 weeks", "resources": [{"title": "Agile Crash Course", "url": "https://www.youtube.com/watch?v=Z9QbYZh1YXY", "type": "video"}]},
+        "UML": {"duration": "2 weeks", "resources": [{"title": "UML Diagrams Tutorial", "url": "https://www.youtube.com/watch?v=WnMQ8HlmeXc", "type": "video"}]},
+        "Power BI": {"duration": "3 weeks", "resources": [{"title": "Power BI for Business Analysts", "url": "https://www.youtube.com/watch?v=TmhQCQr_ECg", "type": "video"}]}
+      }
+    },
+    "Network Engineer": {
+      "description": "Design, implement, and manage computer networks and telecommunications infrastructure.",
+      "required_skills": {
+        "Networking": 0.9, "Cisco": 0.8, "Linux": 0.7, "Security": 0.7,
+        "Routing & Switching": 0.9, "Firewall": 0.7, "VPN": 0.7,
+        "Python": 0.5, "CCNA": 0.7, "Cloud Networking": 0.6, "Monitoring": 0.6
+      },
+      "roadmap": {
+        "Cisco": {"duration": "6 weeks", "resources": [{"title": "CCNA Full Course – Jeremy's IT Lab", "url": "https://www.youtube.com/playlist?list=PLxbwE86jKRgMpuZuLBivzlM8s2Dk5lXBQ", "type": "video"}]},
+        "Security": {"duration": "3 weeks", "resources": [{"title": "Network Security Course", "url": "https://www.youtube.com/watch?v=M5nHxIBJnBE", "type": "video"}]},
+        "Python": {"duration": "3 weeks", "resources": [{"title": "Python for Network Engineers", "url": "https://www.youtube.com/watch?v=PLiVqbFimBwg", "type": "video"}]}
+      }
+    },
+    "Game Developer": {
+      "description": "Design and build interactive games for PC, console, or mobile platforms.",
+      "required_skills": {
+        "C++": 0.8, "C#": 0.8, "Unity": 0.8, "Unreal Engine": 0.6,
+        "OOP": 0.9, "Mathematics": 0.8, "Physics": 0.6, "Git": 0.7,
+        "3D Modeling": 0.5, "Shader Programming": 0.5, "Game Design": 0.7
+      },
+      "roadmap": {
+        "Unity": {"duration": "6 weeks", "resources": [{"title": "Unity Full Game Dev Course", "url": "https://www.youtube.com/watch?v=gB1F9G0JXOo", "type": "video"}]},
+        "C#": {"duration": "4 weeks", "resources": [{"title": "C# Full Course – freeCodeCamp", "url": "https://www.youtube.com/watch?v=GhQdlIFylQ8", "type": "video"}]},
+        "Unreal Engine": {"duration": "5 weeks", "resources": [{"title": "Unreal Engine 5 Beginner Tutorial", "url": "https://www.youtube.com/watch?v=k-zMkzmduqI", "type": "video"}]},
+        "Shader Programming": {"duration": "3 weeks", "resources": [{"title": "Shader Programming Tutorial", "url": "https://www.youtube.com/watch?v=kfM-yu0iQBk", "type": "video"}]}
+      }
+    },
+    "UI/UX Designer": {
+      "description": "Create intuitive and visually appealing interfaces backed by research and usability principles.",
+      "required_skills": {
+        "Figma": 0.9, "Adobe XD": 0.6, "User Research": 0.8, "Prototyping": 0.9,
+        "Wireframing": 0.9, "Usability Testing": 0.7, "HTML": 0.6, "CSS": 0.6,
+        "Design Systems": 0.7, "Typography": 0.8, "Accessibility": 0.7,
+        "Communication": 0.8, "Sketch": 0.5
+      },
+      "roadmap": {
+        "Figma": {"duration": "3 weeks", "resources": [{"title": "Figma UI Design Tutorial", "url": "https://www.youtube.com/watch?v=FTFaQWZBqQ8", "type": "video"}, {"title": "Figma Official Learn", "url": "https://www.figma.com/resources/learn-design/", "type": "docs"}]},
+        "User Research": {"duration": "3 weeks", "resources": [{"title": "UX Research Methods – NNGroup", "url": "https://www.nngroup.com/articles/which-ux-research-methods/", "type": "docs"}]},
+        "Design Systems": {"duration": "2 weeks", "resources": [{"title": "Design Systems 101", "url": "https://www.youtube.com/watch?v=EK-pHkc5EL4", "type": "video"}]},
+        "Usability Testing": {"duration": "2 weeks", "resources": [{"title": "Usability Testing Guide", "url": "https://www.youtube.com/watch?v=0YL0xoSmyZI", "type": "video"}]}
+      }
+    },
+    "Blockchain Developer": {
+      "description": "Build decentralized applications and smart contracts on blockchain platforms.",
+      "required_skills": {
+        "Solidity": 0.9, "Ethereum": 0.8, "Web3.js": 0.8, "Smart Contracts": 0.9,
+        "JavaScript": 0.7, "Python": 0.6, "Cryptography": 0.7,
+        "Hardhat": 0.6, "DeFi": 0.5, "Git": 0.7, "Linux": 0.5
+      },
+      "roadmap": {
+        "Solidity": {"duration": "5 weeks", "resources": [{"title": "Solidity Full Course – freeCodeCamp", "url": "https://www.youtube.com/watch?v=M576WGiDBdQ", "type": "video"}]},
+        "Web3.js": {"duration": "3 weeks", "resources": [{"title": "Web3.js Tutorial", "url": "https://www.youtube.com/watch?v=t3wM5903ty0", "type": "video"}]},
+        "Smart Contracts": {"duration": "4 weeks", "resources": [{"title": "Smart Contracts Development", "url": "https://www.youtube.com/watch?v=ipwxYa-F1uY", "type": "video"}]},
+        "Hardhat": {"duration": "2 weeks", "resources": [{"title": "Hardhat Tutorial", "url": "https://hardhat.org/tutorial", "type": "docs"}]}
+      }
+    },
+    "Product Manager": {
+      "description": "Define product vision, gather requirements, and coordinate teams to ship great products.",
+      "required_skills": {
+        "Product Strategy": 0.9, "Agile": 0.8, "Data Analysis": 0.7,
+        "Communication": 0.9, "JIRA": 0.7, "Roadmapping": 0.8,
+        "User Research": 0.7, "SQL": 0.5, "A/B Testing": 0.6,
+        "Presentation": 0.8, "Stakeholder Management": 0.8, "Prioritization": 0.9
+      },
+      "roadmap": {
+        "Product Strategy": {"duration": "4 weeks", "resources": [{"title": "Product Management – PM School", "url": "https://www.youtube.com/@pmschool", "type": "video"}]},
+        "A/B Testing": {"duration": "2 weeks", "resources": [{"title": "A/B Testing for PMs", "url": "https://www.youtube.com/watch?v=X7YPrT3BFRU", "type": "video"}]},
+        "SQL": {"duration": "3 weeks", "resources": [{"title": "SQL for PMs – Mode Analytics", "url": "https://mode.com/sql-tutorial/", "type": "docs"}]},
+        "Agile": {"duration": "2 weeks", "resources": [{"title": "Agile Product Management", "url": "https://www.youtube.com/watch?v=Z9QbYZh1YXY", "type": "video"}]}
+      }
+    },
+    "QA Engineer": {
+      "description": "Ensure product quality through systematic testing, automation, and bug tracking.",
+      "required_skills": {
+        "Manual Testing": 0.9, "Selenium": 0.8, "Python": 0.7, "JavaScript": 0.5,
+        "JIRA": 0.8, "Test Cases": 0.9, "API Testing": 0.7,
+        "Postman": 0.8, "SQL": 0.6, "Agile": 0.7, "Git": 0.7,
+        "Cypress": 0.6, "Performance Testing": 0.6
+      },
+      "roadmap": {
+        "Selenium": {"duration": "4 weeks", "resources": [{"title": "Selenium WebDriver Full Course", "url": "https://www.youtube.com/watch?v=j7VZsCCnptM", "type": "video"}]},
+        "API Testing": {"duration": "2 weeks", "resources": [{"title": "Postman API Testing", "url": "https://www.youtube.com/watch?v=VywxIQ2ZXw4", "type": "video"}]},
+        "Cypress": {"duration": "3 weeks", "resources": [{"title": "Cypress End-to-End Testing", "url": "https://www.youtube.com/watch?v=u8vMu7viCm8", "type": "video"}]},
+        "Performance Testing": {"duration": "2 weeks", "resources": [{"title": "JMeter Performance Testing", "url": "https://www.youtube.com/watch?v=M-iAXz8vs48", "type": "video"}]}
+      }
+    }
+  }
+}
