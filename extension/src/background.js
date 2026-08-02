@@ -34,6 +34,13 @@ function setStorage(values) {
   });
 }
 
+async function authHeaders() {
+  const stored = await getStorage(["cv_authToken"]);
+  return stored.cv_authToken
+    ? { Authorization: `Bearer ${stored.cv_authToken}` }
+    : {};
+}
+
 async function extractResumeSkills(fileData, fileName) {
   const config = await getConfig();
   const response = await fetch(`${config.BACKEND_URL}/upload`, {
@@ -77,9 +84,14 @@ async function saveResumeAnalysis({ analysis, fileName, source = "extension-resu
   const missingDetails = Array.isArray(analysis.missing_skills) ? analysis.missing_skills : [];
   const missing = missingDetails.map((item) => item.skill || item).filter(Boolean);
 
+  const storedAuth = await getStorage(["cv_authMethod"]);
+  if (storedAuth.cv_authMethod === "demo") {
+    return { skipped: true, reason: "demo-account" };
+  }
+
   const response = await fetch(`${config.BACKEND_URL}/history`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: { "Content-Type": "application/json", ...(await authHeaders()) },
     body: JSON.stringify({
       entryType: "resume-analysis",
       source,
@@ -117,9 +129,14 @@ async function saveJobAnalysis({
     ? analysis.missingSkills
     : missingDetails.map((item) => item.skill).filter(Boolean);
 
+  const storedAuth = await getStorage(["cv_authMethod"]);
+  if (storedAuth.cv_authMethod === "demo") {
+    return { skipped: true, reason: "demo-account" };
+  }
+
   const response = await fetch(`${config.BACKEND_URL}/history`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: { "Content-Type": "application/json", ...(await authHeaders()) },
     body: JSON.stringify({
       entryType: "job-match",
       source,

@@ -154,11 +154,231 @@ function attachQuizHandlers(quizForm, questions, quizModal, onComplete) {
 }
 
 // ============================================================================
+// AUTH MODULE
+// ============================================================================
+
+const AUTH_SESSION_KEYS = ["cv_authToken", "cv_authUser", "cv_authMethod"];
+
+const AUTH_ICONS = {
+  google:
+    '<svg viewBox="0 0 48 48" width="16" height="16" aria-hidden="true">' +
+    '<path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>' +
+    '<path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>' +
+    '<path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>' +
+    '<path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>' +
+    "</svg>",
+  demo:
+    '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' +
+    '<path d="M21.42 10.922a1 1 0 0 0-.019-1.838L12.83 5.18a2 2 0 0 0-1.66 0L2.6 9.08a1 1 0 0 0 0 1.832l8.57 3.908a2 2 0 0 0 1.66 0z"/>' +
+    '<path d="M22 10v6"/><path d="M6 12.5V16a6 3 0 0 0 12 0v-3.5"/></svg>'
+};
+
+let authEls = {};
+
+function setAuthStatus(message, type) {
+  authEls.status.textContent = message || "";
+  authEls.status.className = "auth-status" + (type ? " " + type : "");
+}
+
+function renderAuthLoggedOut() {
+  authEls.buttons.hidden = false;
+  authEls.session.hidden = true;
+}
+
+function renderAuthLoggedIn(session) {
+  authEls.buttons.hidden = true;
+  authEls.session.hidden = false;
+
+  authEls.sessionIcon.innerHTML = AUTH_ICONS[session.method] || AUTH_ICONS.google;
+  const user = session.user || {};
+  const displayName = user.name || user.email || "Logged in";
+  authEls.sessionName.textContent = displayName;
+}
+
+function getStoredSession() {
+  return new Promise((resolve) => {
+    chrome.storage.local.get(AUTH_SESSION_KEYS, (items) => {
+      resolve({
+        token: items.cv_authToken || "",
+        user: items.cv_authUser || null,
+        method: items.cv_authMethod || ""
+      });
+    });
+  });
+}
+
+function setStoredSession(session) {
+  return new Promise((resolve) => {
+    chrome.storage.local.set(
+      {
+        cv_authToken: session.token,
+        cv_authUser: session.user || null,
+        cv_authMethod: session.method
+      },
+      resolve
+    );
+  });
+}
+
+function clearStoredSession() {
+  return new Promise((resolve) => {
+    chrome.storage.local.remove(AUTH_SESSION_KEYS, resolve);
+  });
+}
+
+async function apiPost(path, body) {
+  const response = await fetch(`${CONFIG.BACKEND_URL}${path}`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: body ? JSON.stringify(body) : undefined
+  });
+
+  let data = {};
+  try {
+    data = await response.json();
+  } catch {
+    data = {};
+  }
+
+  if (!response.ok) {
+    throw new Error(data.error || `Server error: ${response.status}`);
+  }
+
+  return data;
+}
+
+async function handleAuthDemo() {
+  setAuthStatus("Signing in…", "loading");
+  try {
+    const data = await apiPost("/auth/demo");
+    const session = { token: data.token, user: data.user, method: "demo" };
+    await setStoredSession(session);
+    renderAuthLoggedIn(session);
+    setAuthStatus("", "");
+    showDemoNotice();
+  } catch (err) {
+    setAuthStatus(err.message, "error");
+  }
+}
+
+function showDemoNotice() {
+  const banner = document.createElement("div");
+  banner.textContent = "You're using a demo account — job and skill check history won't be saved.";
+  banner.style.cssText =
+    "margin-top: 8px; padding: 10px 12px; border-radius: 10px; font-size: 11px; line-height: 1.5; " +
+    "background: rgba(227, 74, 48, 0.08); border: 1px solid var(--border); color: var(--text-muted); text-align: center;";
+  authEls.status.insertAdjacentElement("afterend", banner);
+  setTimeout(() => banner.remove(), 5000);
+}
+
+function generateAuthNonce() {
+  const bytes = new Uint8Array(16);
+  crypto.getRandomValues(bytes);
+  return Array.from(bytes, (byte) => byte.toString(16).padStart(2, "0")).join("");
+}
+
+async function handleAuthGoogle() {
+  const clientId = CONFIG.GOOGLE_CLIENT_ID;
+
+  if (!clientId) {
+    setAuthStatus("Configure your Google OAuth Client ID in Settings first.", "error");
+    return;
+  }
+
+  const redirectUri = chrome.identity.getRedirectURL();
+  const params = new URLSearchParams({
+    client_id: clientId,
+    response_type: "id_token",
+    scope: "openid email profile",
+    redirect_uri: redirectUri,
+    nonce: generateAuthNonce(),
+    prompt: "select_account"
+  });
+
+  setAuthStatus("Signing in…", "loading");
+
+  let responseUrl;
+  try {
+    responseUrl = await new Promise((resolve, reject) => {
+      chrome.identity.launchWebAuthFlow(
+        { url: `https://accounts.google.com/o/oauth2/v2/auth?${params.toString()}`, interactive: true },
+        (redirectUrl) => {
+          if (chrome.runtime.lastError) {
+            reject(new Error(chrome.runtime.lastError.message || "Google sign-in cancelled."));
+            return;
+          }
+          if (!redirectUrl) {
+            reject(new Error("Google sign-in returned no response."));
+            return;
+          }
+          resolve(redirectUrl);
+        }
+      );
+    });
+  } catch (err) {
+    setAuthStatus(err.message, "error");
+    return;
+  }
+
+  const idToken = new URLSearchParams(new URL(responseUrl).hash.slice(1)).get("id_token");
+  if (!idToken) {
+    setAuthStatus("No ID token returned from Google.", "error");
+    return;
+  }
+
+  try {
+    const data = await apiPost("/auth/google", { idToken });
+    const session = { token: data.token, user: data.user, method: "google" };
+    await setStoredSession(session);
+    renderAuthLoggedIn(session);
+    setAuthStatus("", "");
+  } catch (err) {
+    setAuthStatus(err.message, "error");
+  }
+}
+
+async function handleAuthLogout() {
+  await clearStoredSession();
+  renderAuthLoggedOut();
+  setAuthStatus("", "");
+}
+
+function initAuth() {
+  authEls = {
+    buttons: document.getElementById("authButtons"),
+    session: document.getElementById("authSession"),
+    sessionIcon: document.getElementById("authSessionIcon"),
+    sessionName: document.getElementById("authSessionName"),
+    status: document.getElementById("authStatus"),
+    googleBtn: document.getElementById("authGoogleBtn"),
+    demoBtn: document.getElementById("authDemoBtn"),
+    logoutBtn: document.getElementById("authLogoutBtn")
+  };
+
+  authEls.googleBtn.addEventListener("click", handleAuthGoogle);
+  authEls.demoBtn.addEventListener("click", handleAuthDemo);
+  authEls.logoutBtn.addEventListener("click", (event) => {
+    event.preventDefault();
+    handleAuthLogout();
+  });
+
+  getStoredSession().then((session) => {
+    if (session.token) {
+      renderAuthLoggedIn(session);
+    } else {
+      renderAuthLoggedOut();
+    }
+  });
+}
+
+// ============================================================================
 // MAIN INITIALIZATION - ALL CODE RUNS INSIDE DOMContentLoaded
 // ============================================================================
 document.addEventListener("DOMContentLoaded", async () => {
   try {
     CONFIG = await getConfig();
+
+    initAuth();
 
     // DOM elements
     const uploadStatus = document.getElementById("upload-status");

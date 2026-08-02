@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "AI Job Assistant",
   "version": "1.0",
-  "permissions": ["activeTab", "storage", "tabs", "scripting"],
+  "permissions": ["activeTab", "storage", "tabs", "scripting", "identity"],
   "host_permissions": [
     "http://localhost:5000/*",
     "http://localhost:5001/*",

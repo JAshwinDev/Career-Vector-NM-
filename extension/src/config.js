@@ -7,7 +7,8 @@
 
 var DEFAULT_CONFIG = {
   BACKEND_URL: "http://localhost:5000",
-  FRONTEND_URL: "http://localhost:3000"
+  FRONTEND_URL: "http://localhost:3000",
+  GOOGLE_CLIENT_ID: ""
 };
 
 function stripTrailingSlash(value) {
@@ -19,7 +20,8 @@ function getConfig() {
     chrome.storage.sync.get(DEFAULT_CONFIG, function (items) {
       resolve({
         BACKEND_URL: stripTrailingSlash(items.BACKEND_URL || DEFAULT_CONFIG.BACKEND_URL),
-        FRONTEND_URL: stripTrailingSlash(items.FRONTEND_URL || DEFAULT_CONFIG.FRONTEND_URL)
+        FRONTEND_URL: stripTrailingSlash(items.FRONTEND_URL || DEFAULT_CONFIG.FRONTEND_URL),
+        GOOGLE_CLIENT_ID: items.GOOGLE_CLIENT_ID || DEFAULT_CONFIG.GOOGLE_CLIENT_ID
       });
     });
   });
