@@ -1,7 +1,13 @@
 {
   "manifest_version": 3,
-  "name": "AI Job Assistant",
+  "name": "CareerVector",
   "version": "1.0",
+  "icons": {
+    "16": "icons/icon16.png",
+    "32": "icons/icon32.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
   "permissions": ["activeTab", "storage", "tabs", "scripting", "identity"],
   "host_permissions": [
     "http://localhost:5000/*",
@@ -12,7 +18,13 @@
     "extension_pages": "script-src 'self'; object-src 'self'"
   },
   "action": {
-    "default_popup": "pages/popup.html"
+    "default_popup": "pages/popup.html",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "32": "icons/icon32.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    }
   },
   "options_page": "pages/options.html",
   "background": {
@@ -21,10 +33,8 @@
   "content_scripts": [
     {
       "matches": [
-        "*://www.linkedin.com/jobs/*",
-        "*://www.linkedin.com/job/*",
-        "*://linkedin.com/jobs/*",
-        "*://linkedin.com/job/*"
+        "*://www.linkedin.com/*",
+        "*://linkedin.com/*"
       ],
       "js": ["src/config.js", "src/content.js"],
       "run_at": "document_idle"

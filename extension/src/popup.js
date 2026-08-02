@@ -1,4 +1,4 @@
-console.log("CareerVector Extension popup loaded - v2.4");
+console.log("CareerVector Extension popup loaded - v" + (chrome.runtime.getManifest().version || "1.0"));
 
 let CONFIG = DEFAULT_CONFIG;
 
@@ -8,6 +8,7 @@ async function fetchAiQuizQuestions(skills) {
     const response = await fetch(`${CONFIG.BACKEND_URL}/quiz/generate-from-skills`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
+      signal: AbortSignal.timeout(8000),
       body: JSON.stringify({
         resumeSkills: skills.slice(0, 5),
         numQuestions: 5
@@ -70,7 +71,21 @@ function generateFallbackQuizFromSkills(skills) {
 function showQuizModal(skills, onComplete) {
   const quizModal = document.getElementById("quiz-modal");
   const quizForm = document.getElementById("quiz-form");
-  
+  const closeBtn = document.getElementById("quiz-close-btn");
+  const cancelBtn = document.getElementById("quiz-cancel-btn");
+
+  if (!quizModal || !quizForm) {
+    return;
+  }
+
+  closeBtn.onclick = () => {
+    quizModal.style.display = "none";
+  };
+
+  cancelBtn.onclick = () => {
+    quizModal.style.display = "none";
+  };
+
   // Show loading state
   quizForm.innerHTML = `
     <div style="text-align: center; padding: 20px;">
@@ -81,76 +96,62 @@ function showQuizModal(skills, onComplete) {
   quizModal.style.display = "block";
 
   // Fetch AI questions
-  fetchAiQuizQuestions(skills).then(questions => {
-    // Clear previous form
-    quizForm.innerHTML = "";
+  fetchAiQuizQuestions(skills)
+    .then((questions) => {
+      // Clear previous form
+      quizForm.innerHTML = "";
 
-    // Generate form questions
-    questions.forEach((q, index) => {
-      const questionDiv = document.createElement("div");
-      questionDiv.style.marginBottom = "16px";
-      questionDiv.innerHTML = `
-        <label style="display: block; font-size: 11px; font-weight: 600; color: var(--text-soft); text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 8px;">Q${index + 1}: ${q.question}</label>
-        <div style="display: flex; flex-direction: column; gap: 6px;">
-          ${q.options.map((opt, optIdx) => `
-            <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 12px; color: var(--text);">
-              <input type="radio" name="q${index}" value="${opt}" style="cursor: pointer;" />
-              <span>${opt}</span>
-            </label>
-          `).join("")}
+      // Generate form questions
+      questions.forEach((q, index) => {
+        const questionDiv = document.createElement("div");
+        questionDiv.style.marginBottom = "16px";
+        questionDiv.innerHTML = `
+          <label style="display: block; font-size: 11px; font-weight: 600; color: var(--text-soft); text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 8px;">Q${index + 1}: ${q.question}</label>
+          <div style="display: flex; flex-direction: column; gap: 6px;">
+            ${q.options.map((opt, optIdx) => `
+              <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 12px; color: var(--text);">
+                <input type="radio" name="q${index}" value="${opt}" style="cursor: pointer;" />
+                <span>${opt}</span>
+              </label>
+            `).join("")}
+          </div>
+        `;
+        quizForm.appendChild(questionDiv);
+      });
+
+      // Attach submit handler
+      const submitBtn = document.getElementById("quiz-submit-btn");
+      submitBtn.onclick = () => {
+        const formData = new FormData(quizForm);
+        const answers = Object.fromEntries(formData);
+
+        // Check if all questions answered
+        if (Object.keys(answers).length < questions.length) {
+          alert("Please answer all questions before submitting");
+          return;
+        }
+
+        quizModal.style.display = "none";
+
+        // Save quiz completion
+        chrome.storage.local.set(
+          { quizCompleted: true, quizAnswers: answers, quizTimestamp: Date.now() },
+          () => {
+            if (onComplete) {
+              onComplete();
+            }
+          }
+        );
+      };
+    })
+    .catch((err) => {
+      console.error("Quiz loading error:", err);
+      quizForm.innerHTML = `
+        <div style="text-align: center; padding: 20px; color: var(--danger);">
+          <p>Failed to load quiz questions. Please try again.</p>
         </div>
       `;
-      quizForm.appendChild(questionDiv);
     });
-
-    // Attach event handlers
-    attachQuizHandlers(quizForm, questions, quizModal, onComplete);
-  }).catch(err => {
-    console.error("Quiz loading error:", err);
-    quizForm.innerHTML = `
-      <div style="text-align: center; padding: 20px; color: var(--danger);">
-        <p>Failed to load quiz questions. Please try again.</p>
-      </div>
-    `;
-  });
-}
-
-// Attach event handlers to quiz buttons
-function attachQuizHandlers(quizForm, questions, quizModal, onComplete) {
-  const closeBtn = document.getElementById("quiz-close-btn");
-  const cancelBtn = document.getElementById("quiz-cancel-btn");
-  const submitBtn = document.getElementById("quiz-submit-btn");
-
-  closeBtn.onclick = () => {
-    quizModal.style.display = "none";
-  };
-
-  cancelBtn.onclick = () => {
-    quizModal.style.display = "none";
-  };
-
-  submitBtn.onclick = () => {
-    const formData = new FormData(quizForm);
-    const answers = Object.fromEntries(formData);
-
-    // Check if all questions answered
-    if (Object.keys(answers).length < questions.length) {
-      alert("Please answer all questions before submitting");
-      return;
-    }
-
-    quizModal.style.display = "none";
-
-    // Save quiz completion
-    chrome.storage.local.set(
-      { quizCompleted: true, quizAnswers: answers, quizTimestamp: Date.now() },
-      () => {
-        if (onComplete) {
-          onComplete();
-        }
-      }
-    );
-  };
 }
 
 // ============================================================================
@@ -385,14 +386,12 @@ document.addEventListener("DOMContentLoaded", async () => {
     const uploadBtn = document.getElementById("uploadBtn");
     const fileInput = document.getElementById("resumeFile");
     const dropzone = document.getElementById("dropzone");
-    const serverDot = document.getElementById("server-dot");
-    const serverLabel = document.getElementById("server-label");
     const tabs = document.querySelectorAll(".tab");
     const panels = document.querySelectorAll(".panel");
     const analyzeJobBtn = document.getElementById("analyzeJobBtn");
     const analysisStatus = document.getElementById("analysis-status");
 
-    if (!serverDot || !serverLabel || !uploadBtn || !fileInput || !dropzone || !uploadStatus) {
+    if (!uploadBtn || !fileInput || !dropzone || !uploadStatus) {
       console.error("CareerVector: Required DOM elements not found");
       return;
     }
@@ -492,7 +491,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         chrome.scripting.executeScript(
           {
             target: { tabId },
-            files: ["content.js"]
+            files: ["src/config.js", "src/content.js"]
           },
           () => {
             if (chrome.runtime.lastError) {
@@ -543,7 +542,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       chrome.tabs.create({ url, active: true });
     }
 
-    const dashboardButtons = document.querySelectorAll("#openDashboardBtn, #footer-dashboard-link");
+    const dashboardButtons = document.querySelectorAll("#openDashboardBtn");
     dashboardButtons.forEach((button) => {
       button.addEventListener("click", (event) => {
         event.preventDefault();
@@ -551,12 +550,9 @@ document.addEventListener("DOMContentLoaded", async () => {
       });
     });
 
-    const settingsLink = document.getElementById("footer-settings-link");
-    if (settingsLink) {
-      settingsLink.addEventListener("click", (event) => {
-        event.preventDefault();
-        chrome.runtime.openOptionsPage();
-      });
+    const versionBadge = document.getElementById("versionBadge");
+    if (versionBadge && chrome.runtime.getManifest) {
+      versionBadge.textContent = `v${chrome.runtime.getManifest().version}`;
     }
 
     // ────────────────────────────────────────────
@@ -652,26 +648,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     });
 
     // ────────────────────────────────────────────
-    // HEALTH CHECK
-    // ────────────────────────────────────────────
-    fetch(`${CONFIG.BACKEND_URL}/health`, {
-      method: "GET",
-      headers: { "Content-Type": "application/json" },
-      signal: AbortSignal.timeout(3000)
-    })
-      .then((response) => {
-        if (response.ok) {
-          serverDot.classList.add("connected");
-          serverLabel.textContent = "Server connected";
-        } else {
-          serverLabel.textContent = "Server offline";
-        }
-      })
-      .catch(() => {
-        serverLabel.textContent = "Server offline";
-      });
-
-    // ────────────────────────────────────────────
     // ANALYZE JOB BUTTON - WITH QUIZ FLOW
     // ────────────────────────────────────────────
     if (analyzeJobBtn) {
@@ -749,26 +725,6 @@ document.addEventListener("DOMContentLoaded", async () => {
         }
       });
     }
-
-    // ────────────────────────────────────────────
-    // HEALTH CHECK (SECOND CHECK)
-    // ────────────────────────────────────────────
-    fetch(`${CONFIG.BACKEND_URL}/health`, {
-      method: "GET",
-      headers: { "Content-Type": "application/json" },
-      signal: AbortSignal.timeout(3000)
-    })
-      .then((response) => {
-        if (response.ok) {
-          if (serverDot) serverDot.classList.add("connected");
-          if (serverLabel) serverLabel.textContent = "Server connected";
-        } else {
-          if (serverLabel) serverLabel.textContent = "Server offline";
-        }
-      })
-      .catch(() => {
-        if (serverLabel) serverLabel.textContent = "Server offline";
-      });
 
   } catch (error) {
     console.error("CareerVector popup error:", error);

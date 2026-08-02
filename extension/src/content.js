@@ -21,6 +21,8 @@ const COMPANY_SELECTORS = [
 ];
 
 const DESCRIPTION_SELECTORS = [
+  ".jobs-description--reformatted",
+  ".jobs-description",
   ".show-more-less-html__markup",
   ".jobs-description__container",
   ".jobs-description-content__text",
@@ -28,6 +30,16 @@ const DESCRIPTION_SELECTORS = [
   ".job-view-layout",
   "[data-job-description]",
   "[class*='jobs-description']"
+];
+
+const DESCRIPTION_KEYWORDS = [
+  "responsibilit",
+  "requirement",
+  "qualification",
+  "experience",
+  "skills",
+  "about the job",
+  "about the role"
 ];
 
 const SKILL_KEYWORDS = [
@@ -86,8 +98,62 @@ function extractCompanyName() {
   return getTextFromSelectors(COMPANY_SELECTORS) || "Unknown Company";
 }
 
+function countKeywordMatches(text) {
+  const lower = String(text || "").toLowerCase();
+  return DESCRIPTION_KEYWORDS.reduce(
+    (count, keyword) => count + (lower.includes(keyword) ? 1 : 0),
+    0
+  );
+}
+
+function extractJobDescriptionFallback() {
+  const workspace =
+    document.querySelector("#workspace") ||
+    document.querySelector("main[id='workspace']") ||
+    document.querySelector("main");
+
+  if (!workspace) {
+    return "";
+  }
+
+  let bestElement = null;
+  let bestLength = 0;
+
+  const candidates = workspace.querySelectorAll("div, p, section");
+  for (const element of candidates) {
+    const text = normalizeWhitespace(element.innerText || "");
+    if (text.length < MIN_DESCRIPTION_LENGTH) {
+      continue;
+    }
+    if (countKeywordMatches(text) < 2) {
+      continue;
+    }
+    if (text.length > bestLength) {
+      bestLength = text.length;
+      bestElement = element;
+    }
+  }
+
+  return bestElement ? normalizeWhitespace(bestElement.innerText) : "";
+}
+
 function extractJobDescription() {
-  return getTextFromSelectors(DESCRIPTION_SELECTORS, MIN_DESCRIPTION_LENGTH);
+  const selectorText = getTextFromSelectors(DESCRIPTION_SELECTORS, MIN_DESCRIPTION_LENGTH);
+
+  if (selectorText.length >= MIN_DESCRIPTION_LENGTH) {
+    console.debug("CareerVector: job description extracted via selectors");
+    return selectorText;
+  }
+
+  const fallbackText = extractJobDescriptionFallback();
+
+  if (fallbackText.length >= MIN_DESCRIPTION_LENGTH) {
+    console.debug("CareerVector: job description extracted via fallback heuristic");
+    return fallbackText;
+  }
+
+  console.debug("CareerVector: no job description found via selectors or fallback");
+  return "";
 }
 
 function extractSkillsFromText(text) {
@@ -401,67 +467,67 @@ function showOverlay(result, jobContext) {
     ensureOverlayStyles();
     removeOverlay();
 
-  const overlay = document.createElement("div");
-  overlay.id = OVERLAY_ID;
-  overlay.innerHTML = `
-    <div class="cvjm-card">
-      <div class="cvjm-header">
-        <div>
-          <div class="cvjm-title">${escapeHtml(jobContext.jobTitle || "LinkedIn job match")}</div>
-          <div class="cvjm-subtitle">${escapeHtml(jobContext.company || "CareerVector")}</div>
-        </div>
-        <button type="button" class="cvjm-close" id="cvjm-close" aria-label="Close">x</button>
-      </div>
-      <div class="cvjm-body">
-        <div class="cvjm-score-row">
-          <div class="cvjm-score-ring" style="background: conic-gradient(${scoreColor} ${Math.max(0, Math.min(score, 100)) * 3.6}deg, #ebe7e1 0deg);">
-            <div class="cvjm-score-inner">${score}%</div>
-          </div>
+    const overlay = document.createElement("div");
+    overlay.id = OVERLAY_ID;
+    overlay.innerHTML = `
+      <div class="cvjm-card">
+        <div class="cvjm-header">
           <div>
-            <div class="cvjm-pill" style="background: ${scoreColor};">${escapeHtml(recommendation)}</div>
-            <div class="cvjm-subtitle" style="color: #4f4a45; margin-top: 8px;">CareerVector live match</div>
+            <div class="cvjm-title">${escapeHtml(jobContext.jobTitle || "LinkedIn job match")}</div>
+            <div class="cvjm-subtitle">${escapeHtml(jobContext.company || "CareerVector")}</div>
+          </div>
+          <button type="button" class="cvjm-close" id="cvjm-close" aria-label="Close">x</button>
+        </div>
+        <div class="cvjm-body">
+          <div class="cvjm-score-row">
+            <div class="cvjm-score-ring" style="background: conic-gradient(${scoreColor} ${Math.max(0, Math.min(score, 100)) * 3.6}deg, #ebe7e1 0deg);">
+              <div class="cvjm-score-inner">${score}%</div>
+            </div>
+            <div>
+              <div class="cvjm-pill" style="background: ${scoreColor};">${escapeHtml(recommendation)}</div>
+              <div class="cvjm-subtitle" style="color: #4f4a45; margin-top: 8px;">CareerVector live match</div>
+            </div>
+          </div>
+          <div class="cvjm-summary">${escapeHtml(summary)}</div>
+          <div class="cvjm-section">
+            <div class="cvjm-section-title">Matched skills</div>
+            <div class="cvjm-tags">${renderTags(matchedSkills.slice(0, 8), "matched", "No direct matches yet")}</div>
+          </div>
+          <div class="cvjm-section">
+            <div class="cvjm-section-title">Skills to learn</div>
+            <div class="cvjm-tags">${renderTags(missingSkills.slice(0, 8), "missing", "Strong overall fit")}</div>
+          </div>
+          <div class="cvjm-actions">
+            <button type="button" class="cvjm-button primary" id="cvjm-dashboard">View dashboard</button>
+            <button type="button" class="cvjm-button secondary" id="cvjm-dismiss">Dismiss</button>
           </div>
         </div>
-        <div class="cvjm-summary">${escapeHtml(summary)}</div>
-        <div class="cvjm-section">
-          <div class="cvjm-section-title">Matched skills</div>
-          <div class="cvjm-tags">${renderTags(matchedSkills.slice(0, 8), "matched", "No direct matches yet")}</div>
-        </div>
-        <div class="cvjm-section">
-          <div class="cvjm-section-title">Skills to learn</div>
-          <div class="cvjm-tags">${renderTags(missingSkills.slice(0, 8), "missing", "Strong overall fit")}</div>
-        </div>
-        <div class="cvjm-actions">
-          <button type="button" class="cvjm-button primary" id="cvjm-dashboard">View dashboard</button>
-          <button type="button" class="cvjm-button secondary" id="cvjm-dismiss">Dismiss</button>
-        </div>
       </div>
-    </div>
-  `;
+    `;
 
-  document.body.appendChild(overlay);
+    document.body.appendChild(overlay);
 
-  overlay.querySelector("#cvjm-close")?.addEventListener("click", () => {
-    dismissedSignature = lastAnalyzedSignature;
-    removeOverlay();
-  });
+    overlay.querySelector("#cvjm-close")?.addEventListener("click", () => {
+      dismissedSignature = lastAnalyzedSignature;
+      removeOverlay();
+    });
 
-  overlay.querySelector("#cvjm-dismiss")?.addEventListener("click", () => {
-    dismissedSignature = lastAnalyzedSignature;
-    removeOverlay();
-  });
+    overlay.querySelector("#cvjm-dismiss")?.addEventListener("click", () => {
+      dismissedSignature = lastAnalyzedSignature;
+      removeOverlay();
+    });
 
-  overlay.querySelector("#cvjm-dashboard")?.addEventListener("click", async () => {
-    try {
-      await sendRuntimeMessage({
-        type: "OPEN_WEB_APP",
-        url: dashboardUrl
-      });
-    } catch (error) {
-      console.error("Failed to open dashboard:", error);
-      window.open(dashboardUrl, "_blank", "noopener,noreferrer");
-    }
-  });
+    overlay.querySelector("#cvjm-dashboard")?.addEventListener("click", async () => {
+      try {
+        await sendRuntimeMessage({
+          type: "OPEN_WEB_APP",
+          url: dashboardUrl
+        });
+      } catch (error) {
+        console.error("Failed to open dashboard:", error);
+        window.open(dashboardUrl, "_blank", "noopener,noreferrer");
+      }
+    });
   });
 }
 
