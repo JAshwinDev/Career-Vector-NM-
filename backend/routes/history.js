@@ -4,6 +4,7 @@ const mongoose = require("mongoose");
 const JobHistory = require("../models/JobHistory");
 const User = require("../models/User");
 const localStore = require("../utils/localStore");
+const { requireAuth } = require("../middleware/auth");
 
 function toScore(body) {
   const raw = body.score ?? body.compatibilityScore ?? body.matchScore;
@@ -42,11 +43,11 @@ function normalizeMissing(body) {
   return { missing, missingDetails };
 }
 
-function normalizeEntry(body, score, missing, missingDetails) {
+function normalizeEntry(body, score, missing, missingDetails, userId) {
   return {
     entryType: body.entryType || "job-match",
     source: body.source || "platform",
-    userId: body.userId || "",
+    userId: userId || "",
     resumeProfileId: body.resumeProfileId || "",
     score,
     compatibilityScore: Number(body.compatibilityScore ?? score),
@@ -111,7 +112,7 @@ function percentileFor(score, peers) {
 }
 
 // POST /history
-router.post("/", async (req, res) => {
+router.post("/", requireAuth, async (req, res) => {
   try {
     const score = toScore(req.body);
     if (score === null) {
@@ -120,7 +121,7 @@ router.post("/", async (req, res) => {
 
     const { missing, missingDetails } = normalizeMissing(req.body);
 
-    const payload = normalizeEntry(req.body, score, missing, missingDetails);
+    const payload = normalizeEntry(req.body, score, missing, missingDetails, req.userId);
     const entry = localStore.isMongoReady(mongoose)
       ? await new JobHistory(payload).save()
       : localStore.createHistory(payload);
@@ -132,10 +133,10 @@ router.post("/", async (req, res) => {
 });
 
 // GET /history
-router.get("/", async (req, res) => {
+router.get("/", requireAuth, async (req, res) => {
   try {
     const limit = parseInt(req.query.limit, 10) || 50;
-    const filter = {};
+    const filter = { userId: req.userId };
 
     if (req.query.entryType) {
       filter.entryType = req.query.entryType;
@@ -143,10 +144,6 @@ router.get("/", async (req, res) => {
 
     if (req.query.source) {
       filter.source = req.query.source;
-    }
-
-    if (req.query.userId) {
-      filter.userId = req.query.userId;
     }
 
     const history = localStore.isMongoReady(mongoose)
@@ -160,9 +157,9 @@ router.get("/", async (req, res) => {
 });
 
 // GET /history/stats
-router.get("/stats", async (_req, res) => {
+router.get("/stats", requireAuth, async (req, res) => {
   try {
-    const userId = String(_req.query.userId || "");
+    const userId = String(req.userId || "");
     const all = localStore.isMongoReady(mongoose)
       ? await JobHistory.find(userId ? { userId } : {}).lean()
       : localStore.listHistory({ userId, limit: 10000 });
@@ -174,7 +171,7 @@ router.get("/stats", async (_req, res) => {
 });
 
 // GET /history/peer-comparison
-router.get("/peer-comparison", async (req, res) => {
+router.get("/peer-comparison", requireAuth, async (req, res) => {
   try {
     const role = String(req.query.role || "").trim();
     const score = Number(req.query.score);
@@ -203,11 +200,24 @@ router.get("/peer-comparison", async (req, res) => {
     const aheadPercent = peers.length ? Math.round((aheadCount / peers.length) * 100) : 0;
     const percentile = percentileFor(currentScore, peers);
 
-    // Fetch user names
+    // Fetch user names. JobHistory.userId is stored as a String, but User._id
+    // is an ObjectId, so cast valid ids before querying; skip malformed ones
+    // (e.g. demo ids like "demo-<timestamp>").
     const userIds = [...new Set(allInRole.map(item => item.userId).filter(Boolean))];
-    const users = localStore.isMongoReady(mongoose) ? await User.find({ _id: { $in: userIds } }, "name").lean() : [];
+    const objectIds = userIds
+      .map((id) => {
+        try {
+          return new mongoose.Types.ObjectId(id);
+        } catch {
+          return null;
+        }
+      })
+      .filter(Boolean);
+    const users = localStore.isMongoReady(mongoose) && objectIds.length
+      ? await User.find({ _id: { $in: objectIds } }, "name").lean()
+      : [];
     const userMap = users.reduce((acc, user) => {
-      acc[user._id] = user.name;
+      acc[String(user._id)] = user.name;
       return acc;
     }, {});
 
@@ -242,7 +252,7 @@ router.get("/peer-comparison", async (req, res) => {
 });
 
 // GET /history/:id
-router.get("/:id", async (req, res) => {
+router.get("/:id", requireAuth, async (req, res) => {
   try {
     const entry = localStore.isMongoReady(mongoose)
       ? await JobHistory.findById(req.params.id).lean()
@@ -258,7 +268,7 @@ router.get("/:id", async (req, res) => {
 });
 
 // DELETE /history/:id
-router.delete("/:id", async (req, res) => {
+router.delete("/:id", requireAuth, async (req, res) => {
   try {
     if (localStore.isMongoReady(mongoose)) {
       await JobHistory.findByIdAndDelete(req.params.id);

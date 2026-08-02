@@ -355,6 +355,12 @@ body {
   text-decoration: none;
 }
 
+.footer-links {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
 .footer-link:hover {
   text-decoration: underline;
 }

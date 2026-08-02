@@ -1,6 +1,5 @@
 console.log("CareerVector content script ready");
 
-const FRONTEND_URL = "http://localhost:3000";
 const OVERLAY_ID = "cv-job-match-overlay";
 const OVERLAY_STYLE_ID = "cv-job-match-overlay-style";
 const MIN_DESCRIPTION_LENGTH = 120;
@@ -380,26 +379,27 @@ function renderTags(items, className, emptyText) {
 }
 
 function showOverlay(result, jobContext) {
-  const analysis = result.analysis || {};
-  const score = Number(analysis.matchScore ?? analysis.compatibility_score ?? 0);
-  const scoreColor = getScoreColor(score);
-  const matchedSkills = Array.isArray(analysis.matchedSkills)
-    ? analysis.matchedSkills
-    : Array.isArray(analysis.matched_skills)
-      ? analysis.matched_skills
-      : [];
-  const missingSkills = Array.isArray(analysis.missingSkills)
-    ? analysis.missingSkills
-    : Array.isArray(analysis.missing_skills)
-      ? analysis.missing_skills.map((item) => item.skill || item).filter(Boolean)
-      : [];
-  const recommendation = analysis.recommendation || "Analysis ready";
-  const summary = analysis.summary || "Your current resume was compared against this job.";
-  const dashboardUrl = result.dashboardUrl ||
-    (result.analysisId ? `${FRONTEND_URL}/dashboard?analysisId=${result.analysisId}` : `${FRONTEND_URL}/dashboard?tab=history`);
+  return getConfig().then((config) => {
+    const analysis = result.analysis || {};
+    const score = Number(analysis.matchScore ?? analysis.compatibility_score ?? 0);
+    const scoreColor = getScoreColor(score);
+    const matchedSkills = Array.isArray(analysis.matchedSkills)
+      ? analysis.matchedSkills
+      : Array.isArray(analysis.matched_skills)
+        ? analysis.matched_skills
+        : [];
+    const missingSkills = Array.isArray(analysis.missingSkills)
+      ? analysis.missingSkills
+      : Array.isArray(analysis.missing_skills)
+        ? analysis.missing_skills.map((item) => item.skill || item).filter(Boolean)
+        : [];
+    const recommendation = analysis.recommendation || "Analysis ready";
+    const summary = analysis.summary || "Your current resume was compared against this job.";
+    const dashboardUrl = result.dashboardUrl ||
+      (result.analysisId ? `${config.FRONTEND_URL}/dashboard?analysisId=${result.analysisId}` : `${config.FRONTEND_URL}/dashboard?tab=history`);
 
-  ensureOverlayStyles();
-  removeOverlay();
+    ensureOverlayStyles();
+    removeOverlay();
 
   const overlay = document.createElement("div");
   overlay.id = OVERLAY_ID;
@@ -462,6 +462,7 @@ function showOverlay(result, jobContext) {
       window.open(dashboardUrl, "_blank", "noopener,noreferrer");
     }
   });
+  });
 }
 
 async function extractJobDataForMessage() {
@@ -521,7 +522,7 @@ async function analyzeCurrentJob(force = false) {
     });
 
     if (result && result.success && result.analysis) {
-      showOverlay(result, extracted.jobData.context);
+      await showOverlay(result, extracted.jobData.context);
     }
   } catch (error) {
     const errorMsg = (error?.message || "").toLowerCase();

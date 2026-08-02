@@ -1,12 +1,12 @@
 const express = require("express");
 const Interaction = require("../models/Interaction");
+const { requireAuth } = require("../middleware/auth");
 
 const router = express.Router();
 
-router.post("/", async (req, res) => {
+router.post("/", requireAuth, async (req, res) => {
   try {
     const {
-      userId,
       jobId,
       resumeProfileId,
       interactionType,
@@ -22,7 +22,7 @@ router.post("/", async (req, res) => {
     }
 
     const interaction = await Interaction.create({
-      userId: userId || undefined,
+      userId: req.userId || undefined,
       jobId: jobId || undefined,
       resumeProfileId: resumeProfileId || undefined,
       interactionType,
@@ -45,12 +45,11 @@ router.post("/", async (req, res) => {
   }
 });
 
-router.get("/", async (req, res) => {
+router.get("/", requireAuth, async (req, res) => {
   try {
-    const { userId, interactionType, limit = 25 } = req.query;
-    const filter = {};
+    const { interactionType, limit = 25 } = req.query;
+    const filter = { userId: req.userId };
 
-    if (userId) filter.userId = userId;
     if (interactionType) filter.interactionType = interactionType;
 
     const interactions = await Interaction.find(filter)
@@ -67,7 +66,7 @@ router.get("/", async (req, res) => {
   }
 });
 
-router.get("/stats", async (_req, res) => {
+router.get("/stats", requireAuth, async (_req, res) => {
   try {
     const [total, grouped, recent] = await Promise.all([
       Interaction.countDocuments(),

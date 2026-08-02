@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const Job = require("../models/Job");
-const axios = require("axios");
+const { getRemotiveJobs } = require("../utils/remotiveClient");
 
 // Helper to calculate match score
 function calculateMatch(job, userSkills) {
@@ -57,19 +57,12 @@ function mapRemotiveJob(job) {
 router.get("/", async (req, res) => {
   try {
     const { search, limit = 20 } = req.query;
-    
-    // Fetch from Remotive API
-    let url = "https://remotive.com/api/remote-jobs";
-    if (search) {
-      url += "?search=" + encodeURIComponent(search);
-    }
-    
-    const response = await axios.get(url);
-    const jobs = (response.data.jobs || []).slice(0, Number(limit)).map(mapRemotiveJob);
+
+    const result = await getRemotiveJobs({ search, limit });
 
     res.json({
-      jobs,
-      total: response.data.jobs ? response.data.jobs.length : 0,
+      jobs: result.jobs.map(mapRemotiveJob),
+      total: result.total,
       page: 1,
       limit: Number(limit),
       pages: 1
@@ -79,15 +72,68 @@ router.get("/", async (req, res) => {
   }
 });
 
-// GET /jobs/:id - Get single job
+// POST /jobs/ingest - Bulk-upsert jobs into the local Job collection
+router.post("/ingest", async (req, res) => {
+  try {
+    const { jobs } = req.body;
+    if (!Array.isArray(jobs) || !jobs.length) {
+      return res.status(400).json({ error: "jobs array is required." });
+    }
+
+    const normalized = jobs.map((job) => ({
+      externalJobId: String(job.externalJobId || job.id || job._id || ""),
+      title: job.title,
+      company: job.company || job.company_name || "",
+      location: {
+        city: job.location?.city || job.candidate_required_location || "",
+        state: job.location?.state || "",
+        remote: Boolean(job.location?.remote ?? job.remote ?? false)
+      },
+      description: job.description || "",
+      requirements: job.requirements || [],
+      skills: job.skills || job.tags || [],
+      salary: {
+        min: job.salary?.min ?? null,
+        max: job.salary?.max ?? null,
+        currency: job.salary?.currency || ""
+      },
+      jobType: job.jobType || "full-time",
+      url: job.url || job.externalUrl || "",
+      source: job.source || "jsearch",
+      externalUrl: job.externalUrl || job.url || ""
+    }));
+
+    let inserted = 0;
+    for (const job of normalized) {
+      if (!job.externalJobId) continue;
+      try {
+        await Job.updateOne(
+          { externalJobId: job.externalJobId },
+          { $set: job },
+          { upsert: true }
+        );
+        inserted++;
+      } catch (err) {
+        console.warn("Failed to ingest job", job.externalJobId, err.message);
+      }
+    }
+
+    return res.json({ success: true, inserted, total: normalized.length });
+  } catch (err) {
+    return res.status(500).json({ error: "Failed to ingest jobs.", details: err.message });
+  }
+});
+
+// GET /jobs/:id - Get single job from the local collection
 router.get("/:id", async (req, res) => {
   try {
-    // We can't fetch a single job easily by ID from Remotive without full scan,
-    // so we return 404 for now, or fallback to DB if we want.
-    // For this scope, the frontend uses the list.
-    return res.status(404).json({ error: "Single job fetch not supported for external API." });
+    const job = await Job.findById(req.params.id).lean();
+    if (!job) {
+      return res.status(404).json({ error: "Job not found." });
+    }
+    return res.json(job);
   } catch (err) {
-    res.status(500).json({ error: "Failed to fetch job.", details: err.message });
+    return res.status(500).json({ error: "Failed to fetch job.", details: err.message });
   }
 });
 
@@ -102,9 +148,9 @@ router.post("/search/by-match", async (req, res) => {
     
     // We can search remotive using the first skill or a general IT category
     const mainSkill = userSkills[0] || "developer";
-    const response = await axios.get("https://remotive.com/api/remote-jobs?search=" + encodeURIComponent(mainSkill));
-    
-    let jobs = (response.data.jobs || []).map(mapRemotiveJob);
+    const result = await getRemotiveJobs({ search: mainSkill, limit: 50 });
+
+    let jobs = result.jobs.map(mapRemotiveJob);
     
     // Calculate match scores for all fetched jobs
     jobs = jobs.map(job => {

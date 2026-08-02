@@ -1,9 +1,11 @@
-console.log("CareerVector Extension popup loaded - v2.3");
+console.log("CareerVector Extension popup loaded - v2.4");
+
+let CONFIG = DEFAULT_CONFIG;
 
 // Fetch AI-generated quiz questions from backend (Gemini)
 async function fetchAiQuizQuestions(skills) {
   try {
-    const response = await fetch("http://localhost:5000/quiz/generate-from-skills", {
+    const response = await fetch(`${CONFIG.BACKEND_URL}/quiz/generate-from-skills`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -154,8 +156,10 @@ function attachQuizHandlers(quizForm, questions, quizModal, onComplete) {
 // ============================================================================
 // MAIN INITIALIZATION - ALL CODE RUNS INSIDE DOMContentLoaded
 // ============================================================================
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", async () => {
   try {
+    CONFIG = await getConfig();
+
     // DOM elements
     const uploadStatus = document.getElementById("upload-status");
     const uploadBtn = document.getElementById("uploadBtn");
@@ -323,9 +327,17 @@ document.addEventListener("DOMContentLoaded", () => {
     dashboardButtons.forEach((button) => {
       button.addEventListener("click", (event) => {
         event.preventDefault();
-        openDashboard("http://localhost:3000/dashboard");
+        openDashboard(`${CONFIG.FRONTEND_URL}/dashboard`);
       });
     });
+
+    const settingsLink = document.getElementById("footer-settings-link");
+    if (settingsLink) {
+      settingsLink.addEventListener("click", (event) => {
+        event.preventDefault();
+        chrome.runtime.openOptionsPage();
+      });
+    }
 
     // ────────────────────────────────────────────
     // DROPZONE EVENTS
@@ -359,7 +371,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
       const reader = new FileReader();
       reader.onload = () => {
-        fetch("http://localhost:5000/upload", {
+        fetch(`${CONFIG.BACKEND_URL}/upload`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
@@ -422,7 +434,7 @@ document.addEventListener("DOMContentLoaded", () => {
     // ────────────────────────────────────────────
     // HEALTH CHECK
     // ────────────────────────────────────────────
-    fetch("http://localhost:5000/health", {
+    fetch(`${CONFIG.BACKEND_URL}/health`, {
       method: "GET",
       headers: { "Content-Type": "application/json" },
       signal: AbortSignal.timeout(3000)
@@ -498,7 +510,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
             if (result && result.success) {
               setStatus(analysisStatus, "success", "Analysis complete! Opening dashboard...");
-              openDashboard(result.dashboardUrl || "http://localhost:3000/dashboard?tab=history");
+              openDashboard(result.dashboardUrl || `${CONFIG.FRONTEND_URL}/dashboard?tab=history`);
               setTimeout(() => window.close(), 1200);
               return;
             }
@@ -521,7 +533,7 @@ document.addEventListener("DOMContentLoaded", () => {
     // ────────────────────────────────────────────
     // HEALTH CHECK (SECOND CHECK)
     // ────────────────────────────────────────────
-    fetch("http://localhost:5000/health", {
+    fetch(`${CONFIG.BACKEND_URL}/health`, {
       method: "GET",
       headers: { "Content-Type": "application/json" },
       signal: AbortSignal.timeout(3000)

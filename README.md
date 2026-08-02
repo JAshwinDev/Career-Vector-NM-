@@ -4,7 +4,7 @@
 > **CareerVector** is a full-stack AI platform with a Chrome Extension that:
 > 1. **Analyzes your resume** against 20+ job roles using TF-IDF + Cosine Similarity (CareerVector web app)
 > 2. **Overlays real-time match scores** on LinkedIn job listings using Google Gemini AI (Chrome Extension)
-> 3. **Saves your job history** to MongoDB and serves a dashboard of your progress
+> 3. **Saves your job history** and serves a dashboard of your progress
 
 ---
 
@@ -12,59 +12,46 @@
 
 ```
 careervector/
-├── start.sh                        ← One-command startup (all 3 services)
+├── start.sh                          ← One-command startup (all 3 services)
 │
-├── extension/                      ← Chrome Extension (load unpacked)
+├── extension/                        ← Chrome Extension (load unpacked)
 │   ├── manifest.json
-│   ├── content.js                  ← Injects overlay on LinkedIn jobs
-│   ├── background.js               ← Handles resume upload messaging
-│   ├── popup.html / popup.js       ← Extension popup UI
+│   ├── config.js                     ← Shared base-URL config (chrome.storage.sync)
+│   ├── options.html / options.js     ← Settings page (backend/web-app URLs)
+│   ├── content.js                    ← Injects overlay on LinkedIn jobs
+│   ├── background.js                 ← Handles resume upload messaging
+│   ├── popup.html / popup.js         ← Extension popup UI
 │   └── styles.css
 │
-├── backend/                        ← Node.js + Express API (Port 5000)
-│   ├── server.js
-│   ├── .env.example                ← Copy to .env and fill in keys
+├── backend/                          ← Node.js + Express API (Port 5000)
+│   ├── server.js                     ← Entry point (starts the HTTP server)
+│   ├── app.js                        ← Express app (importable by tests)
+│   ├── .env.example                  ← Copy to .env and fill in keys
 │   ├── models/
-│   │   └── JobHistory.js           ← Mongoose schema
-│   └── routes/
-│       ├── match.js                ← POST /match  (Gemini AI job matching)
-│       ├── upload.js               ← POST /upload (PDF → skill extraction)
-│       └── history.js              ← GET/POST /history (MongoDB CRUD)
+│   │   ├── User.js                   ← Auth profile + preferences
+│   │   ├── ResumeProfile.js          ← Parsed resume + extracted skills
+│   │   ├── Job.js                    ← Ingested job postings
+│   │   ├── JobHistory.js             ← Saved analyses / job matches
+│   │   ├── Interaction.js            ← User behaviour events
+│   │   └── Quiz.js                   ← Skill-verification quizzes
+│   ├── middleware/auth.js            ← JWT sign/verify (requireAuth)
+│   ├── routes/                       ← API route handlers
+│   ├── utils/
+│   │   ├── localStore.js             ← JSON fallback when Mongo is unavailable
+│   │   ├── mlService.js              ← ML service base URL helper
+│   │   ├── remotiveClient.js         ← Remotive API client (rate-limited + cached)
+│   │   └── resumeProfiles.js         ← PDF parsing + skill extraction
+│   └── tests/                        ← node:test suite (auth + routes)
 │
-├── ml-service/                     ← Python Flask ML API (Port 5001)
-│   ├── app.py                      ← TF-IDF + cosine similarity engine
-│   └── data/job_roles.json         ← 20 roles, 500+ weighted skills
+├── ml-service/                       ← Python Flask ML API (Port 5001)
+│   ├── app.py                        ← TF-IDF + cosine similarity engine
+│   └── data/job_roles.json           ← 20 roles, 500+ weighted skills
 │
-└── frontend/                       ← React + Vite web app (Port 3000)
+└── frontend/                         ← React + Vite web app (Port 3000)
     └── src/
         ├── App.jsx
-        ├── components/
-        │   ├── HeroSection.jsx
-        │   ├── HowItWorks.jsx
-        │   ├── AnalyzeForm.jsx
-        │   └── ResultsDashboard.jsx
+        ├── components/               ← Login, Upload, Quiz, Jobs, Dashboard…
         └── utils/api.js
-```
-
----
-
-## 🏗️ Full System Architecture
-
-```
-Chrome Extension (LinkedIn)
-  │  content.js detects job description
-  │  popup.js handles skill input / PDF upload
-  ▼
-Node.js Backend  :5000
-  ├── POST /match   → Google Gemini AI → matchScore, matched/missing skills
-  ├── POST /upload  → pdf-parse + Gemini → skill array
-  └── GET/POST /history → MongoDB Atlas
-         ▲
-         │ (also used by)
-React Frontend :3000
-  └── proxy /api → Backend :5000
-             └── /analyze → Python ML Service :5001
-                            (TF-IDF + cosine similarity)
 ```
 
 ---
@@ -74,8 +61,8 @@ React Frontend :3000
 ### 1. Prerequisites
 - Node.js 18+
 - Python 3.9+
-- MongoDB Atlas account (free tier is fine)
-- Google Gemini API key (free at aistudio.google.com)
+- MongoDB Atlas account (optional — the backend falls back to a local JSON store)
+- Google Gemini API key (optional — quiz generation falls back to a built-in bank)
 
 ### 2. Environment Variables
 
@@ -85,12 +72,20 @@ cp .env.example .env
 # Edit .env and fill in MONGO_URI and GEMINI_API_KEY
 ```
 
-**.env contents:**
-```
-MONGO_URI=mongodb+srv://<user>:<pass>@cluster0.xxxxx.mongodb.net/careervector
-GEMINI_API_KEY=your_gemini_api_key_here
-PORT=5000
-```
+Every variable has a safe default or is optional:
+
+| Variable | Purpose | Default |
+|---|---|---|
+| `PORT` | Backend port | `5000` |
+| `MONGO_URI` | MongoDB connection string | *(none → local JSON store)* |
+| `GEMINI_API_KEY` | Google Gemini for quiz generation | *(none → question bank)* |
+| `JWT_SECRET` | JWT signing key | *(ephemeral, regenerated each start)* |
+| `JWT_EXPIRES_IN` | Token lifetime | `7d` |
+| `GOOGLE_CLIENT_ID` | Google OAuth (`POST /auth/google`) | *(none → OAuth disabled)* |
+| `ML_SERVICE_URL` | Python ML service base URL | `http://localhost:5001` |
+| `REMOTIVE_API_URL` | Job source API | `https://remotive.com/api/remote-jobs` |
+| `REMOTIVE_CACHE_TTL_MS` | Remotive response cache TTL | `600000` (10 min) |
+| `REMOTIVE_RATE_LIMIT_MS` | Min. spacing between Remotive calls | `2000` |
 
 ### 3. Start Everything
 
@@ -110,9 +105,17 @@ This installs all dependencies and starts:
 
 1. Open Chrome → `chrome://extensions`
 2. Enable **Developer Mode** (top-right toggle)
-3. Click **Load unpacked**
-4. Select the `extension/` folder from this project
-5. Pin the extension to your toolbar
+3. Click **Load unpacked** → select the `extension/` folder
+4. Pin the extension to your toolbar
+
+### 5. Run the tests
+
+```bash
+cd backend
+npm test
+```
+
+The suite covers the auth middleware (valid/invalid tokens, ownership checks) and at least one route per resource. Tests run offline — the Remotive API is mocked and Mongo is bypassed via the local JSON store.
 
 ---
 
@@ -126,38 +129,89 @@ This installs all dependencies and starts:
    - ✅ Matched Skills
    - 📚 Skills to Learn
    - Recommendation: **APPLY NOW / MAYBE APPLY / SKIP**
-5. Results are auto-saved to MongoDB via `POST /history`
+5. Results are auto-saved via `POST /history`
+
+### Configuring the extension's API base URL
+
+By default the extension calls `http://localhost:5000` (backend) and `http://localhost:3000` (web app). To point it at a different server, open the extension popup → **Settings** (or right-click the icon → *Options*). Values are stored in `chrome.storage.sync` under `BACKEND_URL` / `FRONTEND_URL` and fall back to the defaults in `config.js`.
+
+> Note: to reach a non-local backend, add its origin to `host_permissions` in `extension/manifest.json`.
 
 ---
 
 ## 📄 API Reference
 
-### `POST /match`
-Gemini AI-powered job description matcher.
-```json
-Request:  { "jobDescription": "...", "userSkills": ["Python","SQL",...] }
-Response: { "matchScore": 72, "matchedSkills": [...], "missingSkills": [...],
-            "recommendation": "APPLY NOW", "summary": "..." }
-```
+All routes are mounted under `/` on port `5000`. Routes marked 🔒 require `Authorization: Bearer <token>` (from `/auth/demo`, `/auth/login`, `/auth/register`, or `/auth/google`).
 
-### `POST /upload`
-Upload resume PDF as base64 → extract skills with Gemini.
-```json
-Request:  { "fileData": "data:application/pdf;base64,...", "fileName": "cv.pdf" }
-Response: { "skills": ["Python","React",...], "message": "Resume processed successfully." }
-```
+### Auth
+| Method | Route | Description |
+|---|---|---|
+| `POST` | `/auth/google` | Verify a Google ID token, then log in / sign up |
+| `POST` | `/auth/register` | Email/password signup |
+| `POST` | `/auth/login` | Email/password login |
+| `POST` | `/auth/demo` | Login as a demo student (no DB write) |
+| `GET` 🔒 | `/auth/user/me` | Current user's profile |
+| `GET` 🔒 | `/auth/user/:id` | Own profile by id (403 for others) |
+| `PUT` 🔒 | `/auth/user/:id` | Update name, current/target role, preferences |
+| `POST` | `/auth/logout` | Stateless logout (client discards token) |
 
-### `GET /history`
-Retrieve last 50 job match records from MongoDB.
+### Match & Analysis
+| Method | Route | Description |
+|---|---|---|
+| `POST` | `/match` | Match `jobDescription` + `userSkills` against a role (ML, keyword fallback) |
+| `POST` | `/upload` | Parse resume PDF (base64) → extracted skills |
+| `POST` | `/analyze` | Multipart upload (`resume`, `skills`, `role`) → scored readiness report + roadmap |
+| `GET` | `/roles` | Role catalog (ML, fallback catalog) |
+| `POST` | `/roles` | Role recommendations for a skills array |
 
-### `POST /history`
-Save a job match result to MongoDB.
+### History & Analytics
+| Method | Route | Description |
+|---|---|---|
+| `POST` 🔒 | `/history` | Save an analysis / job match |
+| `GET` 🔒 | `/history` | List saved entries (scoped to user) |
+| `GET` 🔒 | `/history/stats` | Aggregate stats (avg score, apply/maybe/skip counts) |
+| `GET` 🔒 | `/history/peer-comparison` | Percentile + leaderboard vs. peers |
+| `GET` 🔒 | `/history/:id` | Fetch a single entry |
+| `DELETE` 🔒 | `/history/:id` | Delete an entry |
 
-### `GET /history/stats`
-Aggregate stats: avg score, apply/maybe/skip counts, top missing skills.
+### Jobs (Remotive)
+| Method | Route | Description |
+|---|---|---|
+| `GET` | `/jobs` | Search remote jobs (`?search=&limit=`) — rate-limited + cached |
+| `POST` | `/jobs/ingest` | Bulk upsert jobs into the `Job` collection |
+| `GET` | `/jobs/:id` | Fetch an ingested job |
+| `POST` | `/jobs/search/by-match` | Rank jobs against `userSkills` |
 
-### `POST /analyze` *(via frontend proxy)*
-CareerVector TF-IDF ML engine — see ml-service/app.py.
+### Quiz
+| Method | Route | Description |
+|---|---|---|
+| `POST` | `/quiz/generate-from-skills` | AI-generated MCQs from resume skills |
+| `POST` 🔒 | `/quiz/generate` | MCQs for a `targetRole` (Gemini, bank fallback) |
+| `POST` | `/quiz/:id/submit` | Evaluate answers, score, suggestions |
+| `GET` 🔒 | `/quiz/user` | Current user's quiz history |
+| `GET` | `/quiz/:id` | Fetch a quiz |
+
+### Interactions & Workflow
+| Method | Route | Description |
+|---|---|---|
+| `POST` 🔒 | `/interactions` | Log a user interaction |
+| `GET` 🔒 | `/interactions` | List interactions |
+| `GET` 🔒 | `/interactions/stats` | Interaction aggregates |
+| `GET` | `/workflow/overview` | Service health + feature readiness |
+| `GET` | `/health` | Backend / Mongo health probe |
+
+---
+
+## 🗄️ Data Models
+
+All models live in `backend/models/` (Mongoose). When `MONGO_URI` is unset or unreachable, the server transparently uses the local JSON store in `backend/data/local-store.json`.
+
+- **User** — Google/email identity, `currentRole`/`targetRole`, `skills`, `preferences` (dark mode, notification email, preferred locations, min salary), references to `resumeProfiles` and `jobMatches`.
+- **ResumeProfile** — `source`, `fileName`, `rawText`, `manualSkills`, `extractedSkills`, `selectedRole`.
+- **Job** — ingested postings: title, company, location, description, requirements, skills, salary, jobType, source, URL.
+- **JobHistory** — a saved analysis/match: score, matched/missing skills, recommendation, roadmap, all-role scores, owner `userId`.
+- **Interaction** — behaviour events (`resume_upload`, `job_view`, `job_apply`, `match_check`, `roadmap_view`, `quiz_attempt`, …).
+- **Quiz** — generated MCQs, `userAnswers`, score, `skillsPerformance`, suggestions.
 
 ---
 

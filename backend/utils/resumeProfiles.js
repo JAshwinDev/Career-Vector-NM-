@@ -3,9 +3,8 @@ const mongoose = require("mongoose");
 const ResumeProfile = require("../models/ResumeProfile");
 const localStore = require("./localStore");
 const { uniqueSkills } = require("./skillUtils");
+const { ML_SERVICE_URL } = require("./mlService");
 const jobRoleData = require("../../ml-service/data/job_roles.json");
-
-const ML_SERVICE_URL = process.env.ML_SERVICE_URL || "http://localhost:5001";
 const roleData = jobRoleData.roles || jobRoleData;
 const knownSkills = uniqueSkills(
   Object.values(roleData).flatMap((role) => Object.keys(role.required_skills || role.skills || {}))

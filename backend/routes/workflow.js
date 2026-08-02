@@ -6,6 +6,8 @@ const Job = require("../models/Job");
 const JobHistory = require("../models/JobHistory");
 const Interaction = require("../models/Interaction");
 const Quiz = require("../models/Quiz");
+const localStore = require("../utils/localStore");
+const { ML_SERVICE_URL } = require("../utils/mlService");
 
 const router = express.Router();
 
@@ -14,7 +16,7 @@ router.get("/overview", async (_req, res) => {
     let ml = "down";
 
     try {
-      const mlResponse = await fetch("http://localhost:5001/health", {
+      const mlResponse = await fetch(`${ML_SERVICE_URL}/health`, {
         signal: AbortSignal.timeout(2000)
       });
       if (mlResponse.ok) {
@@ -24,30 +26,60 @@ router.get("/overview", async (_req, res) => {
       ml = "down";
     }
 
-    const [
-      users,
-      resumeProfiles,
-      jobs,
-      analyses,
-      interactions,
-      completedQuizzes,
-      avgScoreResult
-    ] = await Promise.all([
-      User.countDocuments(),
-      ResumeProfile.countDocuments(),
-      Job.countDocuments(),
-      JobHistory.countDocuments(),
-      Interaction.countDocuments(),
-      Quiz.countDocuments({ status: "completed" }),
-      JobHistory.aggregate([
-        {
-          $group: {
-            _id: null,
-            avgScore: { $avg: { $ifNull: ["$compatibilityScore", "$score"] } }
+    let counts;
+    if (localStore.isMongoReady(mongoose)) {
+      const [
+        users,
+        resumeProfiles,
+        jobs,
+        analyses,
+        interactions,
+        completedQuizzes,
+        avgScoreResult
+      ] = await Promise.all([
+        User.countDocuments(),
+        ResumeProfile.countDocuments(),
+        Job.countDocuments(),
+        JobHistory.countDocuments(),
+        Interaction.countDocuments(),
+        Quiz.countDocuments({ status: "completed" }),
+        JobHistory.aggregate([
+          {
+            $group: {
+              _id: null,
+              avgScore: { $avg: { $ifNull: ["$compatibilityScore", "$score"] } }
+            }
           }
-        }
-      ])
-    ]);
+        ])
+      ]);
+
+      counts = {
+        users,
+        resumeProfiles,
+        jobs,
+        analyses,
+        interactions,
+        completedQuizzes,
+        avgMatchScore: Math.round(avgScoreResult[0]?.avgScore || 0)
+      };
+    } else {
+      const data = localStore.readStore();
+      const completedQuizzes = data.quizzes.filter((quiz) => quiz.status === "completed").length;
+      const scores = data.histories.map((item) => Number(item.compatibilityScore ?? item.score ?? 0));
+      const avgMatchScore = scores.length
+        ? Math.round(scores.reduce((sum, score) => sum + score, 0) / scores.length)
+        : 0;
+
+      counts = {
+        users: data.users.length,
+        resumeProfiles: data.resumeProfiles.length,
+        jobs: 0,
+        analyses: data.histories.length,
+        interactions: 0,
+        completedQuizzes,
+        avgMatchScore
+      };
+    }
 
     return res.json({
       status: "ok",
@@ -56,15 +88,7 @@ router.get("/overview", async (_req, res) => {
         mongo: mongoose.connection.readyState === 1 ? "connected" : "disconnected",
         ml
       },
-      counts: {
-        users,
-        resumeProfiles,
-        jobs,
-        analyses,
-        interactions,
-        completedQuizzes,
-        avgMatchScore: Math.round(avgScoreResult[0]?.avgScore || 0)
-      },
+      counts,
       workflow: {
         website: [
           { id: "login", label: "Google OAuth Login", path: "/login", ready: true },

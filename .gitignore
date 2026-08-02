@@ -3,6 +3,8 @@ __pycache__/
 *.pyc
 .env
 .env.*
+!.env.example
+!.env.*.example
 .DS_Store
 frontend/build/
 frontend/dist/
@@ -14,3 +16,12 @@ pnpm-debug.log*
 .vite/
 .vscode/
 run-logs/
+
+# Junk / temporary files
+frontend/src/temp.txt
+temp.txt
+extension/*.zip
+' + $testPdf + '
+
+# Runtime data (local JSON store fallback)
+backend/data/

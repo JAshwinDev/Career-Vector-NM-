@@ -7,6 +7,7 @@ const {
 } = require("../utils/resumeProfiles");
 const { parseSkillsInput, uniqueSkills } = require("../utils/skillUtils");
 const jobRoleData = require("../../ml-service/data/job_roles.json");
+const { ML_SERVICE_URL } = require("../utils/mlService");
 const roleData = jobRoleData.roles || jobRoleData;
 
 const router = express.Router();
@@ -112,6 +113,12 @@ router.post("/", upload.single("resume"), async (req, res) => {
       ...manualSkills
     ]);
 
+    if (!mergedSkills.length) {
+      return res.status(400).json({
+        error: "No skills found. Please upload a resume or enter skills manually."
+      });
+    }
+
     const formData = new FormData();
 
     if (targetRole) formData.append("role", targetRole);
@@ -123,17 +130,21 @@ router.post("/", upload.single("resume"), async (req, res) => {
 
     let data;
     try {
-      const response = await fetch("http://localhost:5001/analyze", {
+      const response = await fetch(`${ML_SERVICE_URL}/analyze`, {
         method: "POST",
         body: formData
       });
 
-      data = await response.json();
-      if (!response.ok) {
-        return res.status(500).json({ error: "ML Service failed to analyze resume.", details: data.error || "Unknown ML error" });
+      if (response.ok) {
+        data = await response.json();
+      } else {
+        const errBody = await response.json().catch(() => ({}));
+        console.warn("ML service error:", response.status, errBody.error);
+        data = fallbackAnalyze(mergedSkills, targetRole);
       }
     } catch (err) {
-      return res.status(500).json({ error: "ML Service is currently unavailable.", details: err.message });
+      console.warn("ML service unavailable, using fallback:", err.message);
+      data = fallbackAnalyze(mergedSkills, targetRole);
     }
 
     const storedSkills = uniqueSkills(data.student_skills || mergedSkills);

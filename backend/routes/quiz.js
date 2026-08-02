@@ -1,6 +1,8 @@
 const express = require("express");
 const router = express.Router();
 const Quiz = require("../models/Quiz");
+const { requireAuth } = require("../middleware/auth");
+const { ML_SERVICE_URL } = require("../utils/mlService");
 
 // Initialize Gemini API
 let geminiModel = null;
@@ -9,10 +11,70 @@ try {
   const apiKey = process.env.GEMINI_API_KEY;
   if (apiKey && apiKey !== "your_gemini_api_key_here") {
     const genAI = new GoogleGenerativeAI(apiKey);
-    geminiModel = genAI.getGenerativeModel({ model: "gemini-pro" });
+    geminiModel = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
   }
 } catch (err) {
   console.warn("Gemini API not available:", err.message);
+}
+
+// Generate and sanitize MCQ questions with Gemini. Throws on failure so
+// callers can decide whether to fall back to a local question bank.
+async function generateQuestionsWithGemini(skills, numQuestions) {
+  if (!geminiModel) {
+    throw new Error("Gemini API not configured");
+  }
+
+  const skillsList = skills.slice(0, 5).join(", ");
+
+  const prompt = `Generate ${numQuestions} technical skill verification quiz questions based on these skills: ${skillsList}.
+
+    For each question, create a realistic technical question that verifies if the person actually has that skill.
+
+    Return a JSON array with this exact format (no markdown, just raw JSON):
+    [
+      {
+        "question": "specific technical question about the skill",
+        "options": ["correct answer", "distractor 1", "distractor 2", "distractor 3"],
+        "correctAnswer": "correct answer",
+        "skill": "the skill name",
+        "difficulty": "easy|medium|hard"
+      }
+    ]
+
+    Make questions practical and real-world relevant. Shuffle option order so correct answer is not always first.`;
+
+  const result = await geminiModel.generateContent(prompt);
+  const responseText = result.response.text();
+
+  let questions = [];
+  try {
+    questions = JSON.parse(responseText);
+  } catch {
+    const jsonMatch = responseText.match(/\[[\s\S]*\]/);
+    if (jsonMatch) {
+      questions = JSON.parse(jsonMatch[0]);
+    } else {
+      throw new Error("Could not parse Gemini response");
+    }
+  }
+
+  const sanitized = questions
+    .filter(q => q.question && Array.isArray(q.options) && q.correctAnswer && q.skill)
+    .slice(0, numQuestions)
+    .map((q, idx) => ({
+      id: `q${idx + 1}`,
+      question: q.question,
+      options: q.options.slice(0, 4),
+      correctAnswer: q.correctAnswer,
+      skill: q.skill,
+      difficulty: q.difficulty || "medium"
+    }));
+
+  if (sanitized.length === 0) {
+    throw new Error("No valid questions generated");
+  }
+
+  return sanitized;
 }
 
 // POST /quiz/generate-from-skills - Generate quiz questions from resume skills using Gemini
@@ -28,59 +90,7 @@ router.post("/generate-from-skills", async (req, res) => {
       return res.status(503).json({ error: "Gemini API not configured. Using fallback questions." });
     }
 
-    const skillsList = resumeSkills.slice(0, 5).join(", ");
-    
-    const prompt = `Generate ${numQuestions} technical skill verification quiz questions based on these resume skills: ${skillsList}.
-
-    For each question, create a realistic technical question that verifies if the person actually has that skill.
-    
-    Return a JSON array with this exact format (no markdown, just raw JSON):
-    [
-      {
-        "question": "specific technical question about the skill",
-        "options": ["correct answer", "distractor 1", "distractor 2", "distractor 3"],
-        "correctAnswer": "correct answer",
-        "skill": "the skill name",
-        "difficulty": "easy|medium|hard"
-      }
-    ]
-    
-    Make questions practical and real-world relevant. Shuffle option order so correct answer is not always first.`;
-
-    const result = await geminiModel.generateContent(prompt);
-    const responseText = result.response.text();
-    
-    // Extract JSON from response
-    let questions = [];
-    try {
-      // Try to parse directly
-      questions = JSON.parse(responseText);
-    } catch {
-      // Try to extract JSON from markdown code blocks
-      const jsonMatch = responseText.match(/\[[\s\S]*\]/);
-      if (jsonMatch) {
-        questions = JSON.parse(jsonMatch[0]);
-      } else {
-        throw new Error("Could not parse Gemini response");
-      }
-    }
-
-    // Validate and sanitize questions
-    questions = questions
-      .filter(q => q.question && Array.isArray(q.options) && q.correctAnswer && q.skill)
-      .slice(0, numQuestions)
-      .map((q, idx) => ({
-        id: `q${idx + 1}`,
-        question: q.question,
-        options: q.options.slice(0, 4),
-        correctAnswer: q.correctAnswer,
-        skill: q.skill,
-        difficulty: q.difficulty || "medium"
-      }));
-
-    if (questions.length === 0) {
-      throw new Error("No valid questions generated");
-    }
+    const questions = await generateQuestionsWithGemini(resumeSkills, numQuestions);
 
     res.json({
       success: true,
@@ -91,18 +101,19 @@ router.post("/generate-from-skills", async (req, res) => {
     });
   } catch (err) {
     console.error("Gemini quiz generation error:", err);
-    res.status(500).json({ 
-      error: "Failed to generate quiz with AI", 
+    res.status(500).json({
+      error: "Failed to generate quiz with AI",
       details: err.message,
-      fallback: true 
+      fallback: true
     });
   }
 });
 
 // POST /quiz/generate - Generate MCQ questions for a role
-router.post("/generate", async (req, res) => {
+router.post("/generate", requireAuth, async (req, res) => {
   try {
-    const { targetRole, userId = null, numQuestions = 10 } = req.body;
+    const { targetRole, numQuestions = 10 } = req.body;
+    const userId = req.userId || null;
 
     if (!targetRole) {
       return res.status(400).json({ error: "targetRole is required." });
@@ -111,7 +122,7 @@ router.post("/generate", async (req, res) => {
     // Fetch role information from ML service
     let roleSkills = [];
     try {
-      const response = await fetch("http://localhost:5001/roles");
+      const response = await fetch(`${ML_SERVICE_URL}/roles`);
       if (response.ok) {
         const roles = await response.json();
         const role = roles[targetRole];
@@ -123,8 +134,18 @@ router.post("/generate", async (req, res) => {
       console.error("Failed to fetch role from ML service:", err.message);
     }
 
-    // Generate MCQ questions (in a real app, you'd call an AI service or database)
-    const questions = generateMCQQuestions(targetRole, roleSkills, numQuestions);
+    // Prefer AI-generated questions; fall back to the local question bank if
+    // Gemini is unavailable or returns nothing usable.
+    let questions;
+    let source = "gemini";
+    try {
+      const geminiSourceSkills = roleSkills.length ? roleSkills : [targetRole];
+      questions = await generateQuestionsWithGemini(geminiSourceSkills, numQuestions);
+    } catch (err) {
+      console.warn("Gemini generation failed, using question bank:", err.message);
+      questions = generateMCQQuestions(targetRole, roleSkills, numQuestions);
+      source = "bank";
+    }
 
     // Create quiz document
     const quiz = new Quiz({
@@ -140,6 +161,7 @@ router.post("/generate", async (req, res) => {
     res.json({
       quizId: quiz._id,
       targetRole,
+      source,
       questions: questions.map((q) => ({
         id: q.id,
         question: q.question,
@@ -237,6 +259,19 @@ router.post("/:id/submit", async (req, res) => {
   }
 });
 
+// GET /quiz/user - Current user's quiz history (from JWT)
+router.get("/user", requireAuth, async (req, res) => {
+  try {
+    const quizzes = await Quiz.find({ userId: req.userId })
+      .sort({ createdAt: -1 })
+      .limit(10);
+
+    res.json(quizzes);
+  } catch (err) {
+    res.status(500).json({ error: "Failed to fetch quizzes.", details: err.message });
+  }
+});
+
 // GET /quiz/:id - Get quiz details
 router.get("/:id", async (req, res) => {
   try {
@@ -249,19 +284,6 @@ router.get("/:id", async (req, res) => {
     res.json(quiz);
   } catch (err) {
     res.status(500).json({ error: "Failed to fetch quiz.", details: err.message });
-  }
-});
-
-// GET /quiz/user/:userId - Get user's quiz history
-router.get("/user/:userId", async (req, res) => {
-  try {
-    const quizzes = await Quiz.find({ userId: req.params.userId })
-      .sort({ createdAt: -1 })
-      .limit(10);
-
-    res.json(quizzes);
-  } catch (err) {
-    res.status(500).json({ error: "Failed to fetch quizzes.", details: err.message });
   }
 });
 

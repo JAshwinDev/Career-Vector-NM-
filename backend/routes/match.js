@@ -2,6 +2,8 @@ const express = require("express");
 const mongoose = require("mongoose");
 const ResumeProfile = require("../models/ResumeProfile");
 const localStore = require("../utils/localStore");
+const { extractSkillsLocally } = require("../utils/resumeProfiles");
+const { ML_SERVICE_URL } = require("../utils/mlService");
 
 const router = express.Router();
 
@@ -41,7 +43,7 @@ router.post("/", async (req, res) => {
       return res.status(400).json({ error: "userSkills are required." });
     }
 
-    const response = await fetch("http://localhost:5001/job-match", {
+    const response = await fetch(`${ML_SERVICE_URL}/job-match`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -68,9 +70,12 @@ router.post("/", async (req, res) => {
 
     const mergedSkills = uniqueSkills(req.body.userSkills);
     const descriptionLower = String(req.body.jobDescription || "").toLowerCase();
-    const matchedSkills = mergedSkills.filter((skill) => descriptionLower.includes(skill.toLowerCase()));
-    const missingSkills = mergedSkills.filter((skill) => !matchedSkills.includes(skill)).slice(0, 8);
-    const matchScore = Math.round((matchedSkills.length / Math.max(mergedSkills.length, 1)) * 100);
+    // missingSkills = job-required skills the user lacks (not the inverse).
+    const jobSkills = extractSkillsLocally(descriptionLower);
+    const userSkillSet = new Set(mergedSkills.map((skill) => skill.toLowerCase()));
+    const matchedSkills = jobSkills.filter((skill) => userSkillSet.has(skill.toLowerCase()));
+    const missingSkills = jobSkills.filter((skill) => !userSkillSet.has(skill.toLowerCase())).slice(0, 8);
+    const matchScore = Math.round((matchedSkills.length / Math.max(jobSkills.length, 1)) * 100);
 
     return res.json({
       matchScore,

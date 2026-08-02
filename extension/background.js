@@ -1,5 +1,4 @@
-const BACKEND_URL = "http://localhost:5000";
-const FRONTEND_URL = "http://localhost:3000";
+importScripts("config.js");
 
 function buildRecommendation(score) {
   if (score >= 65) return "APPLY NOW";
@@ -36,7 +35,8 @@ function setStorage(values) {
 }
 
 async function extractResumeSkills(fileData, fileName) {
-  const response = await fetch(`${BACKEND_URL}/upload`, {
+  const config = await getConfig();
+  const response = await fetch(`${config.BACKEND_URL}/upload`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ fileData, fileName })
@@ -46,7 +46,8 @@ async function extractResumeSkills(fileData, fileName) {
 }
 
 async function fetchRoleRecommendations(skills) {
-  const response = await fetch(`${BACKEND_URL}/roles`, {
+  const config = await getConfig();
+  const response = await fetch(`${config.BACKEND_URL}/roles`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ skills })
@@ -57,11 +58,12 @@ async function fetchRoleRecommendations(skills) {
 }
 
 async function generateResumeAnalysis(skills, targetRole) {
+  const config = await getConfig();
   const formData = new FormData();
   formData.append("skills", skills.join(", "));
   formData.append("role", targetRole);
 
-  const response = await fetch(`${BACKEND_URL}/analyze`, {
+  const response = await fetch(`${config.BACKEND_URL}/analyze`, {
     method: "POST",
     body: formData
   });
@@ -70,11 +72,12 @@ async function generateResumeAnalysis(skills, targetRole) {
 }
 
 async function saveResumeAnalysis({ analysis, fileName, source = "extension-resume" }) {
+  const config = await getConfig();
   const score = Number(analysis.compatibility_score || 0);
   const missingDetails = Array.isArray(analysis.missing_skills) ? analysis.missing_skills : [];
   const missing = missingDetails.map((item) => item.skill || item).filter(Boolean);
 
-  const response = await fetch(`${BACKEND_URL}/history`, {
+  const response = await fetch(`${config.BACKEND_URL}/history`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
@@ -107,13 +110,14 @@ async function saveJobAnalysis({
   resumeProfileId,
   source = "extension-popup"
 }) {
+  const config = await getConfig();
   const score = Number(analysis.matchScore ?? analysis.compatibility_score ?? 0);
   const missingDetails = Array.isArray(analysis.missing_skills) ? analysis.missing_skills : [];
   const missing = Array.isArray(analysis.missingSkills)
     ? analysis.missingSkills
     : missingDetails.map((item) => item.skill).filter(Boolean);
 
-  const response = await fetch(`${BACKEND_URL}/history`, {
+  const response = await fetch(`${config.BACKEND_URL}/history`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
@@ -169,17 +173,19 @@ async function handleResumeUpload(message) {
     fileName: message.fileName
   });
 
+  const config = await getConfig();
   return {
     ...uploadData,
     targetRole,
     recommendations,
     analysis,
     analysisId: saved.id,
-    dashboardUrl: `${FRONTEND_URL}/dashboard?analysisId=${saved.id}`
+    dashboardUrl: `${config.FRONTEND_URL}/dashboard?analysisId=${saved.id}`
   };
 }
 
 async function handleJobAnalysis(message) {
+  const config = await getConfig();
   const description = String(message.jobData?.description || "").trim();
   const jobContext = message.jobData?.context || {};
   const requirements = message.jobData?.requirements || {};
@@ -195,7 +201,7 @@ async function handleJobAnalysis(message) {
     throw new Error("Upload your resume first to analyze job matches.");
   }
 
-  const response = await fetch(`${BACKEND_URL}/match`, {
+  const response = await fetch(`${config.BACKEND_URL}/match`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
@@ -250,7 +256,7 @@ async function handleJobAnalysis(message) {
     success: true,
     analysis: normalizedAnalysis,
     analysisId: saved.id,
-    dashboardUrl: `${FRONTEND_URL}/dashboard?analysisId=${saved.id}`
+    dashboardUrl: `${config.FRONTEND_URL}/dashboard?analysisId=${saved.id}`
   };
 }
 
@@ -300,10 +306,12 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 
   if (message.type === "GET_HEALTH_CHECK") {
     // Test backend connectivity
-    fetch(`${BACKEND_URL}/health`)
-      .then(res => res.ok ? { healthy: true } : { healthy: false })
-      .catch(() => ({ healthy: false }))
-      .then(result => sendResponse(result));
+    getConfig().then((config) => {
+      fetch(`${config.BACKEND_URL}/health`)
+        .then(res => res.ok ? { healthy: true } : { healthy: false })
+        .catch(() => ({ healthy: false }))
+        .then(result => sendResponse(result));
+    });
     return true;
   }
 

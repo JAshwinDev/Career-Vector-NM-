@@ -47,7 +47,7 @@ const jobSchema = new mongoose.Schema(
     },
     source: {
       type: String,
-      enum: ["linkedin", "jsearch", "indeed", "glassdoor"],
+      enum: ["linkedin", "jsearch", "indeed", "glassdoor", "remotive"],
       default: "jsearch"
     },
     externalUrl: String,

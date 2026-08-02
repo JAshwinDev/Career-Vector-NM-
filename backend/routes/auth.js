@@ -1,66 +1,77 @@
 const express = require("express");
-const router = express.Router();
+const bcrypt = require("bcrypt");
 const mongoose = require("mongoose");
+const { OAuth2Client } = require("google-auth-library");
 const User = require("../models/User");
 const localStore = require("../utils/localStore");
+const { requireAuth, signToken } = require("../middleware/auth");
 
-// POST /auth/google - Handle Google OAuth callback
+const router = express.Router();
+
+const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
+const oauthClient = GOOGLE_CLIENT_ID ? new OAuth2Client(GOOGLE_CLIENT_ID) : null;
+
+// POST /auth/google - Verify a Google ID token server-side, then log in / sign up
 router.post("/google", async (req, res) => {
   try {
-    const { googleId, email, name, profilePicture } = req.body;
+    const { idToken } = req.body;
 
-    if (!googleId || !email) {
-      return res.status(400).json({ error: "googleId and email are required." });
+    if (!idToken) {
+      return res.status(400).json({ error: "idToken is required." });
     }
 
-    if (!localStore.isMongoReady(mongoose)) {
-      const user = localStore.upsertUser({ googleId, email, name, profilePicture });
-      const token = Buffer.from(JSON.stringify({ userId: user._id, email: user.email })).toString("base64");
-
-      return res.json({
-        success: true,
-        user: {
-          id: user._id,
-          email: user.email,
-          name: user.name,
-          profilePicture: user.profilePicture
-        },
-        token,
-        storage: "local"
+    if (!oauthClient) {
+      return res.status(503).json({
+        error: "Google OAuth is not configured. Set GOOGLE_CLIENT_ID in backend/.env."
       });
     }
 
-    let user = await User.findOne({ googleId });
+    const ticket = await oauthClient.verifyIdToken({
+      idToken,
+      audience: GOOGLE_CLIENT_ID
+    });
 
-    if (!user) {
-      user = await User.findOne({ email });
-
-      if (user) {
-        // Update existing user with Google ID
-        user.googleId = googleId;
-      } else {
-        // Create new user
-        user = new User({
-          googleId,
-          email,
-          name,
-          profilePicture
-        });
-      }
-    } else {
-      // Update existing user info
-      if (name) user.name = name;
-      if (profilePicture) user.profilePicture = profilePicture;
+    const payload = ticket.getPayload();
+    if (!payload || !payload.sub || !payload.email) {
+      return res.status(401).json({ error: "Invalid Google ID token." });
     }
 
-    await user.save();
+    if (payload.email_verified === false) {
+      return res.status(401).json({ error: "Google email is not verified." });
+    }
 
-    // Create JWT token (you'll need to install jsonwebtoken)
-    const token = Buffer.from(
-      JSON.stringify({ userId: user._id, email: user.email })
-    ).toString("base64");
+    const googleId = payload.sub;
+    const email = payload.email;
+    const name = payload.name || "";
+    const profilePicture = payload.picture || "";
 
-    res.json({
+    let user;
+    const mongoReady = localStore.isMongoReady(mongoose);
+
+    if (!mongoReady) {
+      user = localStore.upsertUser({ googleId, email, name, profilePicture });
+    } else {
+      user = await User.findOne({ googleId });
+
+      if (!user) {
+        user = await User.findOne({ email });
+
+        if (user) {
+          user.googleId = googleId;
+        } else {
+          user = new User({ googleId, email, name, profilePicture });
+        }
+      } else {
+        if (name) user.name = name;
+        if (profilePicture) user.profilePicture = profilePicture;
+      }
+
+      await user.save();
+    }
+
+    const token = signToken({ userId: String(user._id), email: user.email });
+
+    return res.json({
       success: true,
       user: {
         id: user._id,
@@ -68,16 +79,45 @@ router.post("/google", async (req, res) => {
         name: user.name,
         profilePicture: user.profilePicture
       },
-      token
+      token,
+      storage: mongoReady ? "mongo" : "local"
     });
   } catch (err) {
-    res.status(500).json({ error: "Authentication failed.", details: err.message });
+    console.error("Google auth error:", err.message);
+    return res.status(401).json({
+      error: "Google authentication failed.",
+      details: err.message
+    });
   }
 });
 
-// GET /auth/user/:id - Get user profile
-router.get("/user/:id", async (req, res) => {
+// GET /auth/user/me - Current user's own profile (from JWT)
+router.get("/user/me", requireAuth, async (req, res) => {
   try {
+    const user = localStore.isMongoReady(mongoose)
+      ? await User.findById(req.userId)
+        .populate("resumeProfiles")
+        .populate("jobMatches")
+        .lean()
+      : localStore.getUserById(req.userId);
+
+    if (!user) {
+      return res.status(404).json({ error: "User not found." });
+    }
+
+    return res.json(user);
+  } catch (err) {
+    return res.status(500).json({ error: "Failed to fetch user.", details: err.message });
+  }
+});
+
+// GET /auth/user/:id - Get user profile (only the authenticated owner)
+router.get("/user/:id", requireAuth, async (req, res) => {
+  try {
+    if (String(req.params.id) !== req.userId) {
+      return res.status(403).json({ error: "You can only view your own profile." });
+    }
+
     const user = localStore.isMongoReady(mongoose)
       ? await User.findById(req.params.id)
         .populate("resumeProfiles")
@@ -89,15 +129,19 @@ router.get("/user/:id", async (req, res) => {
       return res.status(404).json({ error: "User not found." });
     }
 
-    res.json(user);
+    return res.json(user);
   } catch (err) {
-    res.status(500).json({ error: "Failed to fetch user.", details: err.message });
+    return res.status(500).json({ error: "Failed to fetch user.", details: err.message });
   }
 });
 
-// PUT /auth/user/:id - Update user profile
-router.put("/user/:id", async (req, res) => {
+// PUT /auth/user/:id - Update user profile (only the authenticated owner)
+router.put("/user/:id", requireAuth, async (req, res) => {
   try {
+    if (String(req.params.id) !== req.userId) {
+      return res.status(403).json({ error: "You can only update your own profile." });
+    }
+
     const { name, currentRole, targetRole, preferences } = req.body;
 
     const updates = {
@@ -115,21 +159,18 @@ router.put("/user/:id", async (req, res) => {
       return res.status(404).json({ error: "User not found." });
     }
 
-    res.json(user);
+    return res.json(user);
   } catch (err) {
-    res.status(500).json({ error: "Failed to update user.", details: err.message });
+    return res.status(500).json({ error: "Failed to update user.", details: err.message });
   }
 });
 
-// POST /auth/logout - Logout user (optional)
+// POST /auth/logout - Stateless logout (client discards the token)
 router.post("/logout", (req, res) => {
   res.json({ success: true, message: "Logged out successfully" });
 });
 
-
-const bcrypt = require('bcrypt');
-
-// POST /auth/register - Local signup
+// POST /auth/register - Local email/password signup
 router.post("/register", async (req, res) => {
   try {
     const { email, password, name } = req.body;
@@ -146,18 +187,18 @@ router.post("/register", async (req, res) => {
     user = new User({ email, password: hashedPassword, name });
     await user.save();
 
-    const token = Buffer.from(JSON.stringify({ userId: user._id, email: user.email })).toString("base64");
-    res.json({
+    const token = signToken({ userId: String(user._id), email: user.email });
+    return res.json({
       success: true,
       user: { id: user._id, email: user.email, name: user.name },
       token
     });
   } catch (err) {
-    res.status(500).json({ error: "Registration failed.", details: err.message });
+    return res.status(500).json({ error: "Registration failed.", details: err.message });
   }
 });
 
-// POST /auth/login - Local login
+// POST /auth/login - Local email/password login
 router.post("/login", async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -175,16 +216,17 @@ router.post("/login", async (req, res) => {
       return res.status(401).json({ error: "Invalid credentials." });
     }
 
-    const token = Buffer.from(JSON.stringify({ userId: user._id, email: user.email })).toString("base64");
-    res.json({
+    const token = signToken({ userId: String(user._id), email: user.email });
+    return res.json({
       success: true,
       user: { id: user._id, email: user.email, name: user.name },
       token
     });
   } catch (err) {
-    res.status(500).json({ error: "Login failed.", details: err.message });
+    return res.status(500).json({ error: "Login failed.", details: err.message });
   }
 });
+
 // POST /auth/demo - Login as a demo student WITHOUT saving to DB
 router.post("/demo", async (req, res) => {
   try {
@@ -195,11 +237,10 @@ router.post("/demo", async (req, res) => {
       name: "Demo Student",
       is_demo: true
     };
-    
-    // We do NOT save to MongoDB as requested.
-    const token = Buffer.from(JSON.stringify({ userId: demoUser._id, email: demoUser.email, is_demo: true })).toString("base64");
-    
-    res.json({
+
+    const token = signToken({ userId: demoUser._id, email: demoUser.email, is_demo: true });
+
+    return res.json({
       success: true,
       user: {
         id: demoUser._id,
@@ -210,10 +251,8 @@ router.post("/demo", async (req, res) => {
       token
     });
   } catch (err) {
-    res.status(500).json({ error: "Demo login failed.", details: err.message });
+    return res.status(500).json({ error: "Demo login failed.", details: err.message });
   }
 });
+
 module.exports = router;
-
-
-

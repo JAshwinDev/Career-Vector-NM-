@@ -1,9 +1,10 @@
 const express = require("express");
 const router = express.Router();
+const { ML_SERVICE_URL } = require("../utils/mlService");
 
 async function fetchRoleCatalog() {
   try {
-    const response = await fetch("http://localhost:5001/roles");
+    const response = await fetch(`${ML_SERVICE_URL}/roles`);
     if (!response.ok) {
       throw new Error("ML service unavailable");
     }
@@ -34,7 +35,7 @@ router.post("/", async (req, res) => {
   }
 
   try {
-    const response = await fetch("http://localhost:5001/recommend", {
+    const response = await fetch(`${ML_SERVICE_URL}/recommend`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ skills: inputSkills })
