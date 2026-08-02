@@ -1,9 +1,9 @@
 const express = require("express");
 const mongoose = require("mongoose");
-const ResumeProfile = require("../models/ResumeProfile");
-const localStore = require("../utils/localStore");
-const { extractSkillsLocally } = require("../utils/resumeProfiles");
-const { ML_SERVICE_URL } = require("../utils/mlService");
+const ResumeProfile = require("../../models/ResumeProfile");
+const localStore = require("../../utils/localStore");
+const { extractSkillsLocally } = require("../../utils/resumeProfiles");
+const { ML_SERVICE_URL } = require("../../services/mlService");
 
 const router = express.Router();
 

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import gsap from 'gsap';
-import { getPeerComparison } from '../utils/api.js';
+import { getPeerComparison } from '../../utils/api.js';
 
 function ScoreRing({ score }) {
   const [animated, setAnimated] = useState(0);

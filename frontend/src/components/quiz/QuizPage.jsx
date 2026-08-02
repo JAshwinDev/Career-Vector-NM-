@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { logInteraction } from "../utils/api.js";
+import { logInteraction } from "../../utils/api.js";
 
 export default function QuizPage({ targetRole = "Software Developer", onQuizComplete }) {
   const [quiz, setQuiz] = useState(null);

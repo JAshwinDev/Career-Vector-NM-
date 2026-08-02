@@ -1,10 +1,10 @@
 const express = require("express");
 const router = express.Router();
 const mongoose = require("mongoose");
-const JobHistory = require("../models/JobHistory");
-const User = require("../models/User");
-const localStore = require("../utils/localStore");
-const { requireAuth } = require("../middleware/auth");
+const JobHistory = require("../../models/JobHistory");
+const User = require("../../models/User");
+const localStore = require("../../utils/localStore");
+const { requireAuth } = require("../../middleware/auth");
 
 function toScore(body) {
   const raw = body.score ?? body.compatibilityScore ?? body.matchScore;

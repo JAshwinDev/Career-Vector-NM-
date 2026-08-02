@@ -16,12 +16,16 @@ careervector/
 │
 ├── extension/                        ← Chrome Extension (load unpacked)
 │   ├── manifest.json
-│   ├── config.js                     ← Shared base-URL config (chrome.storage.sync)
-│   ├── options.html / options.js     ← Settings page (backend/web-app URLs)
-│   ├── content.js                    ← Injects overlay on LinkedIn jobs
-│   ├── background.js                 ← Handles resume upload messaging
-│   ├── popup.html / popup.js         ← Extension popup UI
-│   └── styles.css
+│   ├── src/                          ← Scripts
+│   │   ├── config.js                 ← Shared base-URL config (chrome.storage.sync)
+│   │   ├── content.js                ← Injects overlay on LinkedIn jobs
+│   │   ├── background.js             ← Handles resume upload messaging
+│   │   ├── options.js                ← Settings page logic
+│   │   └── popup.js                  ← Popup logic
+│   ├── pages/                        ← HTML pages
+│   │   ├── options.html              ← Settings page (backend/web-app URLs)
+│   │   └── popup.html                ← Extension popup UI
+│   └── styles/styles.css
 │
 ├── backend/                          ← Node.js + Express API (Port 5000)
 │   ├── server.js                     ← Entry point (starts the HTTP server)
@@ -35,12 +39,19 @@ careervector/
 │   │   ├── Interaction.js            ← User behaviour events
 │   │   └── Quiz.js                   ← Skill-verification quizzes
 │   ├── middleware/auth.js            ← JWT sign/verify (requireAuth)
-│   ├── routes/                       ← API route handlers
+│   ├── routes/                       ← API route handlers, grouped by feature:
+│   │   ├── auth/                     ← auth.js (Google, register, login, demo)
+│   │   ├── jobs/                     ← jobs.js, match.js, roles.js
+│   │   ├── resume/                   ← upload.js, analyze.js
+│   │   ├── analytics/                ← history.js, interactions.js
+│   │   └── learning/                 ← quiz.js, workflow.js
+│   ├── services/                     ← external clients
+│   │   ├── mlService.js              ← ML service base URL helper
+│   │   └── remotiveClient.js         ← Remotive API client (rate-limited + cached)
 │   ├── utils/
 │   │   ├── localStore.js             ← JSON fallback when Mongo is unavailable
-│   │   ├── mlService.js              ← ML service base URL helper
-│   │   ├── remotiveClient.js         ← Remotive API client (rate-limited + cached)
-│   │   └── resumeProfiles.js         ← PDF parsing + skill extraction
+│   │   ├── resumeProfiles.js         ← PDF parsing + skill extraction
+│   │   └── skillUtils.js             ← shared skill parsing/dedup helpers
 │   └── tests/                        ← node:test suite (auth + routes)
 │
 ├── ml-service/                       ← Python Flask ML API (Port 5001)
@@ -50,7 +61,16 @@ careervector/
 └── frontend/                         ← React + Vite web app (Port 3000)
     └── src/
         ├── App.jsx
-        ├── components/               ← Login, Upload, Quiz, Jobs, Dashboard…
+        ├── components/               ← grouped by feature
+        │   ├── auth/                 ← LoginPage
+        │   ├── landing/              ← HeroSection, HowItWorks
+        │   ├── dashboard/            ← Dashboard, ResultsDashboard, HistoryDashboard, RoadmapViewer
+        │   ├── resume/               ← AnalyzeForm, ResumeUploadForm
+        │   ├── jobs/                 ← JobSearchPage
+        │   ├── quiz/                 ← QuizPage
+        │   ├── workflow/             ← WorkflowSection
+        │   └── shared/               ← CustomCursor
+        ├── hooks/useMousePosition.js
         └── utils/api.js
 ```
 

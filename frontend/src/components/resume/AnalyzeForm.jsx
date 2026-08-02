@@ -4,7 +4,7 @@ import {
   buildResumeHistoryPayload,
   getMockResult,
   saveHistory
-} from "../utils/api.js";
+} from "../../utils/api.js";
 
 const ROLES = [
   "Software Developer", "Data Analyst", "ML Engineer", "Frontend Developer",

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { getWorkflowOverview } from "../utils/api.js";
+import { getWorkflowOverview } from "../../utils/api.js";
 
 function StatusPill({ label, value, tone }) {
   const colorMap = {

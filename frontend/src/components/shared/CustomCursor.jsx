@@ -1,5 +1,5 @@
-import { useMousePosition } from "../hooks/useMousePosition";
-import "../styles/custom-cursor.css";
+import { useMousePosition } from "../../hooks/useMousePosition";
+import "../../styles/custom-cursor.css";
 
 export default function CustomCursor() {
   const { x, y } = useMousePosition();

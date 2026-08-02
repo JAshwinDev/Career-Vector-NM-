@@ -1,8 +1,8 @@
 const express = require("express");
 const router = express.Router();
-const Quiz = require("../models/Quiz");
-const { requireAuth } = require("../middleware/auth");
-const { ML_SERVICE_URL } = require("../utils/mlService");
+const Quiz = require("../../models/Quiz");
+const { requireAuth } = require("../../middleware/auth");
+const { ML_SERVICE_URL } = require("../../services/mlService");
 
 // Initialize Gemini API
 let geminiModel = null;

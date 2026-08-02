@@ -1,13 +1,13 @@
 const express = require("express");
 const mongoose = require("mongoose");
-const User = require("../models/User");
-const ResumeProfile = require("../models/ResumeProfile");
-const Job = require("../models/Job");
-const JobHistory = require("../models/JobHistory");
-const Interaction = require("../models/Interaction");
-const Quiz = require("../models/Quiz");
-const localStore = require("../utils/localStore");
-const { ML_SERVICE_URL } = require("../utils/mlService");
+const User = require("../../models/User");
+const ResumeProfile = require("../../models/ResumeProfile");
+const Job = require("../../models/Job");
+const JobHistory = require("../../models/JobHistory");
+const Interaction = require("../../models/Interaction");
+const Quiz = require("../../models/Quiz");
+const localStore = require("../../utils/localStore");
+const { ML_SERVICE_URL } = require("../../services/mlService");
 
 const router = express.Router();
 

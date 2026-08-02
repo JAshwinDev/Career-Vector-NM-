@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { getUserProfile, getHistory } from "../utils/api.js";
+import { getUserProfile, getHistory } from "../../utils/api.js";
 
 export default function Dashboard() {
   const [user, setUser] = useState(null);

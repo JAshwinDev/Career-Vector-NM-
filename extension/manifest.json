@@ -12,11 +12,11 @@
     "extension_pages": "script-src 'self'; object-src 'self'"
   },
   "action": {
-    "default_popup": "popup.html"
+    "default_popup": "pages/popup.html"
   },
-  "options_page": "options.html",
+  "options_page": "pages/options.html",
   "background": {
-    "service_worker": "background.js"
+    "service_worker": "src/background.js"
   },
   "content_scripts": [
     {
@@ -26,7 +26,7 @@
         "*://linkedin.com/jobs/*",
         "*://linkedin.com/job/*"
       ],
-      "js": ["config.js", "content.js"],
+      "js": ["src/config.js", "src/content.js"],
       "run_at": "document_idle"
     }
   ]

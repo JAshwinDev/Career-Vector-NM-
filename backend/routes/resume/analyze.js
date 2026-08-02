@@ -4,10 +4,10 @@ const {
   createResumeProfile,
   extractSkillsWithMl,
   parsePdfBuffer
-} = require("../utils/resumeProfiles");
-const { parseSkillsInput, uniqueSkills } = require("../utils/skillUtils");
-const jobRoleData = require("../../ml-service/data/job_roles.json");
-const { ML_SERVICE_URL } = require("../utils/mlService");
+} = require("../../utils/resumeProfiles");
+const { parseSkillsInput, uniqueSkills } = require("../../utils/skillUtils");
+const jobRoleData = require("../../../ml-service/data/job_roles.json");
+const { ML_SERVICE_URL } = require("../../services/mlService");
 const roleData = jobRoleData.roles || jobRoleData;
 
 const router = express.Router();

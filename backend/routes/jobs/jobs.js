@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
-const Job = require("../models/Job");
-const { getRemotiveJobs } = require("../utils/remotiveClient");
+const Job = require("../../models/Job");
+const { getRemotiveJobs } = require("../../services/remotiveClient");
 
 // Helper to calculate match score
 function calculateMatch(job, userSkills) {

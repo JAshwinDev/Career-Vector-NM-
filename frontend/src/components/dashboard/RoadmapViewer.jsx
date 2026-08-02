@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { logInteraction } from "../utils/api.js";
+import { logInteraction } from "../../utils/api.js";
 
 export default function RoadmapViewer({ roadmap = [], targetRole = "", userSkills = [] }) {
   const [expandedSkill, setExpandedSkill] = useState(null);

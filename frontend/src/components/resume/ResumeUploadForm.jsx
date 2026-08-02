@@ -1,5 +1,5 @@
 import React, { useState, useRef } from "react";
-import { getRoles, logInteraction, uploadResume } from "../utils/api.js";
+import { getRoles, logInteraction, uploadResume } from "../../utils/api.js";
 
 export default function ResumeUploadForm({ onUploadSuccess }) {
   const [file, setFile] = useState(null);

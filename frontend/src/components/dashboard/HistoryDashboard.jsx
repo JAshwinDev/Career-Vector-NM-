@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { getHistory, getHistoryStats } from "../utils/api.js";
+import { getHistory, getHistoryStats } from "../../utils/api.js";
 
 function StatCard({ label, value, accent }) {
   return (

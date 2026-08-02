@@ -40,16 +40,16 @@ if (process.env.MONGO_URI) {
   console.warn("MONGO_URI not set, using local JSON store.");
 }
 
-app.use("/auth", require("./routes/auth"));
-app.use("/match", require("./routes/match"));
-app.use("/upload", require("./routes/upload"));
-app.use("/analyze", require("./routes/analyze"));
-app.use("/history", require("./routes/history"));
-app.use("/roles", require("./routes/roles"));
-app.use("/jobs", require("./routes/jobs"));
-app.use("/quiz", require("./routes/quiz"));
-app.use("/interactions", require("./routes/interactions"));
-app.use("/workflow", require("./routes/workflow"));
+app.use("/auth", require("./routes/auth/auth"));
+app.use("/match", require("./routes/jobs/match"));
+app.use("/upload", require("./routes/resume/upload"));
+app.use("/analyze", require("./routes/resume/analyze"));
+app.use("/history", require("./routes/analytics/history"));
+app.use("/roles", require("./routes/jobs/roles"));
+app.use("/jobs", require("./routes/jobs/jobs"));
+app.use("/quiz", require("./routes/learning/quiz"));
+app.use("/interactions", require("./routes/analytics/interactions"));
+app.use("/workflow", require("./routes/learning/workflow"));
 
 app.get("/", (_req, res) => res.send("AI Job Assistant Backend Running"));
 

@@ -1,17 +1,17 @@
 import React, { useEffect, useState } from "react";
-import HeroSection from "./components/HeroSection.jsx";
-import WorkflowSection from "./components/WorkflowSection.jsx";
-import AnalyzeForm from "./components/AnalyzeForm.jsx";
-import ResultsDashboard from "./components/ResultsDashboard.jsx";
-import HistoryDashboard from "./components/HistoryDashboard.jsx";
-import Dashboard from "./components/Dashboard.jsx";
-import JobSearchPage from "./components/JobSearchPage.jsx";
-import QuizPage from "./components/QuizPage.jsx";
-import RoadmapViewer from "./components/RoadmapViewer.jsx";
-import LoginPage from "./components/LoginPage.jsx";
-import ResumeUploadForm from "./components/ResumeUploadForm.jsx";
+import HeroSection from "./components/landing/HeroSection.jsx";
+import WorkflowSection from "./components/workflow/WorkflowSection.jsx";
+import AnalyzeForm from "./components/resume/AnalyzeForm.jsx";
+import ResultsDashboard from "./components/dashboard/ResultsDashboard.jsx";
+import HistoryDashboard from "./components/dashboard/HistoryDashboard.jsx";
+import Dashboard from "./components/dashboard/Dashboard.jsx";
+import JobSearchPage from "./components/jobs/JobSearchPage.jsx";
+import QuizPage from "./components/quiz/QuizPage.jsx";
+import RoadmapViewer from "./components/dashboard/RoadmapViewer.jsx";
+import LoginPage from "./components/auth/LoginPage.jsx";
+import ResumeUploadForm from "./components/resume/ResumeUploadForm.jsx";
 import { getHistoryItem, historyItemToResult, generateRoadmap, getStoredUser } from "./utils/api.js";
-import CustomCursor from "./components/CustomCursor.jsx";
+import CustomCursor from "./components/shared/CustomCursor.jsx";
 
 function readRoute() {
   const url = new URL(window.location.href);

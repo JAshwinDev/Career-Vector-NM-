@@ -2,9 +2,9 @@ const express = require("express");
 const bcrypt = require("bcrypt");
 const mongoose = require("mongoose");
 const { OAuth2Client } = require("google-auth-library");
-const User = require("../models/User");
-const localStore = require("../utils/localStore");
-const { requireAuth, signToken } = require("../middleware/auth");
+const User = require("../../models/User");
+const localStore = require("../../utils/localStore");
+const { requireAuth, signToken } = require("../../middleware/auth");
 
 const router = express.Router();
 

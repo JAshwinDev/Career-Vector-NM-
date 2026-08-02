@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { getJobsBySkills, logInteraction, searchJobs } from "../utils/api";
+import { getJobsBySkills, logInteraction, searchJobs } from "../../utils/api";
 
 export default function JobSearchPage({ userSkills: initialUserSkills = [], onJobSelect }) {
   const [userSkills, setUserSkills] = useState(initialUserSkills);

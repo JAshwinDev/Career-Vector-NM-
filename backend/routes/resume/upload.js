@@ -3,8 +3,8 @@ const {
   createResumeProfile,
   extractSkillsWithMl,
   parsePdfBuffer
-} = require("../utils/resumeProfiles");
-const { parseSkillsInput, uniqueSkills } = require("../utils/skillUtils");
+} = require("../../utils/resumeProfiles");
+const { parseSkillsInput, uniqueSkills } = require("../../utils/skillUtils");
 
 const router = express.Router();
 

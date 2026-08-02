@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const { ML_SERVICE_URL } = require("../utils/mlService");
+const { ML_SERVICE_URL } = require("../../services/mlService");
 
 async function fetchRoleCatalog() {
   try {
