@@ -1,5 +1,10 @@
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:5000";
 
+function authHeaders() {
+  const token = localStorage.getItem("authToken");
+  return token ? { Authorization: `Bearer ${token}` } : {};
+}
+
 async function parseJsonResponse(response, fallbackMessage) {
   let data = {};
 
@@ -23,14 +28,14 @@ function buildRecommendation(score) {
 }
 
 export async function getRoles() {
-  const response = await fetch(`${API_BASE_URL}/roles`);
+  const response = await fetch(`${API_BASE_URL}/roles`, { headers: authHeaders() });
   return parseJsonResponse(response, "Failed to fetch roles");
 }
 
 export async function uploadResume({ fileData, fileName, additionalSkills = "" }) {
   const response = await fetch(`${API_BASE_URL}/upload`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: { "Content-Type": "application/json", ...authHeaders() },
     body: JSON.stringify({
       fileData,
       fileName,
@@ -49,6 +54,7 @@ export async function analyzeResume({ resumeFile, skills, role }) {
 
   const response = await fetch(`${API_BASE_URL}/analyze`, {
     method: "POST",
+    headers: authHeaders(),
     body: formData
   });
 
@@ -58,7 +64,7 @@ export async function analyzeResume({ resumeFile, skills, role }) {
 export async function saveHistory(payload) {
   const response = await fetch(`${API_BASE_URL}/history`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: { "Content-Type": "application/json", ...authHeaders() },
     body: JSON.stringify(payload)
   });
 
@@ -72,14 +78,14 @@ export async function getHistory({ limit = 20, entryType, source, userId } = {})
   if (source) params.set("source", source);
   if (userId) params.set("userId", userId);
 
-  const response = await fetch(`${API_BASE_URL}/history?${params.toString()}`);
+  const response = await fetch(`${API_BASE_URL}/history?${params.toString()}`, { headers: authHeaders() });
   return parseJsonResponse(response, "Failed to fetch history");
 }
 
 export async function getHistoryStats({ userId } = {}) {
   const params = new URLSearchParams();
   if (userId) params.set("userId", userId);
-  const response = await fetch(`${API_BASE_URL}/history/stats?${params.toString()}`);
+  const response = await fetch(`${API_BASE_URL}/history/stats?${params.toString()}`, { headers: authHeaders() });
   return parseJsonResponse(response, "Failed to fetch stats");
 }
 
@@ -92,7 +98,7 @@ export function getStoredUser() {
 }
 
 export async function getHistoryItem(id) {
-  const response = await fetch(`${API_BASE_URL}/history/${id}`);
+  const response = await fetch(`${API_BASE_URL}/history/${id}`, { headers: authHeaders() });
   return parseJsonResponse(response, "Failed to fetch history item");
 }
 
@@ -102,14 +108,14 @@ export async function getPeerComparison({ role, score, entryId } = {}) {
   if (score !== undefined && score !== null) params.set("score", String(score));
   if (entryId) params.set("entryId", entryId);
 
-  const response = await fetch(`${API_BASE_URL}/history/peer-comparison?${params.toString()}`);
+  const response = await fetch(`${API_BASE_URL}/history/peer-comparison?${params.toString()}`, { headers: authHeaders() });
   return parseJsonResponse(response, "Failed to fetch peer comparison");
 }
 
 export async function generateRoadmap({ userSkills, jobSkills, targetRole, jobRequirements = [] }) {
   const response = await fetch("http://localhost:5001/generate-roadmap", {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: { "Content-Type": "application/json", ...authHeaders() },
     body: JSON.stringify({
       userSkills: userSkills || [],
       jobSkills: jobSkills || [],
@@ -245,21 +251,21 @@ export function getMockResult(skills, role) {
 export async function loginWithGoogle(googleData) {
   const response = await fetch(`${API_BASE_URL}/auth/google`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: { "Content-Type": "application/json", ...authHeaders() },
     body: JSON.stringify(googleData)
   });
   return parseJsonResponse(response, "Login failed");
 }
 
 export async function getUserProfile(userId) {
-  const response = await fetch(`${API_BASE_URL}/auth/user/${userId}`);
+  const response = await fetch(`${API_BASE_URL}/auth/user/${userId}`, { headers: authHeaders() });
   return parseJsonResponse(response, "Failed to fetch user profile");
 }
 
 export async function updateUserProfile(userId, profileData) {
   const response = await fetch(`${API_BASE_URL}/auth/user/${userId}`, {
     method: "PUT",
-    headers: { "Content-Type": "application/json" },
+    headers: { "Content-Type": "application/json", ...authHeaders() },
     body: JSON.stringify(profileData)
   });
   return parseJsonResponse(response, "Failed to update profile");
@@ -275,19 +281,19 @@ export async function searchJobs(filters = {}) {
   if (filters.limit) params.set("limit", filters.limit);
   if (filters.page) params.set("page", filters.page);
 
-  const response = await fetch(`${API_BASE_URL}/jobs?${params.toString()}`);
+  const response = await fetch(`${API_BASE_URL}/jobs?${params.toString()}`, { headers: authHeaders() });
   return parseJsonResponse(response, "Failed to search jobs");
 }
 
 export async function getJobById(jobId) {
-  const response = await fetch(`${API_BASE_URL}/jobs/${jobId}`);
+  const response = await fetch(`${API_BASE_URL}/jobs/${jobId}`, { headers: authHeaders() });
   return parseJsonResponse(response, "Failed to fetch job");
 }
 
 export async function getJobsBySkills(userSkills, filters = {}) {
   const response = await fetch(`${API_BASE_URL}/jobs/search/by-match`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: { "Content-Type": "application/json", ...authHeaders() },
     body: JSON.stringify({
       userSkills,
       experience_level: filters.experience_level,
@@ -313,7 +319,7 @@ export async function matchJobs(userSkills, jobId) {
 export async function ingestJobs(jobsData) {
   const response = await fetch(`${API_BASE_URL}/jobs/ingest`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: { "Content-Type": "application/json", ...authHeaders() },
     body: JSON.stringify({ jobs: jobsData })
   });
   return parseJsonResponse(response, "Failed to ingest jobs");
@@ -323,7 +329,7 @@ export async function ingestJobs(jobsData) {
 export async function generateQuiz(targetRole, numQuestions = 10) {
   const response = await fetch(`${API_BASE_URL}/quiz/generate`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: { "Content-Type": "application/json", ...authHeaders() },
     body: JSON.stringify({ targetRole, numQuestions })
   });
   return parseJsonResponse(response, "Failed to generate quiz");
@@ -332,19 +338,19 @@ export async function generateQuiz(targetRole, numQuestions = 10) {
 export async function submitQuiz(quizId, answers, timeSpent = 0) {
   const response = await fetch(`${API_BASE_URL}/quiz/${quizId}/submit`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: { "Content-Type": "application/json", ...authHeaders() },
     body: JSON.stringify({ answers, timeSpent })
   });
   return parseJsonResponse(response, "Failed to submit quiz");
 }
 
 export async function getQuiz(quizId) {
-  const response = await fetch(`${API_BASE_URL}/quiz/${quizId}`);
+  const response = await fetch(`${API_BASE_URL}/quiz/${quizId}`, { headers: authHeaders() });
   return parseJsonResponse(response, "Failed to fetch quiz");
 }
 
 export async function getUserQuizzes(userId) {
-  const response = await fetch(`${API_BASE_URL}/quiz/user/${userId}`);
+  const response = await fetch(`${API_BASE_URL}/quiz/user/${userId}`, { headers: authHeaders() });
   return parseJsonResponse(response, "Failed to fetch user quizzes");
 }
 
@@ -352,7 +358,7 @@ export async function getUserQuizzes(userId) {
 export async function logInteraction(payload) {
   const response = await fetch(`${API_BASE_URL}/interactions`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: { "Content-Type": "application/json", ...authHeaders() },
     body: JSON.stringify(payload)
   });
 
@@ -360,11 +366,11 @@ export async function logInteraction(payload) {
 }
 
 export async function getInteractionStats() {
-  const response = await fetch(`${API_BASE_URL}/interactions/stats`);
+  const response = await fetch(`${API_BASE_URL}/interactions/stats`, { headers: authHeaders() });
   return parseJsonResponse(response, "Failed to fetch interaction stats");
 }
 
 export async function getWorkflowOverview() {
-  const response = await fetch(`${API_BASE_URL}/workflow/overview`);
+  const response = await fetch(`${API_BASE_URL}/workflow/overview`, { headers: authHeaders() });
   return parseJsonResponse(response, "Failed to fetch workflow overview");
 }
