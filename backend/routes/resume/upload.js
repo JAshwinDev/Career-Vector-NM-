@@ -5,6 +5,7 @@ const {
   parsePdfBuffer
 } = require("../../utils/resumeProfiles");
 const { parseSkillsInput, uniqueSkills } = require("../../utils/skillUtils");
+const { extractResumeSkills } = require("../../services/geminiAnalysis");
 
 const router = express.Router();
 
@@ -30,7 +31,20 @@ router.post("/", async (req, res) => {
       return res.status(400).json({ error: "PDF appears empty or image-only." });
     }
 
-    const extractedSkills = await extractSkillsWithMl(pdfText);
+    let extractedSkills = [];
+
+    try {
+      const geminiResult = await extractResumeSkills(pdfText);
+      extractedSkills = Array.isArray(geminiResult?.skills) ? geminiResult.skills : [];
+    } catch (err) {
+      console.warn("Gemini resume extraction error, falling back to ML service:", err.message);
+      extractedSkills = [];
+    }
+
+    if (!extractedSkills.length) {
+      extractedSkills = await extractSkillsWithMl(pdfText);
+    }
+
     const manualSkills = parseSkillsInput(additionalSkills);
     const skills = uniqueSkills([
       ...extractedSkills,

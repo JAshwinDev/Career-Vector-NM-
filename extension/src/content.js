@@ -426,6 +426,14 @@ function ensureOverlayStyles() {
       background: #ebe7e1;
       color: #111111;
     }
+
+    #${OVERLAY_ID} .cvjm-button.improve {
+      width: 100%;
+      margin-top: 8px;
+      background: #ffffff;
+      color: #e85b3b;
+      border: 2px solid #e85b3b;
+    }
   `;
 
   document.documentElement.appendChild(style);
@@ -501,6 +509,7 @@ function showOverlay(result, jobContext) {
             <button type="button" class="cvjm-button primary" id="cvjm-dashboard">View dashboard</button>
             <button type="button" class="cvjm-button secondary" id="cvjm-dismiss">Dismiss</button>
           </div>
+          <button type="button" class="cvjm-button improve" id="cvjm-improve">Improve skills</button>
         </div>
       </div>
     `;
@@ -526,6 +535,24 @@ function showOverlay(result, jobContext) {
       } catch (error) {
         console.error("Failed to open dashboard:", error);
         window.open(dashboardUrl, "_blank", "noopener,noreferrer");
+      }
+    });
+
+    overlay.querySelector("#cvjm-improve")?.addEventListener("click", async () => {
+      const analysisId = result.analysisId || "";
+      const redirectPath = analysisId ? `/roadmap?analysisId=${analysisId}` : "/roadmap";
+      const stored = await readStorage(["cv_authToken"]);
+      const url = stored.cv_authToken
+        ? `${config.FRONTEND_URL}${redirectPath}`
+        : `${config.FRONTEND_URL}/login?redirect=${encodeURIComponent(redirectPath)}`;
+      try {
+        await sendRuntimeMessage({
+          type: "OPEN_WEB_APP",
+          url
+        });
+      } catch (error) {
+        console.error("Failed to open roadmap:", error);
+        window.open(url, "_blank", "noopener,noreferrer");
       }
     });
   });

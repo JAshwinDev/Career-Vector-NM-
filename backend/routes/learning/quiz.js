@@ -11,7 +11,7 @@ try {
   const apiKey = process.env.GEMINI_API_KEY;
   if (apiKey && apiKey !== "your_gemini_api_key_here") {
     const genAI = new GoogleGenerativeAI(apiKey);
-    geminiModel = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
+    geminiModel = genAI.getGenerativeModel({ model: "gemini-flash-lite-latest" });
   }
 } catch (err) {
   console.warn("Gemini API not available:", err.message);

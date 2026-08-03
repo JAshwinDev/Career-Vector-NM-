@@ -11,6 +11,10 @@ process.env.DATA_DIR = DATA_DIR;
 process.env.REMOTIVE_RATE_LIMIT_MS = "0";
 process.env.REMOTIVE_CACHE_TTL_MS = "60000";
 
+// Keep tests offline/deterministic: never call the Gemini API, so routes
+// always exercise the local fallback path.
+process.env.GEMINI_API_KEY = "";
+
 const app = require("../app");
 const { signToken } = require("../middleware/auth");
 

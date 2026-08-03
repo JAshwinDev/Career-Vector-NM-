@@ -17,6 +17,7 @@ function readRoute() {
   const url = new URL(window.location.href);
   return {
     pathname: url.pathname,
+    redirect: url.searchParams.get("redirect"),
     analysisId: url.searchParams.get("analysisId"),
     tab: url.searchParams.get("tab") || "overview",
     action: url.searchParams.get("action"),
@@ -293,6 +294,9 @@ export default function App() {
   const [savedResult, setSavedResult] = useState(null);
   const [savedResultLoading, setSavedResultLoading] = useState(false);
   const [savedResultError, setSavedResultError] = useState("");
+  const [roadmapResult, setRoadmapResult] = useState(null);
+  const [roadmapResultLoading, setRoadmapResultLoading] = useState(false);
+  const [roadmapResultError, setRoadmapResultError] = useState("");
   const [user, setUser] = useState(() => getStoredUser());
 
   useEffect(() => {
@@ -353,6 +357,62 @@ export default function App() {
       cancelled = true;
     };
   }, [route.pathname, route.analysisId, sessionResult, user?.id, user?._id]);
+
+  // Load and build a roadmap for deep links to /roadmap?analysisId=...
+  // (e.g. the extension's "Improve skills" button).
+  useEffect(() => {
+    let cancelled = false;
+
+    async function loadRoadmap() {
+      if (route.pathname !== "/roadmap" || !route.analysisId || !user) {
+        setRoadmapResult(null);
+        setRoadmapResultLoading(false);
+        setRoadmapResultError("");
+        return;
+      }
+
+      setRoadmapResultLoading(true);
+      setRoadmapResultError("");
+
+      try {
+        const item = await getHistoryItem(route.analysisId);
+        const result = historyItemToResult(item);
+        let roadmapData = null;
+        try {
+          roadmapData = await generateRoadmap({
+            userSkills: result.student_skills || [],
+            jobSkills: result.matched_skills || [],
+            targetRole: result.target_role || "",
+            jobRequirements: result.missing_skills ? result.missing_skills.map((req) => typeof req === "string" ? req : req.skill) : []
+          });
+        } catch (err) {
+          console.warn("Failed to generate roadmap for saved analysis, using stored roadmap:", err.message);
+        }
+
+        if (cancelled) return;
+        const roadmap = roadmapData?.roadmap || roadmapData?.learningPath || result.roadmap || [];
+        setRoadmapResult({
+          roadmap,
+          learningPath: roadmap,
+          targetRole: result.target_role || "",
+          userSkills: result.student_skills || []
+        });
+      } catch (err) {
+        if (cancelled) return;
+        setRoadmapResult(null);
+        setRoadmapResultError(err.message || "Failed to load roadmap.");
+      } finally {
+        if (!cancelled) {
+          setRoadmapResultLoading(false);
+        }
+      }
+    }
+
+    loadRoadmap();
+    return () => {
+      cancelled = true;
+    };
+  }, [route.pathname, route.analysisId, user?.id, user?._id]);
 
   // Handle job-analysis action from extension
   useEffect(() => {
@@ -524,7 +584,10 @@ export default function App() {
 
       {!user && protectedRoute && !showLoginPage && (
         <>
-          <AuthRequired onLogin={() => navigate("/login")} />
+          <AuthRequired onLogin={() => {
+            const current = window.location.pathname + window.location.search;
+            navigate(`/login?redirect=${encodeURIComponent(current)}`);
+          }} />
           <Footer />
         </>
       )}
@@ -553,7 +616,8 @@ export default function App() {
         <>
           <LoginPage onLoginSuccess={(loggedInUser) => {
             setUser(loggedInUser);
-            navigate("/");
+            const redirectPath = new URLSearchParams(window.location.search).get("redirect");
+            navigate(redirectPath && redirectPath.startsWith("/") ? redirectPath : "/");
           }} />
           <Footer />
         </>
@@ -650,11 +714,29 @@ export default function App() {
 
       {showRoadmapPage && user && (
         <>
-          <RoadmapViewer
-            roadmap={sessionResult?.roadmap || sessionResult?.learningPath || []}
-            targetRole={sessionResult?.target_role || route.targetRole || "Selected role"}
-            userSkills={sessionResult?.student_skills || []}
-          />
+          {roadmapResultLoading ? (
+            <section style={{ maxWidth: 860, margin: "0 auto", padding: "110px 24px 80px", color: "var(--text-secondary)" }}>
+              Building your roadmap...
+            </section>
+          ) : roadmapResultError ? (
+            <section style={{ maxWidth: 860, margin: "0 auto", padding: "110px 24px 80px" }}>
+              <div style={{
+                background: "rgba(255,77,109,0.1)",
+                border: "1px solid rgba(255,77,109,0.35)",
+                borderRadius: 18,
+                padding: 22,
+                color: "var(--red)"
+              }}>
+                {roadmapResultError}
+              </div>
+            </section>
+          ) : (
+            <RoadmapViewer
+              roadmap={sessionResult?.roadmap || sessionResult?.learningPath || roadmapResult?.roadmap || roadmapResult?.learningPath || []}
+              targetRole={sessionResult?.target_role || roadmapResult?.targetRole || route.targetRole || "Selected role"}
+              userSkills={sessionResult?.student_skills || roadmapResult?.userSkills || []}
+            />
+          )}
           <Footer />
         </>
       )}
