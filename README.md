@@ -58,9 +58,9 @@ careervector/
 │   ├── app.py                        ← TF-IDF + cosine similarity engine
 │   └── data/job_roles.json           ← 20 roles, 500+ weighted skills
 │
-└── frontend/                         ← React + Vite web app (Port 3000)
+└── frontend/                         ← Next.js web app (Port 3000)
     └── src/
-        ├── App.jsx
+        ├── app/                      ← Next.js App Router pages/layouts
         ├── components/               ← grouped by feature
         │   ├── auth/                 ← LoginPage
         │   ├── landing/              ← HeroSection, HowItWorks
@@ -114,10 +114,17 @@ chmod +x start.sh
 ./start.sh
 ```
 
+Or run all three via npm concurrently + `concurrently` (installed at the repo root):
+
+```bash
+npm install:all
+npm run dev
+```
+
 This installs all dependencies and starts:
 | Service | URL |
 |---|---|
-| React Frontend | http://localhost:3000 |
+| Next.js Frontend | http://localhost:3000 |
 | Node.js Backend | http://localhost:5000 |
 | Python ML Service | http://localhost:5001 |
 

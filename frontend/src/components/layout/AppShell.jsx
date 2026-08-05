@@ -7,7 +7,7 @@ import Sidebar from "./Sidebar.jsx";
 import AuthScreen from "./AuthScreen.jsx";
 
 export default function AppShell({ children }) {
-  const { user, pathname } = useApp();
+  const { user, pathname, sidebarCollapsed } = useApp();
   const router = useRouter();
 
   // A signed-in user has no business on the login route.
@@ -28,7 +28,7 @@ export default function AppShell({ children }) {
   return (
     <div className="app-shell">
       <Sidebar />
-      <main className="app-content">{children}</main>
+      <main className={`app-content${sidebarCollapsed ? " collapsed" : ""}`}>{children}</main>
     </div>
   );
 }

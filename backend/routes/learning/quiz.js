@@ -147,9 +147,10 @@ router.post("/generate", requireAuth, async (req, res) => {
       source = "bank";
     }
 
-    // Create quiz document
+    // Create quiz document (demo users don't exist in the DB, so store no userId)
+    const isDemo = Boolean(req.auth && req.auth.is_demo);
     const quiz = new Quiz({
-      userId: userId || null,
+      userId: isDemo ? null : (userId || null),
       targetRole,
       questions,
       totalQuestions: questions.length,

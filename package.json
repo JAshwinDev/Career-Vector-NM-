@@ -5,7 +5,7 @@
   "scripts": {
     "install:all": "npm install && cd backend && npm install && cd ../frontend && npm install",
     "dev": "concurrently \"npm run ml\" \"npm run backend\" \"npm run frontend\"",
-    "ml": "cd ml-service && python app.py",
+    "ml": "cd ml-service && python3 app.py",
     "backend": "cd backend && node server.js",
     "frontend": "cd frontend && npm run dev",
     "build": "cd frontend && npm run build",

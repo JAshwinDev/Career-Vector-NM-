@@ -2,10 +2,34 @@
 
 import { useEffect, useState } from "react";
 import { useApp } from "./SidebarProvider.jsx";
+import { useIsMobile } from "../../hooks/useMediaQuery.js";
+
+const svgProps = {
+  viewBox: "0 0 24 24",
+  fill: "none",
+  stroke: "currentColor",
+  strokeWidth: 2,
+  strokeLinecap: "round",
+  strokeLinejoin: "round",
+  "aria-hidden": true
+};
 
 const icons = {
+  menu: (
+    <svg {...svgProps}>
+      <path d="M4 6h16" />
+      <path d="M4 12h16" />
+      <path d="M4 18h16" />
+    </svg>
+  ),
+  close: (
+    <svg {...svgProps}>
+      <path d="M18 6 6 18" />
+      <path d="m6 6 12 12" />
+    </svg>
+  ),
   dashboard: (
-    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <svg {...svgProps}>
       <rect x="3" y="3" width="7" height="9" rx="1.5" />
       <rect x="14" y="3" width="7" height="5" rx="1.5" />
       <rect x="14" y="12" width="7" height="9" rx="1.5" />
@@ -13,36 +37,36 @@ const icons = {
     </svg>
   ),
   analysis: (
-    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-      <path d="M12 20h9" />
-      <path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z" />
+    <svg {...svgProps}>
+      <path d="M3 3v16a2 2 0 0 0 2 2h16" />
+      <path d="m7 14 4-4 4 4 5-5" />
     </svg>
   ),
   history: (
-    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <svg {...svgProps}>
       <circle cx="12" cy="12" r="9" />
       <path d="M12 7v5l3 3" />
     </svg>
   ),
   recommend: (
-    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-      <path d="M12 3l2.35 4.76L20 8.5l-4 3.9.94 5.5L12 15.5l-4.94 2.4.94-5.5-4-3.9 5.65-.74Z" />
+    <svg {...svgProps}>
+      <path d="m12 3 2.36 4.79 5.27.77-3.81 3.71.9 5.25L12 15.1l-4.72 2.42.9-5.25-3.81-3.71 5.27-.77Z" />
     </svg>
   ),
   profile: (
-    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <svg {...svgProps}>
       <circle cx="12" cy="8" r="4" />
       <path d="M4 21a8 8 0 0 1 16 0" />
     </svg>
   ),
   settings: (
-    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <svg {...svgProps}>
+      <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z" />
       <circle cx="12" cy="12" r="3" />
-      <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33h0a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51h0a1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82v0a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1Z" />
     </svg>
   ),
   logout: (
-    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <svg {...svgProps}>
       <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
       <path d="M16 17l5-5-5-5" />
       <path d="M21 12H9" />
@@ -51,12 +75,24 @@ const icons = {
 };
 
 export default function Sidebar() {
-  const { user, navigate, handleLogoClick, handleLogout, pathname } = useApp();
-  const [mobileOpen, setMobileOpen] = useState(false);
-  const [tab, setTab] = useState(null);
+  const {
+    user,
+    navigate,
+    handleLogoClick,
+    handleLogout,
+    pathname,
+    sidebarCollapsed,
+    toggleCollapse,
+    mobileOpen,
+    openMobile,
+    closeMobile
+  } = useApp();
+
+  const isMobile = useIsMobile();
 
   // Read the ?tab= param only after mount so SSR and client markup match on
   // the first render.
+  const [tab, setTab] = useState(null);
   useEffect(() => {
     if (typeof window === "undefined") return;
     setTab(new URLSearchParams(window.location.search).get("tab"));
@@ -71,91 +107,146 @@ export default function Sidebar() {
   ];
 
   const accountItems = [
-    { label: "Settings", icon: icons.settings, path: "/settings", active: pathname === "/settings" }
+    { label: "Settings", icon: icons.settings, path: "/settings", active: pathname === "/settings" },
+    { label: "Logout", icon: icons.logout, path: "logout", active: false }
   ];
 
+  const handleToggle = () => {
+    if (isMobile) {
+      if (mobileOpen) closeMobile();
+      else openMobile();
+    } else {
+      toggleCollapse();
+    }
+  };
+
   const handleNav = (path) => {
-    setMobileOpen(false);
+    if (path === "logout") {
+      handleLogout();
+      return;
+    }
+    closeMobile();
     navigate(path);
   };
 
   const handleLogo = () => {
-    setMobileOpen(false);
+    closeMobile();
     handleLogoClick();
   };
-
-  const initial = (user?.name || "U").charAt(0).toUpperCase();
 
   const renderItem = (item) => (
     <button
       key={item.label}
       type="button"
       className={`cv-sidebar-item${item.active ? " active" : ""}`}
+      data-tooltip={item.label}
       onClick={() => handleNav(item.path)}
+      aria-current={item.active ? "page" : undefined}
     >
       <span className="cv-sidebar-item-icon">{item.icon}</span>
-      <span>{item.label}</span>
-      {item.active && <span className="cv-sidebar-pulse" />}
+      <span className="cv-sidebar-item-label">{item.label}</span>
     </button>
+  );
+
+  const initial = (user?.name || "U").charAt(0).toUpperCase();
+  const avatarContent = user?.profilePicture ? (
+    <img src={user.profilePicture} alt="" />
+  ) : (
+    initial
   );
 
   return (
     <>
       <button
         type="button"
-        className="cv-sidebar-hamburger"
-        onClick={() => setMobileOpen(true)}
+        className="cv-mobile-toggle"
+        onClick={openMobile}
         aria-label="Open navigation menu"
         aria-expanded={mobileOpen}
       >
-        ☰
+        {icons.menu}
       </button>
 
       <div
         className={`cv-sidebar-backdrop${mobileOpen ? " open" : ""}`}
-        onClick={() => setMobileOpen(false)}
+        onClick={closeMobile}
         aria-hidden="true"
       />
 
-      <aside className={`cv-sidebar${mobileOpen ? " mobile-open" : ""}`} aria-label="Sidebar navigation">
-        <div className="cv-sidebar-scanline" />
+      <aside
+        className={`cv-sidebar${sidebarCollapsed ? " collapsed" : ""}${mobileOpen ? " mobile-open" : ""}`}
+        aria-label="Sidebar navigation"
+      >
+        <div className="cv-sidebar-top">
+          <button
+            type="button"
+            className="cv-toggle"
+            onClick={handleToggle}
+            aria-label={
+              isMobile
+                ? mobileOpen ? "Close navigation menu" : "Open navigation menu"
+                : sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"
+            }
+          >
+            {isMobile && mobileOpen ? icons.close : icons.menu}
+          </button>
 
-        <div
-          className="cv-sidebar-logo"
-          role="button"
-          tabIndex={0}
-          onClick={handleLogo}
-          onKeyDown={(e) => e.key === "Enter" && handleLogo()}
-        >
-          <div className="cv-sidebar-logo-icon">⚡</div>
-          <div className="cv-sidebar-logo-text">
-            Career<em>Vector</em>
-          </div>
-        </div>
-
-        <div className="cv-sidebar-user">
-          <div className="cv-sidebar-avatar">
-            {initial}
-            <span className="cv-sidebar-avatar-dot" />
-          </div>
-          <div className="cv-sidebar-user-meta">
-            <span className="cv-sidebar-user-name">{user?.name || "Not signed in"}</span>
-            {user?.email && <span className="cv-sidebar-user-email">{user.email}</span>}
+          <div
+            className="cv-brand"
+            role="button"
+            tabIndex={0}
+            onClick={handleLogo}
+            onKeyDown={(e) => e.key === "Enter" && handleLogo()}
+          >
+            <span className="cv-brand-mark">CV</span>
+            <span className="cv-brand-text">
+              Career<em>Vector</em>
+            </span>
           </div>
         </div>
 
         <nav className="cv-sidebar-nav" aria-label="Main navigation">
-          <div className="cv-sidebar-label">Main</div>
+          <span className="cv-sidebar-label">Main</span>
           {mainItems.map(renderItem)}
-          <div className="cv-sidebar-label">Account</div>
+          <span className="cv-sidebar-label">Account</span>
           {accountItems.map(renderItem)}
         </nav>
 
-        <div className="cv-sidebar-footer">
-          <button type="button" className="cv-sidebar-signout" onClick={handleLogout}>
-            {icons.logout}
-            <span>Sign Out</span>
-          </button>
+        <div className="cv-sidebar-bottom">
+          <div className="cv-user">
+            <span className="cv-user-avatar">{avatarContent}</span>
+
+            {user ? (
+              <>
+                <span className="cv-user-meta">
+                  <span className="cv-user-name">{user.name || user.email}</span>
+                  {user.email && <span className="cv-user-email">{user.email}</span>}
+                </span>
+                <button
+                  type="button"
+                  className="cv-user-logout"
+                  onClick={handleLogout}
+                  aria-label="Sign out"
+                >
+                  {icons.logout}
+                </button>
+              </>
+            ) : (
+              <>
+                <span className="cv-user-login">Not signed in</span>
+                <button
+                  type="button"
+                  className="cv-user-login-btn"
+                  onClick={() => {
+                    closeMobile();
+                    navigate("/login");
+                  }}
+                >
+                  Sign in
+                </button>
+              </>
+            )}
+          </div>
         </div>
       </aside>
     </>

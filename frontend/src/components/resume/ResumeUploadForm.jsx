@@ -3,6 +3,11 @@
 import React, { useState, useRef } from "react";
 import { getRoles, logInteraction, uploadResume } from "../../utils/api.js";
 
+function skillName(item) {
+  if (item && typeof item === "object") return item.skill || "";
+  return item == null ? "" : String(item);
+}
+
 export default function ResumeUploadForm({ onUploadSuccess }) {
   const [file, setFile] = useState(null);
   const [uploading, setUploading] = useState(false);
@@ -271,7 +276,7 @@ export default function ResumeUploadForm({ onUploadSuccess }) {
                   color: "var(--green)"
                 }}
               >
-                {skill}
+                {skillName(skill)}
               </span>
             ))}
           </div>

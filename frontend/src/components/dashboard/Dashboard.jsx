@@ -3,6 +3,11 @@
 import React, { useState, useEffect } from "react";
 import { getUserProfile, getHistory } from "../../utils/api.js";
 
+function skillName(item) {
+  if (item && typeof item === "object") return item.skill || "";
+  return item == null ? "" : String(item);
+}
+
 export default function Dashboard() {
   const [user, setUser] = useState(null);
   const [analyses, setAnalyses] = useState([]);
@@ -63,7 +68,7 @@ export default function Dashboard() {
       ? Math.round(analyses.reduce((sum, a) => sum + Number(a.compatibilityScore ?? a.score ?? a.match_score ?? 0), 0) / analyses.length)
       : 0,
     highMatches: analyses.filter(a => Number(a.compatibilityScore ?? a.score ?? a.match_score ?? 0) >= 65).length,
-    skillsIdentified: new Set(analyses.flatMap(a => a.matched || a.matched_skills || [])).size
+    skillsIdentified: new Set(analyses.flatMap(a => (a.matched || a.matched_skills || [])).map(skillName)).size
   };
 
   const getMatchBadgeColor = (score) => {
@@ -272,7 +277,7 @@ export default function Dashboard() {
                         </p>
                         {(analysis.matched || analysis.matched_skills || []).length > 0 && (
                           <p>
-                            <strong>Matched Skills:</strong> {(analysis.matched || analysis.matched_skills || []).slice(0, 3).join(", ")}
+                            <strong>Matched Skills:</strong> {(analysis.matched || analysis.matched_skills || []).slice(0, 3).map(skillName).join(", ")}
                             {(analysis.matched || analysis.matched_skills || []).length > 3 && ` +${(analysis.matched || analysis.matched_skills || []).length - 3} more`}
                           </p>
                         )}
@@ -370,7 +375,7 @@ export default function Dashboard() {
                   color: "var(--text-primary)"
                 }}
               >
-                {skill}
+                {skillName(skill)}
               </span>
             ))}
           </div>

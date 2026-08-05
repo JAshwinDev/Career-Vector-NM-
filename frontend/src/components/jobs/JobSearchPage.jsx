@@ -3,6 +3,129 @@
 import React, { useState, useEffect } from "react";
 import { getJobsBySkills, logInteraction, searchJobs } from "../../utils/api";
 
+const iconProps = {
+  viewBox: "0 0 24 24",
+  fill: "none",
+  stroke: "currentColor",
+  strokeWidth: 2,
+  strokeLinecap: "round",
+  strokeLinejoin: "round",
+  "aria-hidden": true
+};
+
+const icons = {
+  search: (
+    <svg {...iconProps}>
+      <circle cx="11" cy="11" r="7" />
+      <path d="m21 21-4.3-4.3" />
+    </svg>
+  ),
+  mapPin: (
+    <svg {...iconProps}>
+      <path d="M20 10c0 6-8 12-8 12S4 16 4 10a8 8 0 0 1 16 0Z" />
+      <circle cx="12" cy="10" r="3" />
+    </svg>
+  ),
+  briefcase: (
+    <svg {...iconProps}>
+      <rect x="2" y="7" width="20" height="14" rx="2" />
+      <path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2" />
+    </svg>
+  ),
+  globe: (
+    <svg {...iconProps}>
+      <circle cx="12" cy="12" r="9" />
+      <path d="M3 12h18" />
+      <path d="M12 3a15 15 0 0 1 0 18 15 15 0 0 1 0-18Z" />
+    </svg>
+  ),
+  bookmark: (
+    <svg {...iconProps}>
+      <path d="M19 21l-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2Z" />
+    </svg>
+  ),
+  arrowUpRight: (
+    <svg {...iconProps}>
+      <path d="M7 17 17 7" />
+      <path d="M8 7h9v9" />
+    </svg>
+  ),
+  clock: (
+    <svg {...iconProps}>
+      <circle cx="12" cy="12" r="9" />
+      <path d="M12 7v5l3 3" />
+    </svg>
+  ),
+  x: (
+    <svg {...iconProps}>
+      <path d="M18 6 6 18" />
+      <path d="m6 6 12 12" />
+    </svg>
+  )
+};
+
+// Parse and sanitize the raw job description before it touches the DOM so
+// no raw HTML tags or unsafe attributes are ever displayed.
+function sanitizeHtml(html) {
+  if (!html) return "";
+  if (typeof DOMParser === "undefined") return html;
+
+  const doc = new DOMParser().parseFromString(html, "text/html");
+  const drop = new Set([
+    "SCRIPT", "STYLE", "IFRAME", "NOSCRIPT", "OBJECT", "EMBED",
+    "META", "LINK", "FORM", "INPUT", "BUTTON", "SELECT", "TEXTAREA",
+    "IMG", "SVG", "VIDEO", "AUDIO", "SOURCE"
+  ]);
+
+  for (const el of Array.from(doc.body.querySelectorAll("*"))) {
+    if (drop.has(el.tagName)) {
+      el.remove();
+      continue;
+    }
+    for (const attr of Array.from(el.attributes)) {
+      const name = attr.name.toLowerCase();
+      const keep = el.tagName === "A" && name === "href";
+      if (!keep) el.removeAttribute(attr.name);
+    }
+  }
+
+  return doc.body.innerHTML.trim();
+}
+
+function companyInitials(name) {
+  return (name || "?")
+    .split(/\s+/)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((w) => w.charAt(0).toUpperCase())
+    .join("");
+}
+
+function formatLocation(job) {
+  return [job.location?.city, job.location?.state].filter(Boolean).join(", ") || "Remote";
+}
+
+function formatSalary(job) {
+  if (!job.salary?.min) return "";
+  const min = job.salary.min.toLocaleString();
+  const max = job.salary.max ? job.salary.max.toLocaleString() : "";
+  return `$${min}${max ? ` – $${max}` : ""}`;
+}
+
+function capitalize(value) {
+  if (!value) return "";
+  return String(value)
+    .split(/[\s_]+/)
+    .filter(Boolean)
+    .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+    .join(" ");
+}
+
+function skillName(item) {
+  if (item && typeof item === "object") return item.skill || "";
+  return item == null ? "" : String(item);
+}
+
 export default function JobSearchPage({ userSkills: initialUserSkills = [], onJobSelect }) {
   const [userSkills, setUserSkills] = useState(initialUserSkills);
   const [location, setLocation] = useState("");
@@ -12,6 +135,12 @@ export default function JobSearchPage({ userSkills: initialUserSkills = [], onJo
   const [loading, setLoading] = useState(false);
   const [selectedJob, setSelectedJob] = useState(null);
   const [jobMatches, setJobMatches] = useState({});
+
+  // UI-only presentation state (no data flow / API changes).
+  const [remoteOnly, setRemoteOnly] = useState(false);
+  const [mostRelevant, setMostRelevant] = useState(false);
+  const [savedJobs, setSavedJobs] = useState(() => new Set());
+  const [activeTab, setActiveTab] = useState("about");
 
   const handleSearch = async (overrideParams = {}) => {
     setLoading(true);
@@ -50,6 +179,7 @@ export default function JobSearchPage({ userSkills: initialUserSkills = [], onJo
   useEffect(() => {
     setUserSkills(Array.isArray(initialUserSkills) ? initialUserSkills : []);
     handleSearch({ searchQuery: "", location: "", experienceLevel: "mid" });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [initialUserSkills]);
 
   const onSubmit = (e) => {
@@ -57,192 +187,450 @@ export default function JobSearchPage({ userSkills: initialUserSkills = [], onJo
     handleSearch();
   };
 
-  return (
-    <div className="section container" style={{ minHeight: "100vh" }}>
-      <h1 className="section-title">FIND YOUR NEXT OPPORTUNITY</h1>
+  const openJob = (job) => {
+    setSelectedJob(job);
+    setActiveTab("about");
+    onJobSelect?.(job);
+    logInteraction({
+      jobId: job._id,
+      interactionType: "job_view",
+      actionDetails: {
+        title: job.title,
+        company: job.company,
+        source: job.source || "platform"
+      }
+    }).catch(() => {});
+  };
 
-      {/* Search & Filter Section */}
-      <form onSubmit={onSubmit} className="brutalist-card brutalist-card-accent" style={{ padding: "1.25rem", marginBottom: "2rem" }}>
-        <div style={{
-          display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: "0.75rem"
-        }}>
-          <input
-            type="text"
-            placeholder="JOB TITLE OR COMPANY..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            style={{
-              padding: "0.7rem 0.875rem", border: "1px solid var(--border)", borderRadius: "var(--radius-sm)", background: "var(--bg)",
-              fontFamily: "var(--font-display)", fontWeight: 700, fontSize: "0.9375rem", color: "var(--primary)"
-            }}
-          />
+  const toggleSave = (id) => {
+    setSavedJobs((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
 
-          <select
-            value={experienceLevel}
-            onChange={(e) => setExperienceLevel(e.target.value)}
-            style={{
-              padding: "0.7rem 0.875rem", border: "1px solid var(--border)", borderRadius: "var(--radius-sm)", background: "var(--bg)",
-              fontFamily: "var(--font-display)", fontWeight: 700, fontSize: "0.9375rem", color: "var(--primary)"
+  const displayJobs = (() => {
+    let list = jobs;
+    if (remoteOnly) list = list.filter((job) => job.location?.remote);
+    if (mostRelevant) {
+      list = [...list].sort(
+        (a, b) => (jobMatches[b._id]?.matchScore ?? 0) - (jobMatches[a._id]?.matchScore ?? 0)
+      );
+    }
+    return list;
+  })();
+
+  const matchClass = (score) => (score >= 65 ? "high" : score >= 35 ? "mid" : "low");
+
+  const renderJobCard = (job) => {
+    const match = jobMatches[job._id];
+    const isSaved = savedJobs.has(job._id);
+    const salary = formatSalary(job);
+    const initials = companyInitials(job.company);
+
+    return (
+      <article
+        key={job._id}
+        className="job-card"
+        onClick={() => openJob(job)}
+        role="button"
+        tabIndex={0}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            openJob(job);
+          }
+        }}
+      >
+        <div className="job-card-top">
+          <div className="job-logo">
+            {job.companyLogo ? (
+              <img src={job.companyLogo} alt="" />
+            ) : (
+              <span>{initials}</span>
+            )}
+          </div>
+
+          <div className="job-card-body">
+            <h3 className="job-card-title">{job.title}</h3>
+            <p className="job-card-company">{job.company}</p>
+
+            <div className="job-card-meta">
+              <span className="job-meta-item">
+                {icons.mapPin}
+                {formatLocation(job)}
+              </span>
+              {job.location?.remote && (
+                <span className="remote-badge">{icons.globe} Remote</span>
+              )}
+            </div>
+
+            <div className="job-card-chips">
+              {match && match.matchedSkills.slice(0, 3).map((skill) => (
+                <span key={skillName(skill) || String(skill)} className="skill-chip matched">
+                  ✓ {skillName(skill)}
+                </span>
+              ))}
+              {match && match.missingSkills.length > 0 && (
+                <span className="skill-chip missing">+{match.missingSkills.length} missing</span>
+              )}
+              {!match && job.skills.slice(0, 4).map((skill) => (
+                <span key={skillName(skill) || String(skill)} className="skill-chip">{skillName(skill)}</span>
+              ))}
+            </div>
+          </div>
+
+          <div className="job-card-side">
+            {match && (
+              <span className={`match-badge ${matchClass(match.matchScore)}`}>
+                {match.matchScore}% Match
+              </span>
+            )}
+            <button
+              type="button"
+              className={`bookmark-btn${isSaved ? " saved" : ""}`}
+              aria-label={isSaved ? "Remove from saved jobs" : "Save job"}
+              aria-pressed={isSaved}
+              onClick={(e) => {
+                e.stopPropagation();
+                toggleSave(job._id);
+              }}
+            >
+              {icons.bookmark}
+            </button>
+          </div>
+        </div>
+
+        <div className="job-card-footer">
+          <p className="job-salary">{salary || <span className="job-salary-none">Salary not specified</span>}</p>
+          <button
+            type="button"
+            className="view-job-btn"
+            onClick={(e) => {
+              e.stopPropagation();
+              openJob(job);
             }}
           >
-            <option value="">EXPERIENCE LEVEL</option>
-            <option value="entry">ENTRY LEVEL</option>
-            <option value="mid">MID LEVEL</option>
-            <option value="senior">SENIOR</option>
-            <option value="lead">LEAD</option>
-          </select>
+            View Job
+            {icons.arrowUpRight}
+          </button>
+        </div>
+      </article>
+    );
+  };
 
+  const match = selectedJob && jobMatches[selectedJob._id];
+
+  return (
+    <div className="section container jobs-page">
+      <header className="jobs-header">
+        <h1>Find Your Next Opportunity</h1>
+        <p>Discover jobs that match your skills and career goals.</p>
+      </header>
+
+      {/* Search & Filter Section */}
+      <form onSubmit={onSubmit} className="jobs-search">
+        <div className="jobs-search-bar">
+          {icons.search}
           <input
             type="text"
-            placeholder="LOCATION..."
-            value={location}
-            onChange={(e) => setLocation(e.target.value)}
-            style={{
-              padding: "0.7rem 0.875rem", border: "1px solid var(--border)", borderRadius: "var(--radius-sm)", background: "var(--bg)",
-              fontFamily: "var(--font-display)", fontWeight: 700, fontSize: "0.9375rem", color: "var(--primary)"
-            }}
+            placeholder="Search job title, company or skill..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
           />
+          <button type="submit" className="jobs-search-btn" disabled={loading}>
+            {loading ? "Searching..." : "Search"}
+          </button>
+        </div>
 
-          <button type="submit" className="btn-primary" style={{ padding: "0.7rem 1rem" }}>
-            {loading ? "SEARCHING..." : "SEARCH JOBS"}
+        <div className="jobs-filters">
+          <label className="jobs-filter">
+            {icons.mapPin}
+            <input
+              type="text"
+              placeholder="Location"
+              value={location}
+              onChange={(e) => setLocation(e.target.value)}
+            />
+          </label>
+
+          <label className="jobs-filter">
+            {icons.briefcase}
+            <select
+              value={experienceLevel}
+              onChange={(e) => setExperienceLevel(e.target.value)}
+            >
+              <option value="">Experience level</option>
+              <option value="entry">Entry level</option>
+              <option value="mid">Mid level</option>
+              <option value="senior">Senior</option>
+              <option value="lead">Lead</option>
+            </select>
+          </label>
+
+          <button
+            type="button"
+            className={`jobs-toggle${remoteOnly ? " active" : ""}`}
+            aria-pressed={remoteOnly}
+            onClick={() => setRemoteOnly((v) => !v)}
+          >
+            {icons.globe}
+            Remote
+          </button>
+
+          <button
+            type="button"
+            className={`jobs-toggle${mostRelevant ? " active" : ""}`}
+            aria-pressed={mostRelevant}
+            onClick={() => setMostRelevant((v) => !v)}
+          >
+            Most Relevant
           </button>
         </div>
       </form>
 
       {/* Jobs List */}
-      <div style={{ display: "grid", gap: "1.25rem" }}>
-        {jobs.length === 0 ? (
-          <p style={{ textAlign: "center", padding: "2rem", color: "var(--text-soft)", fontSize: "1.0625rem", fontWeight: 600 }}>
-            NO JOBS FOUND. TRY A DIFFERENT SEARCH.
-          </p>
+      <div className="jobs-list">
+        {displayJobs.length === 0 && !loading ? (
+          <div className="jobs-empty">
+            <h3>No jobs found</h3>
+            <p>Try a different search, or broaden your filters.</p>
+          </div>
         ) : (
-          jobs.map((job) => {
-            const match = jobMatches[job._id];
-            return (
-              <div
-                key={job._id}
-                className="brutalist-card"
-                style={{ padding: "1.25rem", cursor: "pointer", marginBottom: 0 }}
-                onClick={() => {
-                  setSelectedJob(job);
-                  onJobSelect?.(job);
-                  logInteraction({
-                    jobId: job._id,
-                    interactionType: "job_view",
-                    actionDetails: {
-                      title: job.title,
-                      company: job.company,
-                      source: job.source || "platform"
-                    }
-                  }).catch(() => {});
-                }}
-              >
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "0.75rem" }}>
-                  <div>
-                    <h3 style={{ fontSize: "1.25rem", fontWeight: "700", margin: "0 0 0.375rem 0", color: "var(--primary)", fontFamily: "var(--font-display)", textTransform: "uppercase" }}>{job.title}</h3>
-                    <p style={{ fontSize: "1rem", color: "var(--primary)", margin: "0", fontWeight: 500 }}>{job.company}</p>
-                  </div>
-                  {match && (
-                    <div style={{
-                      padding: "0.375rem 0.875rem", border: "1px solid var(--border)", borderRadius: "var(--radius-sm)",
-                      backgroundColor: match.matchScore >= 65 ? "var(--primary)" : match.matchScore >= 35 ? "var(--surface)" : "var(--accent)",
-                      color: match.matchScore >= 65 ? "var(--bg)" : "var(--primary)",
-                      fontWeight: "700", fontSize: "0.9375rem", fontFamily: "var(--font-display)"
-                    }}>
-                      {match.matchScore}% MATCH
-                    </div>
-                  )}
-                </div>
-
-                <p style={{ fontSize: "0.9375rem", color: "var(--text-soft)", marginBottom: "0.75rem", fontWeight: 600, textTransform: "uppercase" }}>
-                  📍 {job.location?.city}, {job.location?.state}
-                  {job.location?.remote ? " (REMOTE)" : ""}
-                </p>
-
-                <div style={{ display: "flex", flexWrap: "wrap", gap: "0.375rem", marginBottom: "0.75rem" }}>
-                  {match && match.matchedSkills.slice(0, 3).map((skill) => (
-                    <span key={skill} style={{
-                      backgroundColor: "var(--primary)", color: "var(--primary)",
-                      padding: "0.15rem 0.375rem", border: "1px solid var(--border)", borderRadius: "var(--radius-sm)",
-                      fontSize: "0.875rem", fontFamily: "var(--font-display)", fontWeight: "700", textTransform: "uppercase"
-                    }}>✓ {skill}</span>
-                  ))}
-                  {match && match.missingSkills.length > 0 && (
-                    <span style={{
-                      backgroundColor: "var(--accent)", color: "var(--primary)",
-                      padding: "0.15rem 0.375rem", border: "1px solid var(--border)", borderRadius: "var(--radius-sm)",
-                      fontSize: "0.875rem", fontFamily: "var(--font-display)", fontWeight: "700", textTransform: "uppercase"
-                    }}>
-                      +{match.missingSkills.length} MISSING
-                    </span>
-                  )}
-                </div>
-
-                {job.salary?.min && (
-                  <p style={{ fontSize: "1.0625rem", fontWeight: "700", color: "var(--primary)", margin: "0", fontFamily: "var(--font-display)" }}>
-                    💰 ${job.salary.min.toLocaleString()} - ${job.salary.max?.toLocaleString() || ""}
-                  </p>
-                )}
-              </div>
-            );
-          })
+          displayJobs.map(renderJobCard)
         )}
       </div>
 
       {/* Job Detail Modal */}
       {selectedJob && (
-        <div style={{
-          position: "fixed", inset: 0, backgroundColor: "rgba(17,17,17,0.8)",
-          display: "flex", alignItems: "center", justifyContent: "center", zIndex: 1000
-        }} onClick={() => setSelectedJob(null)}>
-          <div className="brutalist-card" style={{
-            padding: "2rem", maxWidth: "720px", width: "90%", maxHeight: "80vh", overflowY: "auto", position: "relative"
-          }} onClick={(e) => e.stopPropagation()}>
+        <div className="job-modal-overlay" onClick={() => setSelectedJob(null)}>
+          <div
+            className="job-modal"
+            role="dialog"
+            aria-modal="true"
+            aria-label={selectedJob.title}
+            onClick={(e) => e.stopPropagation()}
+          >
             <button
-              style={{
-                position: "absolute", top: "0.75rem", right: "0.75rem",
-                fontSize: "1.5rem", background: "none", border: "none", cursor: "pointer",
-                color: "var(--primary)", fontFamily: "var(--font-display)", fontWeight: 700
-              }}
+              type="button"
+              className="job-modal-close"
+              aria-label="Close"
               onClick={() => setSelectedJob(null)}
             >
-              ×
+              {icons.x}
             </button>
 
-            <h2 style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: "1.75rem", textTransform: "uppercase", marginBottom: "0.375rem" }}>{selectedJob.title}</h2>
-            <p style={{ fontSize: "1.125rem", fontWeight: 500, marginBottom: "1.25rem" }}>{selectedJob.company}</p>
+            <header className="job-modal-header">
+              <div className="job-modal-logo">
+                {selectedJob.companyLogo ? (
+                  <img src={selectedJob.companyLogo} alt="" />
+                ) : (
+                  <span>{companyInitials(selectedJob.company)}</span>
+                )}
+              </div>
+              <div className="job-modal-heading">
+                <h2 className="job-modal-title">{selectedJob.title}</h2>
+                <p className="job-modal-company">{selectedJob.company}</p>
 
-            <h3 style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: "1.125rem", textTransform: "uppercase", marginBottom: "0.5rem" }}>About the Role</h3>
-            <p style={{ fontSize: "1rem", lineHeight: 1.6, marginBottom: "1.25rem" }}>{selectedJob.description}</p>
+                <div className="job-modal-meta">
+                  {selectedJob.location?.remote && (
+                    <span className="remote-badge">{icons.globe} Remote</span>
+                  )}
+                  <span className="job-meta-item">
+                    {icons.mapPin}
+                    {formatLocation(selectedJob)}
+                  </span>
+                  {selectedJob.experience_level && (
+                    <span className="job-meta-item">
+                      {icons.briefcase}
+                      {capitalize(selectedJob.experience_level)}
+                    </span>
+                  )}
+                  <span className="job-meta-item">
+                    {icons.clock}
+                    {selectedJob.postedDate
+                      ? new Date(selectedJob.postedDate).toLocaleDateString()
+                      : "Just posted"}
+                  </span>
+                </div>
 
-            <h3 style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: "1.125rem", textTransform: "uppercase", marginBottom: "0.5rem" }}>Required Skills</h3>
-            <div style={{ display: "flex", flexWrap: "wrap", gap: "0.75rem", marginBottom: "1.25rem" }}>
-              {selectedJob.skills?.map((skill) => (
-                <span key={skill} style={{
-                  backgroundColor: "var(--surface)", color: "var(--primary)", padding: "0.375rem 0.875rem",
-                  border: "1px solid var(--border)", borderRadius: "var(--radius-sm)", fontSize: "0.875rem", fontFamily: "var(--font-display)", fontWeight: "700", textTransform: "uppercase"
-                }}>{skill}</span>
+                <div className="job-modal-actions">
+                  {match && (
+                    <span className={`match-badge ${matchClass(match.matchScore)}`}>
+                      {match.matchScore}% Match
+                    </span>
+                  )}
+                  <button
+                    type="button"
+                    className={`job-save-btn${savedJobs.has(selectedJob._id) ? " saved" : ""}`}
+                    onClick={() => toggleSave(selectedJob._id)}
+                  >
+                    {icons.bookmark}
+                    {savedJobs.has(selectedJob._id) ? "Saved" : "Save job"}
+                  </button>
+                </div>
+              </div>
+            </header>
+
+            <nav className="job-modal-tabs" aria-label="Job details">
+              {[
+                { id: "about", label: "About" },
+                { id: "requirements", label: "Requirements" },
+                { id: "benefits", label: "Benefits" },
+                { id: "company", label: "Company" }
+              ].map((tab) => (
+                <button
+                  key={tab.id}
+                  type="button"
+                  className={`job-tab${activeTab === tab.id ? " active" : ""}`}
+                  onClick={() => setActiveTab(tab.id)}
+                >
+                  {tab.label}
+                </button>
               ))}
+            </nav>
+
+            <div className="job-modal-body">
+              {activeTab === "about" && (
+                <section>
+                  <h3 className="job-section-title">About the Role</h3>
+                  {selectedJob.description ? (
+                    <div
+                      className="job-description"
+                      dangerouslySetInnerHTML={{ __html: sanitizeHtml(selectedJob.description) }}
+                    />
+                  ) : (
+                    <p className="job-description">No description provided for this role.</p>
+                  )}
+                </section>
+              )}
+
+              {activeTab === "requirements" && (
+                <section>
+                  <h3 className="job-section-title">Required Skills</h3>
+                  <div className="job-skill-list">
+                    {(selectedJob.skills || []).map((skill) => (
+                      <span key={skillName(skill) || String(skill)} className="skill-chip">{skillName(skill)}</span>
+                    ))}
+                    {(selectedJob.skills || []).length === 0 && (
+                      <p className="job-description">No specific skills listed.</p>
+                    )}
+                  </div>
+
+                  {match && match.missingSkills.length > 0 && (
+                    <>
+                      <h3 className="job-section-title">Skills You Can Grow</h3>
+                      <div className="job-skill-list">
+                        {match.missingSkills.map((skill) => (
+                          <span key={skillName(skill) || String(skill)} className="skill-chip missing">{skillName(skill)}</span>
+                        ))}
+                      </div>
+                    </>
+                  )}
+
+                  <div className="job-detail-rows">
+                    <div className="job-detail-row">
+                      <span className="job-detail-label">Experience</span>
+                      <span className="job-detail-value">
+                        {capitalize(selectedJob.experience_level) || "Not specified"}
+                      </span>
+                    </div>
+                    <div className="job-detail-row">
+                      <span className="job-detail-label">Job type</span>
+                      <span className="job-detail-value">
+                        {capitalize(selectedJob.jobType) || "Not specified"}
+                      </span>
+                    </div>
+                  </div>
+                </section>
+              )}
+
+              {activeTab === "benefits" && (
+                <section>
+                  <h3 className="job-section-title">Compensation & Benefits</h3>
+                  <div className="job-detail-rows">
+                    <div className="job-detail-row">
+                      <span className="job-detail-label">Salary</span>
+                      <span className="job-detail-value">
+                        {formatSalary(selectedJob) || "Not specified"}
+                      </span>
+                    </div>
+                    <div className="job-detail-row">
+                      <span className="job-detail-label">Work mode</span>
+                      <span className="job-detail-value">
+                        {selectedJob.location?.remote ? "Fully remote" : "On-site"}
+                      </span>
+                    </div>
+                    <div className="job-detail-row">
+                      <span className="job-detail-label">Location</span>
+                      <span className="job-detail-value">{formatLocation(selectedJob)}</span>
+                    </div>
+                  </div>
+                </section>
+              )}
+
+              {activeTab === "company" && (
+                <section>
+                  <h3 className="job-section-title">About {selectedJob.company}</h3>
+                  <div className="job-detail-rows">
+                    <div className="job-detail-row">
+                      <span className="job-detail-label">Company</span>
+                      <span className="job-detail-value">{selectedJob.company}</span>
+                    </div>
+                    <div className="job-detail-row">
+                      <span className="job-detail-label">Location</span>
+                      <span className="job-detail-value">{formatLocation(selectedJob)}</span>
+                    </div>
+                    <div className="job-detail-row">
+                      <span className="job-detail-label">Source</span>
+                      <span className="job-detail-value">
+                        {capitalize(selectedJob.source) || "Platform"}
+                      </span>
+                    </div>
+                  </div>
+                  {selectedJob.url && (
+                    <a
+                      href={selectedJob.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="job-link"
+                    >
+                      Visit {selectedJob.company}
+                      {icons.arrowUpRight}
+                    </a>
+                  )}
+                </section>
+              )}
             </div>
 
-            <h3 style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: "1.125rem", textTransform: "uppercase", marginBottom: "0.5rem" }}>Job Details</h3>
-            <ul className="brutal-list" style={{ marginBottom: "1.25rem" }}>
-              <li><span>EXPERIENCE LEVEL:</span> <span>{selectedJob.experience_level}</span></li>
-              <li><span>JOB TYPE:</span> <span>{selectedJob.jobType}</span></li>
-              {selectedJob.salary?.min && (
-                <li><span>SALARY:</span> <span>${selectedJob.salary.min} - ${selectedJob.salary.max}</span></li>
-              )}
-            </ul>
-
-            <a
-              href={selectedJob.url || "#"}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="btn-primary"
-              style={{ display: "block", textAlign: "center", marginTop: "1.25rem" }}
-            >
-              APPLY NOW
-            </a>
+            <footer className="job-modal-footer">
+              <a
+                href={selectedJob.url || "#"}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="job-btn job-btn-primary"
+              >
+                Visit Job
+                {icons.arrowUpRight}
+              </a>
+              <button
+                type="button"
+                className={`job-btn job-btn-outline${savedJobs.has(selectedJob._id) ? " saved" : ""}`}
+                onClick={() => toggleSave(selectedJob._id)}
+              >
+                {icons.bookmark}
+                {savedJobs.has(selectedJob._id) ? "Saved" : "Save Job"}
+              </button>
+              <button
+                type="button"
+                className="job-btn job-btn-ghost"
+                onClick={() => setSelectedJob(null)}
+              >
+                Close
+              </button>
+            </footer>
           </div>
         </div>
       )}

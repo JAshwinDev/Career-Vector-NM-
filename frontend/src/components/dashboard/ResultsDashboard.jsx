@@ -4,6 +4,11 @@ import React, { useState, useEffect, useRef } from 'react';
 import gsap from 'gsap';
 import { getPeerComparison } from '../../utils/api.js';
 
+function skillName(item) {
+  if (item && typeof item === "object") return item.skill || "";
+  return item == null ? "" : String(item);
+}
+
 function ScoreRing({ score }) {
   const [animated, setAnimated] = useState(0);
 
@@ -69,7 +74,7 @@ function SkillTag({ skill, matched }) {
         e.currentTarget.style.boxShadow = 'none';
         e.currentTarget.style.borderColor = 'transparent';
     }}>
-      <span style={{ fontFamily: "var(--font-display)", fontWeight: 700 }}>{matched ? '✓' : '✗'}</span> {skill}
+      <span style={{ fontFamily: "var(--font-display)", fontWeight: 700 }}>{matched ? '✓' : '✗'}</span> {skillName(skill)}
     </span>
   );
 }
@@ -355,8 +360,8 @@ export default function ResultsDashboard({ result, onReset }) {
               }}>SKILLS DETECTED</h3>
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: "0.75rem" }}>
                 {student_skills.map(skill => (
-                  <SkillTag key={skill} skill={skill}
-                    matched={matched_skills.map(s => s.toLowerCase()).includes(skill.toLowerCase())} />
+                  <SkillTag key={skillName(skill) || String(skill)} skill={skill}
+                    matched={matched_skills.map(s => skillName(s).toLowerCase()).includes(skillName(skill).toLowerCase())} />
                 ))}
                 {student_skills.length === 0 && (
                   <span style={{ color: 'var(--text-soft)', fontSize: "0.9375rem", fontWeight: 600 }}>NO SKILLS DETECTED</span>
@@ -373,12 +378,12 @@ export default function ResultsDashboard({ result, onReset }) {
                 }}>MATCHED SKILLS</h3>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: "0.5rem" }}>
                   {matched_skills.map(skill => (
-                    <div key={skill} style={{
+                    <div key={skillName(skill) || String(skill)} style={{
                       display: 'flex', alignItems: 'center', gap: "0.75rem",
                       padding: '0.6rem 0.875rem', background: "var(--surface)", borderRadius: "var(--radius-sm)",
                       fontSize: "0.9375rem", color: "var(--primary)", fontWeight: 500, border: "1px solid var(--border)"
                     }}>
-                      <span style={{ fontFamily: "var(--font-display)", color: "var(--success)" }}>✓</span> {skill}
+                      <span style={{ fontFamily: "var(--font-display)", color: "var(--success)" }}>✓</span> {skillName(skill)}
                     </div>
                   ))}
                 </div>
@@ -391,16 +396,16 @@ export default function ResultsDashboard({ result, onReset }) {
                 }}>MISSING SKILLS</h3>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: "0.5rem" }}>
                   {missing_skills.map(item => (
-                    <div key={item.skill} style={{
+                    <div key={skillName(item) || String(item)} style={{
                       display: 'flex', alignItems: 'center', justifyContent: 'space-between',
                       padding: '0.6rem 0.875rem', background: 'var(--surface)', borderRadius: "var(--radius-sm)",
                       fontSize: "0.9375rem", color: 'var(--primary)', fontWeight: 500, border: "1px solid var(--border)"
                     }}>
-                      <span style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}><span style={{color: "var(--danger)"}}>✗</span> {item.skill}</span>
+                      <span style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}><span style={{color: "var(--danger)"}}>✗</span> {skillName(item)}</span>
                       <span style={{
                         fontFamily: 'var(--font-mono)', fontSize: "0.8125rem", fontWeight: 700,
                         color: 'var(--danger)', background: "var(--bg)", borderRadius: "100px", padding: "0.15rem 0.5rem"
-                      }}>{Math.round(item.weight * 100)}%</span>
+                      }}>{Math.round((item.weight ?? 0.5) * 100)}%</span>
                     </div>
                   ))}
                 </div>

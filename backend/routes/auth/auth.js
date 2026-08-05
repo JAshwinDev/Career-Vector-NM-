@@ -113,6 +113,15 @@ router.get("/google/config", (_req, res) => {
 // GET /auth/user/me - Current user's own profile (from JWT)
 router.get("/user/me", requireAuth, async (req, res) => {
   try {
+    if (req.auth && req.auth.is_demo) {
+      return res.json({
+        _id: req.userId,
+        email: req.auth.email || "",
+        name: "Demo Student",
+        is_demo: true
+      });
+    }
+
     const user = localStore.isMongoReady(mongoose)
       ? await User.findById(req.userId)
         .populate("resumeProfiles")
@@ -121,14 +130,6 @@ router.get("/user/me", requireAuth, async (req, res) => {
       : localStore.getUserById(req.userId);
 
     if (!user) {
-      if (req.auth && req.auth.is_demo) {
-        return res.json({
-          _id: req.userId,
-          email: req.auth.email || "",
-          name: "Demo Student",
-          is_demo: true
-        });
-      }
       return res.status(404).json({ error: "User not found." });
     }
 

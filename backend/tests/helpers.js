@@ -15,6 +15,14 @@ process.env.REMOTIVE_CACHE_TTL_MS = "60000";
 // always exercise the local fallback path.
 process.env.GEMINI_API_KEY = "";
 
+// Isolate from any real Mongo in backend/.env so tests never touch a live
+// database (also lets the process exit cleanly after the suite runs).
+process.env.MONGO_URI = "";
+
+// Force /match onto the local keyword fallback regardless of whether the
+// ML service happens to be running during the test run.
+process.env.ML_SERVICE_URL = "http://127.0.0.1:1";
+
 const app = require("../app");
 const { signToken } = require("../middleware/auth");
 

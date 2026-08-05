@@ -3,6 +3,11 @@
 import React, { useEffect, useState } from "react";
 import { getHistory, getHistoryStats } from "../../utils/api.js";
 
+function skillName(item) {
+  if (item && typeof item === "object") return item.skill || "";
+  return item == null ? "" : String(item);
+}
+
 function useCountUp(target, duration = 1400) {
   const [value, setValue] = useState(0);
 
@@ -304,7 +309,7 @@ export default function HistoryDashboard({ onOpenAnalysis, user }) {
                   const dark = weight > 0.45;
                   const isTop = count === maxGapCount;
                   return (
-                    <div key={item.skill} className="gap-item">
+                    <div key={skillName(item) || String(item)} className="gap-item">
                       <span
                         className={`gap-bubble${isTop ? " pulse" : ""}`}
                         style={{
@@ -312,7 +317,7 @@ export default function HistoryDashboard({ onOpenAnalysis, user }) {
                           color: dark ? "#fff" : "var(--primary)"
                         }}
                       >
-                        {item.skill}
+                        {skillName(item)}
                         <span className="gap-bubble-count">{count}</span>
                       </span>
                       <div className="gap-bar">
@@ -389,10 +394,10 @@ export default function HistoryDashboard({ onOpenAnalysis, user }) {
                         {(matched.length > 0 || missing.length > 0) && (
                           <div className="cv-timeline-chips">
                             {matched.map((skill) => (
-                              <span key={`m-${skill}`} className="skill-chip matched">{skill}</span>
+                              <span key={`m-${skillName(skill) || String(skill)}`} className="skill-chip matched">{skillName(skill)}</span>
                             ))}
                             {missing.map((skill) => (
-                              <span key={`x-${skill}`} className="skill-chip missing">{skill}</span>
+                              <span key={`x-${skillName(skill) || String(skill)}`} className="skill-chip missing">{skillName(skill)}</span>
                             ))}
                           </div>
                         )}
