@@ -4,7 +4,7 @@ const mongoose = require("mongoose");
 const { OAuth2Client } = require("google-auth-library");
 const User = require("../../models/User");
 const localStore = require("../../utils/localStore");
-const { requireAuth, signToken } = require("../../middleware/auth");
+const { requireAuth, signToken, revokeToken } = require("../../middleware/auth");
 
 const router = express.Router();
 
@@ -83,12 +83,31 @@ router.post("/google", async (req, res) => {
       storage: mongoReady ? "mongo" : "local"
     });
   } catch (err) {
-    console.error("Google auth error:", err.message);
-    return res.status(401).json({
-      error: "Google authentication failed.",
-      details: err.message
-    });
+    const message = String(err && err.message ? err.message : err);
+    let error = "Google authentication failed.";
+
+    if (/Wrong recipient|audience/i.test(message)) {
+      error =
+        "Google token audience mismatch: the client ID used to sign in differs from GOOGLE_CLIENT_ID in backend/.env. " +
+        "The sign-in button must be configured with: " + (GOOGLE_CLIENT_ID || "(unset)");
+    } else if (/No pem found|invalid token|signature/i.test(message)) {
+      error =
+        "Google ID token could not be verified. It may be malformed, expired, or not issued for this app's Google client ID.";
+    }
+
+    console.error("Google auth error:", message);
+    return res.status(401).json({ error, details: message });
   }
+});
+
+// GET /auth/google/config - Expose the Google client ID so the frontend can
+// initialize Google Identity Services with the exact value the backend verifies
+// against. Single source of truth: never hardcode the ID in the UI.
+router.get("/google/config", (_req, res) => {
+  res.json({
+    enabled: Boolean(oauthClient),
+    clientId: GOOGLE_CLIENT_ID || null
+  });
 });
 
 // GET /auth/user/me - Current user's own profile (from JWT)
@@ -102,6 +121,14 @@ router.get("/user/me", requireAuth, async (req, res) => {
       : localStore.getUserById(req.userId);
 
     if (!user) {
+      if (req.auth && req.auth.is_demo) {
+        return res.json({
+          _id: req.userId,
+          email: req.auth.email || "",
+          name: "Demo Student",
+          is_demo: true
+        });
+      }
       return res.status(404).json({ error: "User not found." });
     }
 
@@ -165,8 +192,16 @@ router.put("/user/:id", requireAuth, async (req, res) => {
   }
 });
 
-// POST /auth/logout - Stateless logout (client discards the token)
+// POST /auth/logout - Revoke the presented token (if any) so cached copies of
+// the same session in other clients (e.g. the extension) stop validating.
 router.post("/logout", (req, res) => {
+  const header = req.headers.authorization || "";
+  const [scheme, token] = header.split(" ");
+
+  if (scheme === "Bearer" && token) {
+    revokeToken(token);
+  }
+
   res.json({ success: true, message: "Logged out successfully" });
 });
 

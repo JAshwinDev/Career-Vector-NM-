@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useState, useRef } from "react";
 import { getRoles, logInteraction, uploadResume } from "../../utils/api.js";
 
@@ -142,16 +144,16 @@ export default function ResumeUploadForm({ onUploadSuccess }) {
     <section
       style={{
         maxWidth: 800,
-        margin: "80px auto 60px",
-        padding: "40px 24px",
+        margin: "48px auto",
+        padding: "var(--space-6) 24px",
         color: "var(--text-primary)"
       }}
     >
       <h2
         style={{
-          fontSize: 32,
+          fontSize: 24,
           fontWeight: 600,
-          marginBottom: 12,
+          marginBottom: 8,
           background: "linear-gradient(135deg, #6366f1, #8b5cf6)",
           backgroundClip: "text",
           WebkitBackgroundClip: "text",
@@ -160,7 +162,7 @@ export default function ResumeUploadForm({ onUploadSuccess }) {
       >
         Upload Your Resume
       </h2>
-      <p style={{ color: "var(--text-secondary)", marginBottom: 32, fontSize: 15 }}>
+      <p style={{ color: "var(--text-secondary)", marginBottom: 20, fontSize: 15 }}>
         Upload your resume in PDF format. We'll analyze it to extract your skills and provide personalized job matches.
       </p>
 
@@ -172,7 +174,7 @@ export default function ResumeUploadForm({ onUploadSuccess }) {
         style={{
           border: "2px dashed rgba(99, 102, 241, 0.4)",
           borderRadius: 16,
-          padding: 48,
+          padding: 32,
           textAlign: "center",
           cursor: uploading ? "not-allowed" : "pointer",
           background: "rgba(99, 102, 241, 0.05)",

@@ -1,4 +1,4 @@
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:5000";
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:5000";
 
 function authHeaders() {
   const token = localStorage.getItem("authToken");
@@ -15,7 +15,9 @@ async function parseJsonResponse(response, fallbackMessage) {
   }
 
   if (!response.ok) {
-    throw new Error(data.error || fallbackMessage);
+    const error = new Error(data.error || fallbackMessage);
+    error.status = response.status;
+    throw error;
   }
 
   return data;
@@ -248,6 +250,27 @@ export function getMockResult(skills, role) {
 }
 
 // ============ Auth Functions ============
+export async function fetchCurrentUser(token) {
+  const headers = token
+    ? { Authorization: `Bearer ${token}` }
+    : authHeaders();
+  const response = await fetch(`${API_BASE_URL}/auth/user/me`, { headers });
+  return parseJsonResponse(response, "Failed to load user");
+}
+
+export async function getGoogleConfig() {
+  const response = await fetch(`${API_BASE_URL}/auth/google/config`);
+  return parseJsonResponse(response, "Failed to load Google login config");
+}
+
+export async function logoutSession() {
+  const response = await fetch(`${API_BASE_URL}/auth/logout`, {
+    method: "POST",
+    headers: authHeaders()
+  });
+  return parseJsonResponse(response, "Logout failed");
+}
+
 export async function loginWithGoogle(googleData) {
   const response = await fetch(`${API_BASE_URL}/auth/google`, {
     method: "POST",

@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useState, useEffect } from "react";
 import { logInteraction } from "../../utils/api.js";
 
@@ -217,7 +219,7 @@ const styles = {
   container: {
     maxWidth: "1000px",
     margin: "0 auto",
-    padding: "40px 20px",
+    padding: "32px 20px",
     backgroundColor: "#f9fafb",
     minHeight: "100vh"
   },
@@ -225,52 +227,52 @@ const styles = {
     display: "flex",
     justifyContent: "space-between",
     alignItems: "flex-start",
-    marginBottom: "40px",
-    gap: "30px"
+    marginBottom: "24px",
+    gap: "20px"
   },
   title: {
-    fontSize: "32px",
+    fontSize: "24px",
     fontWeight: "bold",
     margin: "0 0 5px 0",
     color: "#111827"
   },
   subtitle: {
-    fontSize: "16px",
+    fontSize: "15px",
     color: "#6b7280",
     margin: "0"
   },
   statsBox: {
     display: "flex",
-    gap: "20px"
+    gap: "12px"
   },
   stat: {
     backgroundColor: "white",
-    padding: "15px 20px",
+    padding: "10px 16px",
     borderRadius: "8px",
     textAlign: "center",
     boxShadow: "0 1px 3px rgba(0,0,0,0.1)"
   },
   statNumber: {
-    fontSize: "24px",
+    fontSize: "18px",
     fontWeight: "bold",
     color: "#3b82f6"
   },
   statLabel: {
-    fontSize: "12px",
+    fontSize: "11px",
     color: "#6b7280",
-    marginTop: "5px"
+    marginTop: "4px"
   },
   progressContainer: {
     backgroundColor: "white",
-    padding: "20px",
+    padding: "16px",
     borderRadius: "12px",
-    marginBottom: "30px",
+    marginBottom: "20px",
     boxShadow: "0 1px 3px rgba(0,0,0,0.1)"
   },
   progressLabel: {
     fontSize: "14px",
     fontWeight: "500",
-    marginBottom: "10px",
+    marginBottom: "8px",
     color: "#111827"
   },
   progressBarOuter: {
@@ -279,7 +281,7 @@ const styles = {
     backgroundColor: "#e5e7eb",
     borderRadius: "4px",
     overflow: "hidden",
-    marginBottom: "8px"
+    marginBottom: "6px"
   },
   progressBarInner: {
     height: "100%",
@@ -294,87 +296,87 @@ const styles = {
     position: "relative"
   },
   roadmapItem: {
-    marginBottom: "20px",
+    marginBottom: "14px",
     transition: "opacity 0.2s"
   },
   timelineConnector: {
     position: "absolute",
     left: "28px",
-    top: "60px",
+    top: "52px",
     width: "2px",
-    height: "60px",
+    height: "52px",
     backgroundColor: "#e5e7eb"
   },
   skillCard: {
     backgroundColor: "white",
     borderRadius: "12px",
-    padding: "20px",
+    padding: "16px",
     boxShadow: "0 1px 3px rgba(0,0,0,0.1)"
   },
   skillCardHeader: {
     display: "flex",
     justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: "15px"
+    marginBottom: "12px"
   },
   skillCardTitleArea: {
     display: "flex",
-    gap: "15px",
+    gap: "12px",
     alignItems: "flex-start"
   },
   skillNumber: {
-    width: "48px",
-    height: "48px",
+    width: "40px",
+    height: "40px",
     borderRadius: "50%",
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
     color: "white",
     fontWeight: "bold",
-    fontSize: "18px",
+    fontSize: "16px",
     flexShrink: 0
   },
   skillCardTitle: {
-    fontSize: "18px",
+    fontSize: "16px",
     fontWeight: "bold",
-    margin: "0 0 5px 0",
+    margin: "0 0 4px 0",
     color: "#111827"
   },
   skillCardMeta: {
-    fontSize: "13px",
+    fontSize: "12px",
     color: "#6b7280",
     margin: "0"
   },
   completeBtn: {
-    padding: "8px 16px",
+    padding: "6px 14px",
     border: "none",
     borderRadius: "6px",
     cursor: "pointer",
-    fontSize: "13px",
+    fontSize: "12px",
     fontWeight: "500",
     transition: "background-color 0.2s"
   },
   expandBtn: {
     width: "100%",
-    padding: "10px",
+    padding: "8px",
     backgroundColor: "#f3f4f6",
     border: "1px solid #e5e7eb",
     borderRadius: "6px",
     cursor: "pointer",
-    fontSize: "13px",
+    fontSize: "12px",
     fontWeight: "500",
     color: "#374151",
-    marginBottom: "10px"
+    marginBottom: "8px"
   },
   resourcesContainer: {
     display: "grid",
-    gap: "12px",
-    paddingTop: "10px",
+    gap: "10px",
+    paddingTop: "8px",
     borderTop: "1px solid #e5e7eb"
   },
   resourceItem: {
     backgroundColor: "#f9fafb",
-    padding: "12px",
+    padding: "10px",
     borderRadius: "6px",
     borderLeft: "3px solid #3b82f6"
   },
@@ -382,26 +384,26 @@ const styles = {
     display: "inline-block",
     backgroundColor: "#dbeafe",
     color: "#1e40af",
-    padding: "3px 8px",
+    padding: "2px 8px",
     borderRadius: "3px",
     fontSize: "11px",
     fontWeight: "600",
-    marginBottom: "5px"
+    marginBottom: "4px"
   },
   resourceTitle: {
     fontSize: "13px",
     fontWeight: "500",
-    margin: "5px 0",
+    margin: "4px 0",
     color: "#111827"
   },
   resourcePlatform: {
     fontSize: "12px",
     color: "#6b7280",
-    margin: "5px 0"
+    margin: "4px 0"
   },
   resourceLink: {
     display: "inline-block",
-    marginTop: "8px",
+    marginTop: "6px",
     color: "#3b82f6",
     textDecoration: "none",
     fontWeight: "500",
@@ -414,13 +416,13 @@ const styles = {
   },
   actionButtons: {
     display: "flex",
-    gap: "15px",
-    marginTop: "40px",
-    marginBottom: "30px"
+    gap: "12px",
+    marginTop: "24px",
+    marginBottom: "20px"
   },
   downloadBtn: {
     flex: 1,
-    padding: "12px 20px",
+    padding: "10px 20px",
     backgroundColor: "#3b82f6",
     color: "white",
     border: "none",
@@ -431,7 +433,7 @@ const styles = {
   },
   shareBtn: {
     flex: 1,
-    padding: "12px 20px",
+    padding: "10px 20px",
     backgroundColor: "#10b981",
     color: "white",
     border: "none",
@@ -442,25 +444,25 @@ const styles = {
   },
   tipsSection: {
     backgroundColor: "white",
-    padding: "20px",
+    padding: "16px",
     borderRadius: "12px",
     boxShadow: "0 1px 3px rgba(0,0,0,0.1)"
   },
   tipsTitle: {
-    fontSize: "16px",
+    fontSize: "15px",
     fontWeight: "bold",
     marginTop: "0",
     color: "#111827"
   },
   tipsList: {
     margin: "0",
-    paddingLeft: "20px",
+    paddingLeft: "18px",
     color: "#374151",
-    lineHeight: "1.8"
+    lineHeight: "1.7"
   },
   emptyContainer: {
     textAlign: "center",
-    padding: "40px",
+    padding: "32px",
     backgroundColor: "#f3f4f6",
     borderRadius: "12px"
   }

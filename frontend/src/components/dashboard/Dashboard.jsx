@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useState, useEffect } from "react";
 import { getUserProfile, getHistory } from "../../utils/api.js";
 
@@ -107,17 +109,17 @@ export default function Dashboard() {
       style={{
         maxWidth: 1000,
         margin: "0 auto",
-        padding: "80px 24px",
+        padding: "var(--space-7) 24px",
         color: "var(--text-primary)"
       }}
     >
       {/* Header */}
-      <div style={{ marginBottom: 40 }}>
+      <div style={{ marginBottom: 32 }}>
         <h1
           style={{
-            fontSize: 36,
+            fontSize: 28,
             fontWeight: 700,
-            marginBottom: 8,
+            marginBottom: 6,
             background: "linear-gradient(135deg, #6366f1, #8b5cf6)",
             backgroundClip: "text",
             WebkitBackgroundClip: "text",
@@ -135,9 +137,9 @@ export default function Dashboard() {
       <div
         style={{
           display: "grid",
-          gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
-          gap: 16,
-          marginBottom: 40
+          gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))",
+          gap: 12,
+          marginBottom: 32
         }}
       >
         {[
@@ -149,7 +151,7 @@ export default function Dashboard() {
           <div
             key={idx}
             style={{
-              padding: 20,
+              padding: 16,
               background: `rgba(99, 102, 241, 0.05)`,
               border: "1px solid rgba(99, 102, 241, 0.2)",
               borderRadius: 12,
@@ -158,10 +160,10 @@ export default function Dashboard() {
           >
             <div
               style={{
-                fontSize: 24,
+                fontSize: 20,
                 fontWeight: 700,
                 color: stat.color,
-                marginBottom: 8
+                marginBottom: 6
               }}
             >
               {stat.value}
@@ -175,8 +177,8 @@ export default function Dashboard() {
 
       {/* Analyses List */}
       <div>
-        <div style={{ marginBottom: 24 }}>
-          <h2 style={{ fontSize: 20, fontWeight: 600, marginBottom: 16 }}>
+        <div style={{ marginBottom: 20 }}>
+          <h2 style={{ fontSize: 18, fontWeight: 600, marginBottom: 12 }}>
             Analysis History
           </h2>
 
@@ -211,7 +213,7 @@ export default function Dashboard() {
         {filteredAnalyses.length === 0 ? (
           <div
             style={{
-              padding: 40,
+              padding: 24,
               textAlign: "center",
               background: "rgba(99, 102, 241, 0.05)",
               borderRadius: 12,
@@ -233,7 +235,7 @@ export default function Dashboard() {
                 <div
                   key={idx}
                   style={{
-                    padding: 20,
+                    padding: 16,
                     background: "rgba(99, 102, 241, 0.05)",
                     border: "1px solid rgba(99, 102, 241, 0.2)",
                     borderRadius: 12,
@@ -280,17 +282,17 @@ export default function Dashboard() {
                     {/* Match Score Badge */}
                     <div
                       style={{
-                        padding: "12px 20px",
+                        padding: "8px 16px",
                         background: getMatchBadgeBackground(score),
                         border: `2px solid ${getMatchBadgeColor(score)}`,
                         borderRadius: 8,
                         textAlign: "center",
-                        minWidth: 100
+                        minWidth: 84
                       }}
                     >
                       <div
                         style={{
-                          fontSize: 24,
+                          fontSize: 18,
                           fontWeight: 700,
                           color: getMatchBadgeColor(score)
                         }}
@@ -299,9 +301,9 @@ export default function Dashboard() {
                       </div>
                       <div
                         style={{
-                          fontSize: 11,
+                          fontSize: 10,
                           color: getMatchBadgeColor(score),
-                          marginTop: 4
+                          marginTop: 2
                         }}
                       >
                         {score >= 65 && "Great Match"}
@@ -312,7 +314,7 @@ export default function Dashboard() {
                   </div>
 
                   {/* Action Button */}
-                  <div style={{ marginTop: 16 }}>
+                  <div style={{ marginTop: 12 }}>
                     <button
                       onClick={() => {
                         // Navigate to view analysis with roadmap
@@ -350,8 +352,8 @@ export default function Dashboard() {
 
       {/* User Skills Section */}
       {user?.skills && user.skills.length > 0 && (
-        <div style={{ marginTop: 40 }}>
-          <h2 style={{ fontSize: 18, fontWeight: 600, marginBottom: 16 }}>
+        <div style={{ marginTop: 32 }}>
+          <h2 style={{ fontSize: 16, fontWeight: 600, marginBottom: 12 }}>
             Your Skills
           </h2>
           <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>

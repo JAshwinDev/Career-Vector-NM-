@@ -2,156 +2,47 @@ console.log("CareerVector Extension popup loaded - v" + (chrome.runtime.getManif
 
 let CONFIG = DEFAULT_CONFIG;
 
-// Fetch AI-generated quiz questions from backend (Gemini)
-async function fetchAiQuizQuestions(skills) {
-  try {
-    const response = await fetch(`${CONFIG.BACKEND_URL}/quiz/generate-from-skills`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      signal: AbortSignal.timeout(8000),
-      body: JSON.stringify({
-        resumeSkills: skills.slice(0, 5),
-        numQuestions: 5
-      })
+let els = {};
+let lastDashboardUrl = "";
+let sessionExpired = false;
+
+function sendRuntimeMessage(payload) {
+  return new Promise((resolve, reject) => {
+    chrome.runtime.sendMessage(payload, (response) => {
+      if (chrome.runtime.lastError) {
+        reject(new Error(chrome.runtime.lastError.message || "Runtime message failed"));
+        return;
+      }
+      resolve(response);
     });
-
-    if (!response.ok) {
-      throw new Error(`Server error: ${response.status}`);
-    }
-
-    const data = await response.json();
-    
-    if (data.success && Array.isArray(data.questions)) {
-      return data.questions;
-    } else if (Array.isArray(data.questions)) {
-      return data.questions;
-    } else {
-      throw new Error("Invalid response format");
-    }
-  } catch (err) {
-    console.warn("Failed to fetch AI quiz, using fallback:", err.message);
-    return generateFallbackQuizFromSkills(skills);
-  }
+  });
 }
 
-// Fallback quiz generation for when API is unavailable
-function generateFallbackQuizFromSkills(skills) {
-  const quizQuestions = [
-    {
-      question: "Which of these skills do you feel most confident with?",
-      options: skills.slice(0, 4).length > 0 ? skills.slice(0, 4) : ["JavaScript", "Python", "React", "Node.js"],
-      skill: "Self Assessment"
-    },
-    {
-      question: "Which skill would you like to improve the most?",
-      options: skills.slice(4, 8).length > 0 ? skills.slice(4, 8) : ["Machine Learning", "DevOps", "System Design", "Data Structures"],
-      skill: "Learning Goals"
-    },
-    {
-      question: "How many years of professional experience do you have?",
-      options: ["0-1 years", "1-3 years", "3-5 years", "5+ years"],
-      skill: "Experience"
-    },
-    {
-      question: "What type of roles interest you most?",
-      options: ["Backend Development", "Frontend Development", "Full Stack", "DevOps/Cloud"],
-      skill: "Role Interest"
-    },
-    {
-      question: "Are you open to learning new technologies for a job match?",
-      options: ["Yes, actively learning", "Yes, but prefer existing skills", "Maybe, depends on role", "No, prefer roles matching skills"],
-      skill: "Learning Openness"
-    }
-  ];
-
-  return quizQuestions;
+function setStatus(message, type) {
+  els.status.textContent = message || "";
+  els.status.className = "status" + (type ? " " + type : "");
 }
 
-// Show quiz modal
-function showQuizModal(skills, onComplete) {
-  const quizModal = document.getElementById("quiz-modal");
-  const quizForm = document.getElementById("quiz-form");
-  const closeBtn = document.getElementById("quiz-close-btn");
-  const cancelBtn = document.getElementById("quiz-cancel-btn");
+// ============================================================================
+// VIEW SWITCHING (single popup, two internal views)
+// ============================================================================
 
-  if (!quizModal || !quizForm) {
-    return;
+function showView(name) {
+  const home = document.getElementById("view-home");
+  const skills = document.getElementById("view-skills");
+
+  if (name === "skills") {
+    home.hidden = true;
+    skills.hidden = false;
+    renderSkillsList();
+  } else {
+    skills.hidden = true;
+    home.hidden = false;
+    renderSkillsCount();
+    refreshJobPreview();
   }
 
-  closeBtn.onclick = () => {
-    quizModal.style.display = "none";
-  };
-
-  cancelBtn.onclick = () => {
-    quizModal.style.display = "none";
-  };
-
-  // Show loading state
-  quizForm.innerHTML = `
-    <div style="text-align: center; padding: 20px;">
-      <div style="display: inline-block; width: 30px; height: 30px; border: 3px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.8s linear infinite;"></div>
-      <p style="color: var(--text-muted); margin-top: 12px;">Generating skill verification questions...</p>
-    </div>
-  `;
-  quizModal.style.display = "block";
-
-  // Fetch AI questions
-  fetchAiQuizQuestions(skills)
-    .then((questions) => {
-      // Clear previous form
-      quizForm.innerHTML = "";
-
-      // Generate form questions
-      questions.forEach((q, index) => {
-        const questionDiv = document.createElement("div");
-        questionDiv.style.marginBottom = "16px";
-        questionDiv.innerHTML = `
-          <label style="display: block; font-size: 11px; font-weight: 600; color: var(--text-soft); text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 8px;">Q${index + 1}: ${q.question}</label>
-          <div style="display: flex; flex-direction: column; gap: 6px;">
-            ${q.options.map((opt, optIdx) => `
-              <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 12px; color: var(--text);">
-                <input type="radio" name="q${index}" value="${opt}" style="cursor: pointer;" />
-                <span>${opt}</span>
-              </label>
-            `).join("")}
-          </div>
-        `;
-        quizForm.appendChild(questionDiv);
-      });
-
-      // Attach submit handler
-      const submitBtn = document.getElementById("quiz-submit-btn");
-      submitBtn.onclick = () => {
-        const formData = new FormData(quizForm);
-        const answers = Object.fromEntries(formData);
-
-        // Check if all questions answered
-        if (Object.keys(answers).length < questions.length) {
-          alert("Please answer all questions before submitting");
-          return;
-        }
-
-        quizModal.style.display = "none";
-
-        // Save quiz completion
-        chrome.storage.local.set(
-          { quizCompleted: true, quizAnswers: answers, quizTimestamp: Date.now() },
-          () => {
-            if (onComplete) {
-              onComplete();
-            }
-          }
-        );
-      };
-    })
-    .catch((err) => {
-      console.error("Quiz loading error:", err);
-      quizForm.innerHTML = `
-        <div style="text-align: center; padding: 20px; color: var(--danger);">
-          <p>Failed to load quiz questions. Please try again.</p>
-        </div>
-      `;
-    });
+  document.body.classList.toggle("skills-open", name === "skills");
 }
 
 // ============================================================================
@@ -160,50 +51,75 @@ function showQuizModal(skills, onComplete) {
 
 const AUTH_SESSION_KEYS = ["cv_authToken", "cv_authUser", "cv_authMethod"];
 
-const AUTH_ICONS = {
-  google:
-    '<svg viewBox="0 0 48 48" width="16" height="16" aria-hidden="true">' +
-    '<path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>' +
-    '<path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>' +
-    '<path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>' +
-    '<path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>' +
-    "</svg>",
-  demo:
-    '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' +
-    '<path d="M21.42 10.922a1 1 0 0 0-.019-1.838L12.83 5.18a2 2 0 0 0-1.66 0L2.6 9.08a1 1 0 0 0 0 1.832l8.57 3.908a2 2 0 0 0 1.66 0z"/>' +
-    '<path d="M22 10v6"/><path d="M6 12.5V16a6 3 0 0 0 12 0v-3.5"/></svg>'
-};
-
-let authEls = {};
-
 function setAuthStatus(message, type) {
-  authEls.status.textContent = message || "";
-  authEls.status.className = "auth-status" + (type ? " " + type : "");
+  els.authStatus.textContent = message || "";
+  els.authStatus.className = "auth-status" + (type ? " " + type : "");
 }
 
 function renderAuthLoggedOut() {
-  authEls.buttons.hidden = false;
-  authEls.session.hidden = true;
+  els.authButtons.hidden = false;
+  els.authSession.hidden = true;
+  hideResult();
 }
 
 function renderAuthLoggedIn(session) {
-  authEls.buttons.hidden = true;
-  authEls.session.hidden = false;
+  els.authButtons.hidden = true;
+  els.authSession.hidden = false;
 
-  authEls.sessionIcon.innerHTML = AUTH_ICONS[session.method] || AUTH_ICONS.google;
   const user = session.user || {};
   const displayName = user.name || user.email || "Logged in";
-  authEls.sessionName.textContent = displayName;
+  const email = user.email || "";
+
+  els.authSessionName.textContent = displayName;
+  if (els.authSessionEmail) els.authSessionEmail.textContent = email;
+
+  if (els.authSessionAvatar) {
+    if (user.profilePicture) {
+      els.authSessionAvatar.textContent = "";
+      els.authSessionAvatar.style.backgroundImage = `url("${user.profilePicture}")`;
+      els.authSessionAvatar.classList.add("has-image");
+    } else {
+      const initials = String(displayName)
+        .split(/\s+/)
+        .map((part) => part.charAt(0))
+        .join("")
+        .slice(0, 2)
+        .toUpperCase();
+      els.authSessionAvatar.textContent = initials;
+      els.authSessionAvatar.style.backgroundImage = "";
+      els.authSessionAvatar.classList.remove("has-image");
+    }
+  }
 }
 
 function getStoredSession() {
   return new Promise((resolve) => {
     chrome.storage.local.get(AUTH_SESSION_KEYS, (items) => {
-      resolve({
-        token: items.cv_authToken || "",
-        user: items.cv_authUser || null,
-        method: items.cv_authMethod || ""
-      });
+      if (items.cv_authToken) {
+        resolve({
+          token: items.cv_authToken,
+          user: items.cv_authUser || null,
+          method: items.cv_authMethod || ""
+        });
+        return;
+      }
+
+      // No cached token: ask the background to pull the shared session from
+      // the web app (localStorage on localhost:3000), so the extension picks
+      // up the same account the user logged into on the website.
+      sendRuntimeMessage({ type: "GET_SESSION" })
+        .then((res) => {
+          if (res && res.success && res.token) {
+            resolve({
+              token: res.token,
+              user: res.user || null,
+              method: res.method || "google"
+            });
+          } else {
+            resolve({ token: "", user: null, method: "" });
+          }
+        })
+        .catch(() => resolve({ token: "", user: null, method: "" }));
     });
   });
 }
@@ -225,6 +141,45 @@ function clearStoredSession() {
   return new Promise((resolve) => {
     chrome.storage.local.remove(AUTH_SESSION_KEYS, resolve);
   });
+}
+
+// Validate the cached token against the backend (the single source of truth).
+// If the token was revoked or expired, discard the cached session so the popup
+// never trusts stale login data.
+async function validateSession() {
+  const session = await getStoredSession();
+  if (!session.token) return session;
+
+  sessionExpired = false;
+
+  try {
+    const response = await fetch(`${CONFIG.BACKEND_URL}/auth/user/me`, {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${session.token}`
+      }
+    });
+
+    if (response.status === 401) {
+      sessionExpired = true;
+      await clearStoredSession();
+      renderAuthLoggedOut();
+      setAuthStatus("Session expired. Please login again.", "error");
+      return { token: "", user: null, method: "" };
+    }
+
+    if (!response.ok) {
+      return session;
+    }
+
+    const user = await response.json();
+    const refreshed = { ...session, user: user || null };
+    await setStoredSession(refreshed);
+    return refreshed;
+  } catch (err) {
+    console.warn("Failed to validate session:", err.message);
+    return session;
+  }
 }
 
 async function apiPost(path, body) {
@@ -257,6 +212,7 @@ async function handleAuthDemo() {
     renderAuthLoggedIn(session);
     setAuthStatus("", "");
     showDemoNotice();
+    refreshJobPreview();
   } catch (err) {
     setAuthStatus(err.message, "error");
   }
@@ -268,104 +224,64 @@ function showDemoNotice() {
   banner.style.cssText =
     "margin-top: 8px; padding: 10px 12px; border-radius: 10px; font-size: 11px; line-height: 1.5; " +
     "background: rgba(227, 74, 48, 0.08); border: 1px solid var(--border); color: var(--text-muted); text-align: center;";
-  authEls.status.insertAdjacentElement("afterend", banner);
+  els.authStatus.insertAdjacentElement("afterend", banner);
   setTimeout(() => banner.remove(), 5000);
 }
 
-function generateAuthNonce() {
-  const bytes = new Uint8Array(16);
-  crypto.getRandomValues(bytes);
-  return Array.from(bytes, (byte) => byte.toString(16).padStart(2, "0")).join("");
-}
-
+// Google OAuth runs in the background service worker so it survives the popup
+// closing while the Google sign-in window is open.
 async function handleAuthGoogle() {
-  const clientId = CONFIG.GOOGLE_CLIENT_ID;
-
-  if (!clientId) {
-    setAuthStatus("Configure your Google OAuth Client ID in Settings first.", "error");
-    return;
-  }
-
-  const redirectUri = chrome.identity.getRedirectURL();
-  const params = new URLSearchParams({
-    client_id: clientId,
-    response_type: "id_token",
-    scope: "openid email profile",
-    redirect_uri: redirectUri,
-    nonce: generateAuthNonce(),
-    prompt: "select_account"
-  });
-
   setAuthStatus("Signing in…", "loading");
 
-  let responseUrl;
   try {
-    responseUrl = await new Promise((resolve, reject) => {
-      chrome.identity.launchWebAuthFlow(
-        { url: `https://accounts.google.com/o/oauth2/v2/auth?${params.toString()}`, interactive: true },
-        (redirectUrl) => {
-          if (chrome.runtime.lastError) {
-            reject(new Error(chrome.runtime.lastError.message || "Google sign-in cancelled."));
-            return;
-          }
-          if (!redirectUrl) {
-            reject(new Error("Google sign-in returned no response."));
-            return;
-          }
-          resolve(redirectUrl);
-        }
-      );
-    });
-  } catch (err) {
-    setAuthStatus(err.message, "error");
-    return;
-  }
+    const data = await sendRuntimeMessage({ type: "GOOGLE_AUTH" });
 
-  const idToken = new URLSearchParams(new URL(responseUrl).hash.slice(1)).get("id_token");
-  if (!idToken) {
-    setAuthStatus("No ID token returned from Google.", "error");
-    return;
-  }
+    if (!data || !data.success) {
+      throw new Error((data && data.error) || "Google sign-in failed.");
+    }
 
-  try {
-    const data = await apiPost("/auth/google", { idToken });
     const session = { token: data.token, user: data.user, method: "google" };
+
     await setStoredSession(session);
     renderAuthLoggedIn(session);
     setAuthStatus("", "");
+    refreshJobPreview();
   } catch (err) {
     setAuthStatus(err.message, "error");
   }
 }
 
 async function handleAuthLogout() {
+  // Revoke the token on the backend, clear the extension cache, and sign the
+  // website out too (shared single session).
+  try {
+    await sendRuntimeMessage({ type: "EXT_LOGOUT" });
+  } catch (err) {
+    // Even if the background handshake fails, clear the local session below.
+  }
   await clearStoredSession();
   renderAuthLoggedOut();
   setAuthStatus("", "");
+  refreshJobPreview();
 }
 
 function initAuth() {
-  authEls = {
-    buttons: document.getElementById("authButtons"),
-    session: document.getElementById("authSession"),
-    sessionIcon: document.getElementById("authSessionIcon"),
-    sessionName: document.getElementById("authSessionName"),
-    status: document.getElementById("authStatus"),
-    googleBtn: document.getElementById("authGoogleBtn"),
-    demoBtn: document.getElementById("authDemoBtn"),
-    logoutBtn: document.getElementById("authLogoutBtn")
-  };
-
-  authEls.googleBtn.addEventListener("click", handleAuthGoogle);
-  authEls.demoBtn.addEventListener("click", handleAuthDemo);
-  authEls.logoutBtn.addEventListener("click", (event) => {
+  els.authGoogleBtn.addEventListener("click", handleAuthGoogle);
+  els.authDemoBtn.addEventListener("click", handleAuthDemo);
+  els.authLogoutBtn.addEventListener("click", (event) => {
     event.preventDefault();
     handleAuthLogout();
   });
 
   getStoredSession().then((session) => {
     if (session.token) {
-      renderAuthLoggedIn(session);
+      validateSession().then((refreshed) => {
+        if (refreshed.token) {
+          renderAuthLoggedIn(refreshed);
+        } else {
+          renderAuthLoggedOut();
+        }
+      });
     } else {
       renderAuthLoggedOut();
     }
@@ -373,181 +289,438 @@ function initAuth() {
 }
 
 // ============================================================================
-// MAIN INITIALIZATION - ALL CODE RUNS INSIDE DOMContentLoaded
+// SKILLS MODULE
+// ============================================================================
+
+function renderSkillsCount() {
+  chrome.storage.local.get(["userSkills"], (items) => {
+    const skills = Array.isArray(items.userSkills) ? items.userSkills : [];
+    if (els.skillsCount) els.skillsCount.textContent = String(skills.length);
+  });
+}
+
+function renderSkillsList() {
+  chrome.storage.local.get(["userSkills"], (items) => {
+    const skills = Array.isArray(items.userSkills) ? items.userSkills : [];
+    renderSkillsCount();
+
+    els.skillsListBody.innerHTML = "";
+    if (!skills.length) {
+      els.skillsListBody.innerHTML =
+        '<div class="skills-list-empty">No skills yet. Add a few above or upload your resume.</div>';
+      return;
+    }
+
+    skills.forEach((skill, index) => {
+      const chip = document.createElement("div");
+      chip.className = "skill-chip";
+
+      const label = document.createElement("span");
+      label.className = "skill-chip-label";
+      label.textContent = skill;
+
+      const removeBtn = document.createElement("button");
+      removeBtn.className = "skill-chip-remove";
+      removeBtn.type = "button";
+      removeBtn.setAttribute("aria-label", `Remove ${skill}`);
+      removeBtn.textContent = "×";
+      removeBtn.addEventListener("click", () => {
+        const next = skills.slice();
+        next.splice(index, 1);
+        chrome.storage.local.set({ userSkills: next }, () => {
+          renderSkillsList();
+        });
+      });
+
+      chip.appendChild(label);
+      chip.appendChild(removeBtn);
+      els.skillsListBody.appendChild(chip);
+    });
+  });
+}
+
+function parseSkillList(value) {
+  const seen = new Set();
+  const result = [];
+  String(value || "")
+    .split(",")
+    .map((skill) => skill.trim())
+    .filter(Boolean)
+    .forEach((skill) => {
+      const key = skill.toLowerCase();
+      if (!seen.has(key)) {
+        seen.add(key);
+        result.push(skill);
+      }
+    });
+  return result;
+}
+
+function saveSkills() {
+  const typed = parseSkillList(els.manualSkillsInput.value || "");
+  if (!typed.length) {
+    setStatus("Enter at least one skill, e.g. React, Node.js", "error");
+    return;
+  }
+
+  chrome.storage.local.get(["userSkills"], (items) => {
+    const existing = Array.isArray(items.userSkills) ? items.userSkills : [];
+    const seen = new Set(existing.map((skill) => skill.toLowerCase()));
+    const merged = existing.slice();
+    typed.forEach((skill) => {
+      if (!seen.has(skill.toLowerCase())) {
+        seen.add(skill.toLowerCase());
+        merged.push(skill);
+      }
+    });
+
+    chrome.storage.local.set({ userSkills: merged }, () => {
+      els.manualSkillsInput.value = "";
+      setStatus(`✓ Saved ${merged.length} skill${merged.length === 1 ? "" : "s"}.`, "success");
+      renderSkillsList();
+    });
+  });
+}
+
+// ============================================================================
+// RESUME UPLOAD (from the Update Skills view)
+// ============================================================================
+
+function setUploadStatus(message, type) {
+  els.uploadStatus.textContent = message || "";
+  els.uploadStatus.className = "upload-status" + (type ? " " + type : "");
+}
+
+function readFileAsBase64(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(String(reader.result || ""));
+    reader.onerror = () => reject(new Error("Could not read the file."));
+    reader.readAsDataURL(file);
+  });
+}
+
+async function handleUploadResume() {
+  const file = els.resumeFile.files && els.resumeFile.files[0];
+  if (!file) {
+    setUploadStatus("Choose a PDF/DOC/DOCX file first.", "error");
+    return;
+  }
+
+  const session = await validateSession();
+  if (!session.token) {
+    setUploadStatus("Sign in to upload a resume.", "error");
+    return;
+  }
+
+  setUploadStatus("Uploading and extracting skills…", "loading");
+
+  try {
+    const fileData = await readFileAsBase64(file);
+
+    const response = await fetch(`${CONFIG.BACKEND_URL}/upload`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${session.token}`
+      },
+      body: JSON.stringify({ fileData, fileName: file.name })
+    });
+
+    let data = {};
+    try {
+      data = await response.json();
+    } catch {
+      data = {};
+    }
+
+    if (!response.ok) {
+      throw new Error(data.error || "Resume upload failed.");
+    }
+
+    const uploadedSkills = Array.isArray(data.skills) ? data.skills : [];
+    const existing = await new Promise((resolve) => {
+      chrome.storage.local.get(["userSkills"], (items) =>
+        resolve(Array.isArray(items.userSkills) ? items.userSkills : [])
+      );
+    });
+
+    const seen = new Set(existing.map((skill) => skill.toLowerCase()));
+    const merged = existing.slice();
+    uploadedSkills.forEach((skill) => {
+      const key = String(skill).toLowerCase();
+      if (key && !seen.has(key)) {
+        seen.add(key);
+        merged.push(skill);
+      }
+    });
+
+    await new Promise((resolve) =>
+      chrome.storage.local.set(
+        {
+          userSkills: merged,
+          resumeProfileId: data.resumeProfileId || data.profileId || ""
+        },
+        resolve
+      )
+    );
+
+    renderSkillsList();
+    setUploadStatus(
+      `✓ Extracted ${uploadedSkills.length} skill${uploadedSkills.length === 1 ? "" : "s"} from your resume.`,
+      "success"
+    );
+  } catch (err) {
+    setUploadStatus(err.message, "error");
+  }
+}
+
+// ============================================================================
+// JOB DETECTION + ANALYSIS
+// ============================================================================
+
+function setJobStatus(message, detected) {
+  els.jobStatus.textContent = message;
+  els.jobStatus.className = "job-card-status" + (detected ? " job-detected" : "");
+}
+
+async function refreshJobPreview() {
+  setJobStatus("Checking current tab…");
+  els.jobDetail.hidden = true;
+
+  try {
+    const res = await sendRuntimeMessage({ type: "GET_JOB_PREVIEW" });
+
+    if (res && res.success && res.isJobPage) {
+      els.jobDetail.hidden = false;
+      const label = [res.jobTitle, res.company].filter(Boolean).join(" — ");
+      els.jobDetail.textContent = label || "Job details detected on this page";
+      setJobStatus("LinkedIn job detected", true);
+    } else if (res && res.error) {
+      setJobStatus(res.error, false);
+    } else {
+      setJobStatus("Open a LinkedIn job page to analyze.", false);
+    }
+  } catch (err) {
+    setJobStatus("Open a LinkedIn job page to analyze.", false);
+  }
+}
+
+function hideResult() {
+  els.resultCard.hidden = true;
+  lastDashboardUrl = "";
+}
+
+function normalizeSkillList(value) {
+  return (Array.isArray(value) ? value : [])
+    .map((item) => (typeof item === "string" ? item : item && item.skill))
+    .filter(Boolean);
+}
+
+function renderTags(container, items, emptyText) {
+  container.innerHTML = "";
+  if (!items.length) {
+    const tag = document.createElement("span");
+    tag.className = "result-tag muted";
+    tag.textContent = emptyText;
+    container.appendChild(tag);
+    return;
+  }
+  items.slice(0, 12).forEach((item) => {
+    const tag = document.createElement("span");
+    tag.className = "result-tag";
+    tag.textContent = item;
+    container.appendChild(tag);
+  });
+}
+
+function renderResult(res) {
+  const analysis = res.analysis || {};
+  const score = Number(analysis.matchScore ?? analysis.compatibility_score ?? 0);
+
+  els.resultScore.textContent = `${score}%`;
+  els.resultScore.style.color = score >= 65 ? "#3b7a60" : score >= 35 ? "#c58b2d" : "#b24442";
+  els.resultRecommendation.textContent = analysis.recommendation || "Analysis ready";
+  els.resultJob.textContent = [analysis.jobTitle, analysis.company].filter(Boolean).join(" · ");
+
+  renderTags(els.resultMatched, normalizeSkillList(analysis.matchedSkills || analysis.matched_skills), "No direct matches yet");
+  renderTags(els.resultMissing, normalizeSkillList(analysis.missingSkills || analysis.missing_skills), "Strong overall fit");
+
+  lastDashboardUrl = res.dashboardUrl || `${CONFIG.FRONTEND_URL}/dashboard?tab=history`;
+  els.resultCard.hidden = false;
+}
+
+async function handleAnalyze() {
+  const session = await validateSession();
+
+  if (!session.token) {
+    setStatus(
+      sessionExpired ? "Session expired. Please login again." : "Sign in to analyze jobs.",
+      "error"
+    );
+    return;
+  }
+
+  const items = await new Promise((resolve) => {
+    chrome.storage.local.get(["userSkills"], (items) => resolve(items));
+  });
+  const skills = Array.isArray(items.userSkills) ? items.userSkills : [];
+
+  if (!skills.length) {
+    setStatus("Add skills first, then analyze.", "error");
+    return;
+  }
+
+  hideResult();
+  setStatus("Analyzing job…", "loading");
+
+  try {
+    const res = await sendRuntimeMessage({ type: "ANALYZE_CURRENT_JOB" });
+
+    if (!res || !res.success) {
+      throw new Error((res && res.error) || "Analysis failed.");
+    }
+
+    renderResult(res);
+    setStatus("", "");
+  } catch (err) {
+    setStatus(err.message, "error");
+  }
+}
+
+// ============================================================================
+// SYNC
+// ============================================================================
+
+async function handleSync() {
+  setStatus("Syncing…", "loading");
+
+  try {
+    const session = await validateSession();
+
+    if (!session.token) {
+      setStatus(
+        sessionExpired ? "Session expired. Please login again." : "Sign in to sync your skills.",
+        "error"
+      );
+      return;
+    }
+
+    renderAuthLoggedIn(session);
+
+    const user = session.user || {};
+    const extracted = (Array.isArray(user.resumeProfiles) ? user.resumeProfiles : [])
+      .flatMap((profile) => (Array.isArray(profile.extractedSkills) ? profile.extractedSkills : []));
+
+    if (extracted.length) {
+      const existing = await new Promise((resolve) => {
+        chrome.storage.local.get(["userSkills"], (items) =>
+          resolve(Array.isArray(items.userSkills) ? items.userSkills : [])
+        );
+      });
+      const seen = new Set(existing.map((skill) => skill.toLowerCase()));
+      const merged = existing.slice();
+      extracted.forEach((skill) => {
+        const key = String(skill).toLowerCase();
+        if (key && !seen.has(key)) {
+          seen.add(key);
+          merged.push(skill);
+        }
+      });
+      await new Promise((resolve) => chrome.storage.local.set({ userSkills: merged }, resolve));
+      renderSkillsList();
+    }
+
+    await refreshJobPreview();
+    setStatus("✓ Synced.", "success");
+  } catch (err) {
+    setStatus(err.message, "error");
+  }
+}
+
+// ============================================================================
+// OPEN DASHBOARD (with token hand-off to the website)
+// ============================================================================
+
+function openDashboard(url) {
+  if (!url) return;
+
+  getStoredSession().then((session) => {
+    let targetUrl = url;
+    if (session.token) {
+      const parsed = new URL(targetUrl);
+      parsed.searchParams.set("token", session.token);
+      targetUrl = parsed.toString();
+    }
+
+    chrome.tabs.create({ url: targetUrl, active: true });
+  });
+}
+
+// ============================================================================
+// MAIN INITIALIZATION
 // ============================================================================
 document.addEventListener("DOMContentLoaded", async () => {
   try {
     CONFIG = await getConfig();
 
+    els = {
+      authButtons: document.getElementById("authButtons"),
+      authSession: document.getElementById("authSession"),
+      authSessionAvatar: document.getElementById("authSessionAvatar"),
+      authSessionName: document.getElementById("authSessionName"),
+      authSessionEmail: document.getElementById("authSessionEmail"),
+      authStatus: document.getElementById("authStatus"),
+      authGoogleBtn: document.getElementById("authGoogleBtn"),
+      authDemoBtn: document.getElementById("authDemoBtn"),
+      authLogoutBtn: document.getElementById("authLogoutBtn"),
+      jobStatus: document.getElementById("jobStatus"),
+      jobDetail: document.getElementById("jobDetail"),
+      analyzeJobBtn: document.getElementById("analyzeJobBtn"),
+      syncBtn: document.getElementById("syncBtn"),
+      skillsCount: document.getElementById("skillsCount"),
+      manualSkillsInput: document.getElementById("manualSkills"),
+      saveSkillsBtn: document.getElementById("saveSkillsBtn"),
+      skillsListBody: document.getElementById("skillsListBody"),
+      resumeFile: document.getElementById("resumeFile"),
+      uploadResumeBtn: document.getElementById("uploadResumeBtn"),
+      uploadStatus: document.getElementById("uploadStatus"),
+      resultCard: document.getElementById("resultCard"),
+      resultScore: document.getElementById("resultScore"),
+      resultRecommendation: document.getElementById("resultRecommendation"),
+      resultJob: document.getElementById("resultJob"),
+      resultMatched: document.getElementById("resultMatched"),
+      resultMissing: document.getElementById("resultMissing"),
+      openResultDashboardBtn: document.getElementById("openResultDashboardBtn"),
+      status: document.getElementById("app-status")
+    };
+
     initAuth();
+    renderSkillsCount();
 
-    // DOM elements
-    const uploadStatus = document.getElementById("upload-status");
-    const uploadBtn = document.getElementById("uploadBtn");
-    const fileInput = document.getElementById("resumeFile");
-    const dropzone = document.getElementById("dropzone");
-    const tabs = document.querySelectorAll(".tab");
-    const panels = document.querySelectorAll(".panel");
-    const analyzeJobBtn = document.getElementById("analyzeJobBtn");
-    const analysisStatus = document.getElementById("analysis-status");
-
-    if (!uploadBtn || !fileInput || !dropzone || !uploadStatus) {
-      console.error("CareerVector: Required DOM elements not found");
-      return;
-    }
-
-    // ────────────────────────────────────────────
-    // TAB SWITCHING
-    // ────────────────────────────────────────────
-    tabs.forEach(tab => {
-      tab.addEventListener("click", () => {
-        const tabName = tab.getAttribute("data-tab");
-        
-        tabs.forEach(t => t.classList.remove("active"));
-        panels.forEach(p => p.classList.remove("active"));
-        
-        tab.classList.add("active");
-        document.getElementById(`panel-${tabName}`).classList.add("active");
-      });
+    document.getElementById("openDashboardBtn").addEventListener("click", (event) => {
+      event.preventDefault();
+      openDashboard(`${CONFIG.FRONTEND_URL}/dashboard`);
     });
 
-    function setStatus(element, type, message) {
-      if (element) {
-        element.className = `status ${type}`;
-        element.textContent = message;
-      }
-    }
+    document.getElementById("updateSkillsBtn").addEventListener("click", () => showView("skills"));
+    document.getElementById("mySkillsRow").addEventListener("click", () => showView("skills"));
+    document.getElementById("backBtn").addEventListener("click", () => showView("home"));
+    document.getElementById("saveSkillsDoneBtn").addEventListener("click", () => showView("home"));
 
-    function handleFile(file) {
-      if (!file) return;
-      if (file.type !== "application/pdf") {
-        setStatus(uploadStatus, "error", "Please upload a PDF file.");
-        return;
-      }
-      if (file.size > 10 * 1024 * 1024) {
-        setStatus(uploadStatus, "error", "File too large. Max 10MB.");
-        return;
-      }
-
-      dropzone.classList.add("success");
-      const icon = dropzone.querySelector(".dropzone-icon");
-      const title = dropzone.querySelector(".dropzone-title");
-      const sub = dropzone.querySelector(".dropzone-sub");
-      
-      if (icon) icon.textContent = "✓";
-      if (title) title.textContent = file.name;
-      if (sub) sub.textContent = `${(file.size / 1024).toFixed(0)} KB - Click to change`;
-      
-      uploadBtn.disabled = false;
-      uploadBtn._file = file;
-    }
-
-    function isRestrictedUrl(url) {
-      return !url ||
-        url.startsWith("chrome://") ||
-        url.startsWith("chrome-extension://") ||
-        url.startsWith("edge://") ||
-        url.startsWith("about:");
-    }
-
-    function isMissingReceiverError(message) {
-      return message.includes("Could not establish connection") ||
-        message.includes("Receiving end does not exist");
-    }
-
-    function queryActiveTab() {
-      return new Promise((resolve, reject) => {
-        chrome.tabs.query({ active: true, currentWindow: true }, (tabList) => {
-          if (chrome.runtime.lastError) {
-            reject(new Error(chrome.runtime.lastError.message));
-            return;
-          }
-
-          if (!tabList[0]?.id) {
-            reject(new Error("No active tab found"));
-            return;
-          }
-
-          resolve(tabList[0]);
-        });
-      });
-    }
-
-    function sendMessageToTab(tabId, payload) {
-      return new Promise((resolve, reject) => {
-        chrome.tabs.sendMessage(tabId, payload, (response) => {
-          if (chrome.runtime.lastError) {
-            reject(new Error(chrome.runtime.lastError.message || "Message failed"));
-            return;
-          }
-
-          resolve(response);
-        });
-      });
-    }
-
-    function injectContentScript(tabId) {
-      return new Promise((resolve, reject) => {
-        chrome.scripting.executeScript(
-          {
-            target: { tabId },
-            files: ["src/config.js", "src/content.js"]
-          },
-          () => {
-            if (chrome.runtime.lastError) {
-              reject(new Error(chrome.runtime.lastError.message || "Script injection failed"));
-              return;
-            }
-
-            resolve();
-          }
-        );
-      });
-    }
-
-    async function requestJobExtraction(tabId) {
-      try {
-        return await sendMessageToTab(tabId, { type: "ANALYZE_JOB" });
-      } catch (error) {
-        if (!isMissingReceiverError(error.message || "")) {
-          throw error;
-        }
-
-        // Content script not injected, inject it and retry
-        console.log("Injecting content script...");
-        await injectContentScript(tabId);
-        
-        // Give the script a moment to initialize
-        await new Promise(resolve => setTimeout(resolve, 500));
-        
-        return sendMessageToTab(tabId, { type: "ANALYZE_JOB" });
-      }
-    }
-
-    function sendRuntimeMessage(payload) {
-      return new Promise((resolve, reject) => {
-        chrome.runtime.sendMessage(payload, (response) => {
-          if (chrome.runtime.lastError) {
-            reject(new Error(chrome.runtime.lastError.message || "Runtime message failed"));
-            return;
-          }
-
-          resolve(response);
-        });
-      });
-    }
-
-    function openDashboard(url) {
-      if (!url) return;
-      chrome.tabs.create({ url, active: true });
-    }
-
-    const dashboardButtons = document.querySelectorAll("#openDashboardBtn");
-    dashboardButtons.forEach((button) => {
-      button.addEventListener("click", (event) => {
+    els.analyzeJobBtn.addEventListener("click", handleAnalyze);
+    els.syncBtn.addEventListener("click", handleSync);
+    els.saveSkillsBtn.addEventListener("click", saveSkills);
+    els.manualSkillsInput.addEventListener("keydown", (event) => {
+      if (event.key === "Enter") {
         event.preventDefault();
-        openDashboard(`${CONFIG.FRONTEND_URL}/dashboard`);
-      });
+        saveSkills();
+      }
+    });
+    els.uploadResumeBtn.addEventListener("click", () => els.resumeFile.click());
+    els.resumeFile.addEventListener("change", handleUploadResume);
+    els.openResultDashboardBtn.addEventListener("click", () => {
+      openDashboard(lastDashboardUrl);
     });
 
     const versionBadge = document.getElementById("versionBadge");
@@ -555,181 +728,8 @@ document.addEventListener("DOMContentLoaded", async () => {
       versionBadge.textContent = `v${chrome.runtime.getManifest().version}`;
     }
 
-    // ────────────────────────────────────────────
-    // DROPZONE EVENTS
-    // ────────────────────────────────────────────
-    dropzone.addEventListener("click", () => fileInput.click());
-    dropzone.addEventListener("dragover", (event) => {
-      event.preventDefault();
-      dropzone.classList.add("drag");
-    });
-    dropzone.addEventListener("dragleave", () => dropzone.classList.remove("drag"));
-    dropzone.addEventListener("drop", (event) => {
-      event.preventDefault();
-      dropzone.classList.remove("drag");
-      handleFile(event.dataTransfer.files[0]);
-    });
-
-    fileInput.addEventListener("change", () => handleFile(fileInput.files[0]));
-
-    // ────────────────────────────────────────────
-    // UPLOAD BUTTON
-    // ────────────────────────────────────────────
-    uploadBtn.addEventListener("click", () => {
-      const file = uploadBtn._file;
-      if (!file) {
-        setStatus(uploadStatus, "error", "Select a PDF first.");
-        return;
-      }
-
-      setStatus(uploadStatus, "loading", "Uploading resume to MongoDB...");
-      uploadBtn.disabled = true;
-
-      const reader = new FileReader();
-      reader.onload = () => {
-        fetch(`${CONFIG.BACKEND_URL}/upload`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            fileData: reader.result,
-            fileName: file.name,
-            additionalSkills: ""
-          })
-        })
-          .then((response) => {
-            if (!response.ok) {
-              throw new Error(`Server error: ${response.status}`);
-            }
-            return response.json();
-          })
-          .then((data) => {
-            uploadBtn.disabled = false;
-
-            if (data.error) {
-              setStatus(uploadStatus, "error", data.error);
-              return;
-            }
-
-            if (!data.skills) {
-              setStatus(uploadStatus, "error", "No skills extracted from resume");
-              return;
-            }
-
-            chrome.storage.local.set(
-              {
-                userSkills: data.skills || [],
-                resumeProfileId: data.profileId || data.resumeProfileId || "",
-                resumeUploaded: true,
-                uploadTimestamp: Date.now(),
-                quizCompleted: false  // Reset quiz on new upload
-              },
-              () => {
-                setStatus(uploadStatus, "success", `✓ Resume saved! Starting quiz...`);
-                
-                // Show quiz after upload
-                showQuizModal(data.skills || [], () => {
-                  setTimeout(() => {
-                    setStatus(uploadStatus, "success", `✓ Quiz completed! Resume ready for analysis.`);
-                    dropzone.classList.remove("success");
-                    fileInput.value = "";
-                    uploadBtn._file = null;
-                  }, 800);
-                });
-              }
-            );
-          })
-          .catch((err) => {
-            uploadBtn.disabled = false;
-            console.error("Upload error:", err);
-            setStatus(uploadStatus, "error", `Upload failed: ${err.message}`);
-          });
-      };
-      reader.readAsDataURL(file);
-    });
-
-    // ────────────────────────────────────────────
-    // ANALYZE JOB BUTTON - WITH QUIZ FLOW
-    // ────────────────────────────────────────────
-    if (analyzeJobBtn) {
-      analyzeJobBtn.addEventListener("click", async () => {
-        // Check if quiz is completed
-        chrome.storage.local.get(["quizCompleted", "userSkills"], async (data) => {
-          if (!data.quizCompleted) {
-            // Show quiz first
-            const skills = data.userSkills || ["JavaScript", "Python", "React", "Node.js"];
-            showQuizModal(skills, () => {
-              // After quiz, proceed with analysis
-              performJobAnalysis();
-            });
-          } else {
-            // Quiz already completed, proceed with analysis
-            performJobAnalysis();
-          }
-        });
-
-        async function performJobAnalysis() {
-          setStatus(analysisStatus, "loading", "Extracting job details...");
-
-          try {
-            const currentTab = await queryActiveTab();
-            const tabUrl = currentTab.url || "";
-
-            if (isRestrictedUrl(tabUrl)) {
-              setStatus(analysisStatus, "error", "Click extension icon on a web page");
-              return;
-            }
-
-            if (!tabUrl.includes("linkedin.com")) {
-              setStatus(analysisStatus, "error", "Only works on LinkedIn job pages");
-              return;
-            }
-
-            const response = await requestJobExtraction(currentTab.id);
-
-            if (!response) {
-              setStatus(analysisStatus, "error", "No response from page - please wait for page to load");
-              return;
-            }
-
-            if (response.error) {
-              setStatus(analysisStatus, "error", response.error);
-              return;
-            }
-
-            if (!response.success || !response.jobData) {
-              setStatus(analysisStatus, "error", "Could not extract job details. Make sure you're viewing the job description panel.");
-              return;
-            }
-
-            setStatus(analysisStatus, "loading", "Analyzing match...");
-            const result = await sendRuntimeMessage({ type: "ANALYZE_JOB", jobData: response.jobData });
-
-            if (result && result.success) {
-              setStatus(analysisStatus, "success", "Analysis complete! Opening dashboard...");
-              openDashboard(result.dashboardUrl || `${CONFIG.FRONTEND_URL}/dashboard?tab=history`);
-              setTimeout(() => window.close(), 1200);
-              return;
-            }
-
-            setStatus(analysisStatus, "error", result?.error || "Analysis failed");
-          } catch (error) {
-            const errorMsg = error.message || "";
-            console.error("Message error:", errorMsg);
-
-            if (isMissingReceiverError(errorMsg)) {
-              setStatus(analysisStatus, "error", "Extension not loaded on this page. Refresh LinkedIn job page and try again.");
-            } else {
-              setStatus(analysisStatus, "error", "Connection error - refresh page and try again");
-            }
-          }
-        }
-      });
-    }
-
+    refreshJobPreview();
   } catch (error) {
     console.error("CareerVector popup error:", error);
   }
 });
-// ============================================================================
-// END OF INITIALIZATION - ALL CODE ABOVE IS INSIDE DOMContentLoaded LISTENER
-// ============================================================================

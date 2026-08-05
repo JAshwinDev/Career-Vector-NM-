@@ -9,104 +9,146 @@
 
 <body>
   <div class="popup-shell">
-    <header class="header">
-      <div class="brand">
-        <div class="logo"><img src="../assets/popup-logo.png" alt="CareerVector" /></div>
-        <div class="brand-copy">
-          <div class="header-title">CareerVector</div>
-          <div class="header-sub">Resume + LinkedIn job match engine</div>
-        </div>
-      </div>
-      <div class="header-actions">
-        <button class="pill" id="openDashboardBtn">Open dashboard</button>
-        <span class="header-badge" id="versionBadge">v1.0</span>
-      </div>
-    </header>
 
-    <div class="tabs">
-      <button class="tab active" data-tab="analysis">Analysis</button>
-      <button class="tab" data-tab="upload">Upload</button>
-    </div>
-
-    <main class="content">
-      <section class="panel active" id="panel-analysis">
-        <div class="hero-card">
-          <div>
-            <div class="hero-pretitle">LinkedIn match</div>
-            <h1>Analyze job fit in one click</h1>
-            <p>Open any LinkedIn job listing, then use this extension to compare the role against your uploaded resume and skill profile.</p>
+    <!-- ============================================================
+         HOME VIEW
+    ============================================================= -->
+    <div class="view" id="view-home">
+      <header class="header">
+        <div class="brand">
+          <div class="logo"><img src="../assets/popup-logo.png" alt="CareerVector" /></div>
+          <div class="brand-copy">
+            <div class="header-title">CareerVector</div>
+            <div class="header-sub">Resume + LinkedIn job match engine</div>
           </div>
-          <button class="btn btn-primary" id="analyzeJobBtn">Analyze current job</button>
+        </div>
+        <div class="header-actions">
+          <span class="header-badge" id="versionBadge">v1.0</span>
+        </div>
+      </header>
+
+      <section class="auth-bar">
+        <div class="auth-buttons" id="authButtons">
+          <button class="auth-btn auth-btn-google" data-method="google" id="authGoogleBtn" type="button">
+            <span class="auth-btn-icon" aria-hidden="true">
+              <svg viewBox="0 0 48 48" width="18" height="18">
+                <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
+                <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
+                <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
+                <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
+              </svg>
+            </span>
+            <span class="auth-btn-label">Google</span>
+          </button>
+          <button class="auth-btn" data-method="demo" id="authDemoBtn" type="button">
+            <span class="auth-btn-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21.42 10.922a1 1 0 0 0-.019-1.838L12.83 5.18a2 2 0 0 0-1.66 0L2.6 9.08a1 1 0 0 0 0 1.832l8.57 3.908a2 2 0 0 0 1.66 0z"/>
+                <path d="M22 10v6"/>
+                <path d="M6 12.5V16a6 3 0 0 0 12 0v-3.5"/>
+              </svg>
+            </span>
+            <span class="auth-btn-label">Demo</span>
+          </button>
         </div>
 
-        <div class="status" id="analysis-status"></div>
+        <div class="auth-session" id="authSession" hidden>
+          <div class="auth-session-avatar" id="authSessionAvatar" aria-hidden="true"></div>
+          <div class="auth-session-meta">
+            <span class="auth-session-name" id="authSessionName"></span>
+            <span class="auth-session-email" id="authSessionEmail"></span>
+          </div>
+          <a href="#" class="auth-logout" id="authLogoutBtn">Log out</a>
+        </div>
+
+        <div class="auth-status" id="authStatus"></div>
       </section>
 
-      <section class="panel" id="panel-upload">
-        <div class="upload-card">
-          <label for="resumeFile">Resume upload</label>
-          <div class="dropzone" id="dropzone" tabindex="0">
-            <div class="dropzone-icon">📄</div>
-            <div class="dropzone-title">Drop PDF here</div>
-            <div class="dropzone-sub">or click to browse — max 10MB</div>
-          </div>
-          <input type="file" id="resumeFile" accept=".pdf" hidden />
-        </div>
-        <button class="btn btn-primary" id="uploadBtn" disabled>Upload resume</button>
-        <div class="status" id="upload-status"></div>
-      </section>
-    </main>
+      <main class="content">
+        <section class="card job-card">
+          <div class="job-card-status" id="jobStatus">Checking current tab…</div>
+          <div class="job-card-detail" id="jobDetail" hidden></div>
+        </section>
 
-    <div class="modal-overlay" id="quiz-modal">
-      <div class="modal" role="dialog" aria-modal="true" aria-labelledby="quiz-modal-title">
-        <div class="modal-header">
-          <div class="modal-title" id="quiz-modal-title">Skill verification</div>
-          <button class="modal-close" id="quiz-close-btn" type="button" aria-label="Close">×</button>
+        <div class="actions-row">
+          <button class="btn btn-primary" id="analyzeJobBtn" type="button">Analyze current job</button>
+          <button class="btn btn-secondary btn-sm" id="syncBtn" type="button">Sync</button>
         </div>
-        <div class="modal-body">
-          <div class="modal-hint">Answer a few quick questions to calibrate your skill profile for better job matches.</div>
-          <form id="quiz-form"></form>
+
+        <section class="skills-panel">
+          <button class="nav-row" id="mySkillsRow" type="button">
+            <span class="nav-row-label">My Skills</span>
+            <span class="nav-row-value"><span id="skillsCount">0</span> skills added</span>
+            <span class="nav-row-chevron" aria-hidden="true">›</span>
+          </button>
+          <button class="nav-row" id="updateSkillsBtn" type="button">
+            <span class="nav-row-label">Update Skills</span>
+            <span class="nav-row-chevron" aria-hidden="true">›</span>
+          </button>
+          <button class="nav-row" id="openDashboardBtn" type="button">
+            <span class="nav-row-label">View Dashboard</span>
+            <span class="nav-row-chevron" aria-hidden="true">›</span>
+          </button>
+        </section>
+
+        <section class="card result-card" id="resultCard" hidden>
+          <div class="result-header">
+            <div class="result-score" id="resultScore">0%</div>
+            <div class="result-meta">
+              <div class="result-recommendation" id="resultRecommendation"></div>
+              <div class="result-job" id="resultJob"></div>
+            </div>
+          </div>
+          <div class="result-section">
+            <div class="result-section-title">Matched skills</div>
+            <div class="result-tags" id="resultMatched"></div>
+          </div>
+          <div class="result-section">
+            <div class="result-section-title">Skills to learn</div>
+            <div class="result-tags" id="resultMissing"></div>
+          </div>
+          <button class="btn btn-primary" id="openResultDashboardBtn" type="button">Open full dashboard</button>
+        </section>
+
+        <div class="status" id="app-status"></div>
+      </main>
+    </div>
+
+    <!-- ============================================================
+         UPDATE SKILLS VIEW (internal)
+    ============================================================= -->
+    <div class="view" id="view-skills" hidden>
+      <div class="skills-view">
+        <div class="skills-view-topbar">
+          <button class="back-btn" id="backBtn" type="button" aria-label="Back">← Back</button>
+          <span class="header-badge">Skills</span>
         </div>
-        <div class="modal-footer">
-          <button class="btn btn-secondary btn-sm" id="quiz-cancel-btn" type="button">Cancel</button>
-          <button class="btn btn-primary btn-sm" id="quiz-submit-btn" type="button">Submit</button>
-        </div>
+
+        <div class="skills-view-title">Update Skills</div>
+
+        <section class="card">
+          <div class="card-title">Upload Resume</div>
+          <div class="upload-card">
+            <div class="upload-card-text">Upload your resume<br />(PDF/DOC/DOCX)</div>
+            <input type="file" id="resumeFile" accept=".pdf,.doc,.docx" hidden />
+            <button class="btn btn-secondary" id="uploadResumeBtn" type="button">Upload Resume</button>
+          </div>
+          <div class="upload-status" id="uploadStatus"></div>
+        </section>
+
+        <section class="card">
+          <div class="card-title">Manual Skill Entry</div>
+          <div class="skills-entry-row">
+            <input type="text" id="manualSkills" placeholder="React, Node.js, MongoDB" autocomplete="off" />
+            <button class="btn btn-secondary btn-sm" id="saveSkillsBtn" type="button">Add Skills</button>
+          </div>
+          <div class="skills-list-body" id="skillsListBody"></div>
+        </section>
+
+        <button class="btn btn-primary" id="saveSkillsDoneBtn" type="button">Save Skills</button>
       </div>
     </div>
 
-    <section class="auth-bar">
-      <div class="auth-buttons" id="authButtons">
-        <button class="auth-btn auth-btn-google" data-method="google" id="authGoogleBtn" type="button">
-          <span class="auth-btn-icon" aria-hidden="true">
-            <svg viewBox="0 0 48 48" width="18" height="18">
-              <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
-              <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
-              <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
-              <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
-            </svg>
-          </span>
-          <span class="auth-btn-label">Google</span>
-        </button>
-        <button class="auth-btn" data-method="demo" id="authDemoBtn" type="button">
-          <span class="auth-btn-icon" aria-hidden="true">
-            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M21.42 10.922a1 1 0 0 0-.019-1.838L12.83 5.18a2 2 0 0 0-1.66 0L2.6 9.08a1 1 0 0 0 0 1.832l8.57 3.908a2 2 0 0 0 1.66 0z"/>
-              <path d="M22 10v6"/>
-              <path d="M6 12.5V16a6 3 0 0 0 12 0v-3.5"/>
-            </svg>
-          </span>
-          <span class="auth-btn-label">Demo</span>
-        </button>
-      </div>
-
-      <div class="auth-session" id="authSession" hidden>
-        <span class="auth-session-icon" id="authSessionIcon" aria-hidden="true"></span>
-        <span class="auth-session-name" id="authSessionName"></span>
-        <a href="#" class="auth-logout" id="authLogoutBtn">Log out</a>
-      </div>
-
-      <div class="auth-status" id="authStatus"></div>
-    </section>
   </div>
 
   <script src="../src/config.js"></script>

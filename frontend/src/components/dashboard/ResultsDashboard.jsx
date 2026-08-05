@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useState, useEffect, useRef } from 'react';
 import gsap from 'gsap';
 import { getPeerComparison } from '../../utils/api.js';
@@ -21,22 +23,22 @@ function ScoreRing({ score }) {
   }, [score]);
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: "1rem" }}>
+    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: "0.75rem" }}>
       <div style={{
-        width: 160, height: 160, borderRadius: "50%",
+        width: 120, height: 120, borderRadius: "50%",
         border: "1px solid var(--border-dark)",
         display: "flex", alignItems: "center", justifyContent: "center",
         flexDirection: "column", background: "var(--surface)"
       }}>
         <span style={{
-          fontFamily: 'var(--font-display)', fontWeight: 900, fontSize: "4rem",
+          fontFamily: 'var(--font-display)', fontWeight: 900, fontSize: "2.5rem",
           color: "var(--primary)", lineHeight: 1, letterSpacing: "-0.05em"
         }}>{animated}</span>
-        <span style={{ fontFamily: 'var(--font-display)', fontSize: "1.2rem", color: 'var(--text-soft)', fontWeight: 500 }}>%</span>
+        <span style={{ fontFamily: 'var(--font-display)', fontSize: "1rem", color: 'var(--text-soft)', fontWeight: 500 }}>%</span>
       </div>
       <div>
         <span style={{
-          fontFamily: 'var(--font-body)', fontSize: "0.9rem", fontWeight: 600,
+          fontFamily: 'var(--font-body)', fontSize: "0.8125rem", fontWeight: 600,
           color: "var(--text-soft)", textTransform: "uppercase", letterSpacing: "1px"
         }}>Match Score</span>
       </div>
@@ -77,57 +79,57 @@ function RoadmapCard({ item, index }) {
 
   return (
     <div style={{
-      display: 'flex', gap: "2rem",
-      paddingBottom: "2rem", paddingTop: "2rem",
+      display: 'flex', gap: "1.25rem",
+      paddingBottom: "1.25rem", paddingTop: "1.25rem",
       borderBottom: "1px solid var(--border)",
     }}>
       {/* Timeline dot */}
       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', flexShrink: 0 }}>
         <div style={{
-          width: 48, height: 48, borderRadius: "var(--radius-sm)",
+          width: 40, height: 40, borderRadius: "var(--radius-sm)",
           background: "var(--surface)", border: "1px solid var(--border)",
           display: 'flex', alignItems: 'center', justifyContent: 'center',
-          fontFamily: 'var(--font-display)', fontSize: "1.5rem", fontWeight: 700, color: "var(--primary)",
+          fontFamily: 'var(--font-display)', fontSize: "1.125rem", fontWeight: 700, color: "var(--primary)",
         }}>
           {String(index + 1).padStart(2, '0')}
         </div>
         <div style={{
-          width: 4, flex: 1, minHeight: 40,
+          width: 4, flex: 1, minHeight: 32,
           background: "var(--surface)",
-          marginTop: "1rem",
+          marginTop: "0.75rem",
         }} />
       </div>
 
       {/* Content */}
       <div style={{ flex: 1 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: "1rem", marginBottom: "1rem", flexWrap: 'wrap' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: "0.75rem", marginBottom: "0.75rem", flexWrap: 'wrap' }}>
           <span style={{
-            fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: "1.5rem",
+            fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: "1.125rem",
             color: 'var(--primary)', textTransform: "uppercase"
           }}>{item.skill}</span>
           <span style={{
-            fontFamily: 'var(--font-display)', fontSize: "1rem", fontWeight: 500,
+            fontFamily: 'var(--font-display)', fontSize: "0.875rem", fontWeight: 500,
             color: "var(--primary)", border: "1px solid var(--border)", borderRadius: "var(--radius-sm)",
-            padding: '0.2rem 0.8rem',
+            padding: '0.1rem 0.6rem',
           }}>⏱ {item.duration}</span>
           {item.start_week && (
             <span style={{
-              fontFamily: 'var(--font-display)', fontSize: "1rem", fontWeight: 500,
+              fontFamily: 'var(--font-display)', fontSize: "0.875rem", fontWeight: 500,
               color: 'var(--primary)', background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--radius-sm)",
-              padding: '0.2rem 0.8rem',
+              padding: '0.1rem 0.6rem',
             }}>WK {item.start_week}</span>
           )}
         </div>
 
-        <div style={{ display: 'flex', gap: "1rem", flexWrap: 'wrap' }}>
+        <div style={{ display: 'flex', gap: "0.75rem", flexWrap: 'wrap' }}>
           {item.resources.map((r, i) => (
             <a key={i} href={r.url} target="_blank" rel="noopener noreferrer"
               style={{
                 display: 'inline-flex', alignItems: 'center', gap: "0.5rem",
-                padding: '0.5rem 1rem',
+                padding: '0.4rem 0.875rem',
                 background: 'var(--surface)', border: "1px solid var(--border)", borderRadius: "var(--radius-sm)",
                 color: 'var(--primary)', textDecoration: 'none',
-                fontFamily: 'var(--font-body)', fontSize: "1rem", fontWeight: 600,
+                fontFamily: 'var(--font-body)', fontSize: "0.875rem", fontWeight: 600,
                 transition: 'all 0.2s ease', cursor: "pointer"
               }}
               onMouseEnter={e => {
@@ -156,22 +158,22 @@ function RoleBar({ role, score, isTarget }) {
   }, [score]);
 
   return (
-    <div style={{ marginBottom: "2rem" }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: "0.5rem" }}>
+    <div style={{ marginBottom: "1.5rem" }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: "0.375rem" }}>
         <span style={{
-          fontFamily: 'var(--font-display)', fontSize: "1.2rem",
+          fontFamily: 'var(--font-display)', fontSize: "1rem",
           color: isTarget ? 'var(--accent)' : 'var(--primary)',
           fontWeight: 700, textTransform: "uppercase"
         }}>
           {isTarget && '★ '}{role}
         </span>
         <span style={{
-          fontFamily: 'var(--font-display)', fontSize: "1.2rem", fontWeight: 700,
+          fontFamily: 'var(--font-display)', fontSize: "1rem", fontWeight: 700,
           color: 'var(--primary)',
         }}>{score}%</span>
       </div>
       <div style={{
-        height: 16, border: "1px solid var(--border)", borderRadius: "var(--radius-sm)", background: 'var(--surface)', overflow: 'hidden',
+        height: 8, border: "1px solid var(--border)", borderRadius: "var(--radius-sm)", background: 'var(--surface)', overflow: 'hidden',
       }}>
         <div style={{
           height: '100%',
@@ -240,11 +242,11 @@ export default function ResultsDashboard({ result, onReset }) {
   }, [displayTargetRole, displayScore, isRoadmapOnly, result.historyId]);
 
   const tabStyle = (active) => ({
-    padding: '1rem 2rem',
+    padding: '0.5rem 1.25rem',
     background: active ? 'var(--primary)' : 'var(--surface)',
     color: active ? 'var(--bg)' : 'var(--primary)',
     border: "1px solid var(--border)", borderRadius: "var(--radius-sm)",
-    fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: "1.2rem",
+    fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: "0.875rem",
     cursor: "pointer", transition: 'all 0.2s ease', textTransform: 'uppercase',
   });
 
@@ -253,79 +255,79 @@ export default function ResultsDashboard({ result, onReset }) {
       {/* Header */}
       <div style={{
         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-        marginBottom: "3rem", flexWrap: 'wrap', gap: "1rem",
+        marginBottom: "var(--space-5)", flexWrap: 'wrap', gap: "1rem",
       }}>
         <div>
-          <h2 className="section-title" style={{ fontSize: "clamp(2rem, 6vw, 4rem)", marginBottom: "1rem" }}>
+          <h2 className="section-title" style={{ fontSize: "var(--text-subheading)", marginBottom: "0.75rem" }}>
             {isRoadmapOnly ? 'YOUR LEARNING ROADMAP' : (hasGeneratedRoadmap ? 'ANALYSIS & ROADMAP FOR' : 'YOUR ANALYSIS FOR')} <span style={{ color: 'var(--accent)' }}>{displayTargetRole}</span>
           </h2>
           {(recommendation || summary) && (
-            <div style={{ marginTop: "1rem", display: 'flex', flexWrap: 'wrap', gap: "1rem", alignItems: 'center' }}>
+            <div style={{ marginTop: "0.75rem", display: 'flex', flexWrap: 'wrap', gap: "0.75rem", alignItems: 'center' }}>
               {recommendation && (
                 <span style={{
-                  display: 'inline-flex', alignItems: 'center', padding: '0.5rem 1rem',
+                  display: 'inline-flex', alignItems: 'center', padding: '0.375rem 0.875rem',
                   background: 'var(--accent)', border: "1px solid var(--border)", borderRadius: "var(--radius-sm)",
-                  color: 'var(--primary)', fontSize: "1rem", fontFamily: 'var(--font-display)', fontWeight: 700, textTransform: "uppercase"
+                  color: 'var(--primary)', fontSize: "0.875rem", fontFamily: 'var(--font-display)', fontWeight: 700, textTransform: "uppercase"
                 }}>
                   {recommendation}
                 </span>
               )}
               {summary && (
-                <span style={{ color: 'var(--text-soft)', fontSize: "1.1rem", maxWidth: 600, fontWeight: 600 }}>
+                <span style={{ color: 'var(--text-soft)', fontSize: "0.9375rem", maxWidth: 600, fontWeight: 600 }}>
                   {summary}
                 </span>
               )}
             </div>
           )}
           {(isRoadmapOnly || hasGeneratedRoadmap) && estimatedTime && (
-            <div style={{ marginTop: "1rem" }}>
+            <div style={{ marginTop: "0.75rem" }}>
               <span style={{
-                display: 'inline-flex', alignItems: 'center', padding: '0.5rem 1rem',
+                display: 'inline-flex', alignItems: 'center', padding: '0.375rem 0.875rem',
                 background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--radius-sm)",
-                color: "var(--primary)", fontSize: "1rem", fontFamily: 'var(--font-display)', fontWeight: 700
+                color: "var(--primary)", fontSize: "0.875rem", fontFamily: 'var(--font-display)', fontWeight: 700
               }}>
                 ESTIMATED TIME: {estimatedTime}
               </span>
             </div>
           )}
         </div>
-        <button onClick={onReset} className="btn-primary" style={{ padding: "0.5rem 1.5rem", fontSize: "1.2rem" }}>
+        <button onClick={onReset} className="btn-primary">
           ← START OVER
         </button>
       </div>
 
       {!isRoadmapOnly && (
         <div className="brutalist-card brutalist-card-accent" style={{
-          display: 'flex', alignItems: 'center', gap: "4rem", flexWrap: 'wrap',
-          marginBottom: "3rem"
+          display: 'flex', alignItems: 'center', gap: "var(--space-6)", flexWrap: 'wrap',
+          marginBottom: "var(--space-5)"
         }}>
           <ScoreRing score={displayScore} />
-          <div style={{ flex: 1, minWidth: 300 }}>
+          <div style={{ flex: 1, minWidth: 280 }}>
             <div style={{
-              fontFamily: 'var(--font-display)', fontSize: "1.5rem", color: 'var(--primary)',
-              marginBottom: "1rem", textTransform: 'uppercase', fontWeight: 700
+              fontFamily: 'var(--font-display)', fontSize: "1.0625rem", color: 'var(--primary)',
+              marginBottom: "0.75rem", textTransform: 'uppercase', fontWeight: 700
             }}>ROLE DESCRIPTION</div>
-            <p style={{ color: 'var(--text-soft)', fontSize: "1.2rem", lineHeight: 1.6, marginBottom: "2rem" }}>
+            <p style={{ color: 'var(--text-soft)', fontSize: "1rem", lineHeight: 1.6, marginBottom: "1.5rem" }}>
               {role_description}
             </p>
-            <div style={{ display: 'flex', gap: "1rem", flexWrap: 'wrap' }}>
+            <div style={{ display: 'flex', gap: "0.75rem", flexWrap: 'wrap' }}>
               <div style={{
                 border: "1px solid var(--border)", borderRadius: "var(--radius-sm)", background: "var(--surface)",
-                padding: '1rem', textAlign: 'center', minWidth: 120
+                padding: '0.75rem 1rem', textAlign: 'center', minWidth: 100
               }}>
-                <div style={{ fontFamily: 'var(--font-display)', fontSize: "2.5rem", color: 'var(--primary)', fontWeight: 700 }}>
+                <div style={{ fontFamily: 'var(--font-display)', fontSize: "1.75rem", color: 'var(--primary)', fontWeight: 700 }}>
                   {matched_skills?.length || 0}
                 </div>
-                <div style={{ fontSize: "1rem", fontWeight: 500, color: 'var(--primary)', textTransform: "uppercase" }}>Matched</div>
+                <div style={{ fontSize: "0.875rem", fontWeight: 500, color: 'var(--primary)', textTransform: "uppercase" }}>Matched</div>
               </div>
               <div style={{
                 border: "1px solid var(--border)", borderRadius: "var(--radius-sm)", background: "var(--accent)",
-                padding: '1rem', textAlign: 'center', minWidth: 120
+                padding: '0.75rem 1rem', textAlign: 'center', minWidth: 100
               }}>
-                <div style={{ fontFamily: 'var(--font-display)', fontSize: "2.5rem", color: 'var(--primary)', fontWeight: 700 }}>
+                <div style={{ fontFamily: 'var(--font-display)', fontSize: "1.75rem", color: 'var(--primary)', fontWeight: 700 }}>
                   {missing_skills?.length || 0}
                 </div>
-                <div style={{ fontSize: "1rem", fontWeight: 500, color: 'var(--primary)', textTransform: "uppercase" }}>Gaps</div>
+                <div style={{ fontSize: "0.875rem", fontWeight: 500, color: 'var(--primary)', textTransform: "uppercase" }}>Gaps</div>
               </div>
             </div>
           </div>
@@ -333,7 +335,7 @@ export default function ResultsDashboard({ result, onReset }) {
       )}
 
       {/* Tabs */}
-      <div style={{ display: 'flex', borderBottom: "1px solid var(--border)", marginBottom: "3rem" }}>
+      <div style={{ display: 'flex', borderBottom: "1px solid var(--border)", marginBottom: "var(--space-5)" }}>
         {tabs.map(tab => (
           <button key={tab} onClick={() => setActiveTab(tab)} style={tabStyle(activeTab === tab)}>
             {tab === 'roadmap' ? 'COURSES' : tab}
@@ -345,59 +347,59 @@ export default function ResultsDashboard({ result, onReset }) {
       <div className="brutalist-card" style={{ animation: 'fadeIn 0.3s ease' }}>
         {activeTab === 'overview' && (
           <div>
-            <div style={{ marginBottom: "3rem" }}>
+            <div style={{ marginBottom: "var(--space-5)" }}>
               <h3 style={{
-                fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: "1.5rem",
+                fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: "1.0625rem",
                 textTransform: 'uppercase', color: 'var(--primary)',
-                marginBottom: "1.5rem", paddingBottom: "0.5rem", borderBottom: "1px solid var(--border)"
+                marginBottom: "1rem", paddingBottom: "0.375rem", borderBottom: "1px solid var(--border)"
               }}>SKILLS DETECTED</h3>
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: "1rem" }}>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: "0.75rem" }}>
                 {student_skills.map(skill => (
                   <SkillTag key={skill} skill={skill}
                     matched={matched_skills.map(s => s.toLowerCase()).includes(skill.toLowerCase())} />
                 ))}
                 {student_skills.length === 0 && (
-                  <span style={{ color: 'var(--text-soft)', fontSize: "1.2rem", fontWeight: 600 }}>NO SKILLS DETECTED</span>
+                  <span style={{ color: 'var(--text-soft)', fontSize: "0.9375rem", fontWeight: 600 }}>NO SKILLS DETECTED</span>
                 )}
               </div>
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: "3rem" }}>
-              <div style={{ background: "var(--bg-soft)", padding: "2rem", borderRadius: "var(--radius-md)" }}>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: "var(--space-5)" }}>
+              <div style={{ background: "var(--bg-soft)", padding: "1.25rem", borderRadius: "var(--radius-md)" }}>
                 <h3 style={{
-                  fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: "1.1rem",
+                  fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: "0.9375rem",
                   textTransform: 'uppercase', color: 'var(--success)', letterSpacing: "0.5px",
-                  marginBottom: "1.5rem",
+                  marginBottom: "1rem",
                 }}>MATCHED SKILLS</h3>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: "0.5rem" }}>
                   {matched_skills.map(skill => (
                     <div key={skill} style={{
-                      display: 'flex', alignItems: 'center', gap: "1rem",
-                      padding: '0.8rem 1rem', background: "var(--surface)", borderRadius: "var(--radius-sm)",
-                      fontSize: "1rem", color: "var(--primary)", fontWeight: 500, border: "1px solid var(--border)"
+                      display: 'flex', alignItems: 'center', gap: "0.75rem",
+                      padding: '0.6rem 0.875rem', background: "var(--surface)", borderRadius: "var(--radius-sm)",
+                      fontSize: "0.9375rem", color: "var(--primary)", fontWeight: 500, border: "1px solid var(--border)"
                     }}>
                       <span style={{ fontFamily: "var(--font-display)", color: "var(--success)" }}>✓</span> {skill}
                     </div>
                   ))}
                 </div>
               </div>
-              <div style={{ background: "var(--bg-soft)", padding: "2rem", borderRadius: "var(--radius-md)" }}>
+              <div style={{ background: "var(--bg-soft)", padding: "1.25rem", borderRadius: "var(--radius-md)" }}>
                 <h3 style={{
-                  fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: "1.1rem",
+                  fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: "0.9375rem",
                   textTransform: 'uppercase', color: 'var(--danger)', letterSpacing: "0.5px",
-                  marginBottom: "1.5rem",
+                  marginBottom: "1rem",
                 }}>MISSING SKILLS</h3>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: "0.5rem" }}>
                   {missing_skills.map(item => (
                     <div key={item.skill} style={{
                       display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                      padding: '0.8rem 1rem', background: 'var(--surface)', borderRadius: "var(--radius-sm)",
-                      fontSize: "1rem", color: 'var(--primary)', fontWeight: 500, border: "1px solid var(--border)"
+                      padding: '0.6rem 0.875rem', background: 'var(--surface)', borderRadius: "var(--radius-sm)",
+                      fontSize: "0.9375rem", color: 'var(--primary)', fontWeight: 500, border: "1px solid var(--border)"
                     }}>
-                      <span style={{ display: "flex", alignItems: "center", gap: "1rem" }}><span style={{color: "var(--danger)"}}>✗</span> {item.skill}</span>
+                      <span style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}><span style={{color: "var(--danger)"}}>✗</span> {item.skill}</span>
                       <span style={{
-                        fontFamily: 'var(--font-mono)', fontSize: "0.85rem", fontWeight: 700,
-                        color: 'var(--danger)', background: "var(--bg)", borderRadius: "100px", padding: "0.2rem 0.6rem"
+                        fontFamily: 'var(--font-mono)', fontSize: "0.8125rem", fontWeight: 700,
+                        color: 'var(--danger)', background: "var(--bg)", borderRadius: "100px", padding: "0.15rem 0.5rem"
                       }}>{Math.round(item.weight * 100)}%</span>
                     </div>
                   ))}
@@ -409,12 +411,12 @@ export default function ResultsDashboard({ result, onReset }) {
 
         {activeTab === 'roadmap' && (
           <div>
-            <div style={{ marginBottom: "3rem" }}>
+            <div style={{ marginBottom: "var(--space-5)" }}>
               <h3 style={{
-                fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: "2rem",
-                marginBottom: "1rem", textTransform: "uppercase", color: "var(--primary)"
+                fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: "1.25rem",
+                marginBottom: "0.75rem", textTransform: "uppercase", color: "var(--primary)"
               }}>RECOMMENDED COURSES</h3>
-              <p style={{ color: 'var(--text-soft)', fontSize: "1.2rem", fontWeight: 600 }}>
+              <p style={{ color: 'var(--text-soft)', fontSize: "0.9375rem", fontWeight: 600 }}>
                 {isRoadmapOnly
                   ? `MASTER ${skillGaps?.length || 0} SKILLS FOR ${displayTargetRole}. FOLLOW THESE COURSES TO BECOME JOB-READY.`
                   : 'CLOSE YOUR SKILL GAPS WITH FREE RESOURCES. FOLLOW THESE COURSES TO BECOME JOB-READY.'
@@ -429,8 +431,8 @@ export default function ResultsDashboard({ result, onReset }) {
               </div>
             ) : (
               <div style={{
-                textAlign: 'center', padding: "3rem",
-                color: 'var(--primary)', fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: "1.5rem",
+                textAlign: 'center', padding: "var(--space-6)",
+                color: 'var(--primary)', fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: "1.125rem",
                 border: "1px solid var(--border)", borderRadius: "var(--radius-sm)", background: "var(--surface)"
               }}>
                 YOU ALREADY MATCH ALL KEY SKILLS. APPLY WITH CONFIDENCE.
@@ -442,10 +444,10 @@ export default function ResultsDashboard({ result, onReset }) {
         {activeTab === 'alternatives' && (
           <div>
             <h3 style={{
-              fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: "2rem", marginBottom: "1rem",
+              fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: "1.25rem", marginBottom: "0.75rem",
               textTransform: "uppercase"
             }}>BEST ROLE MATCHES</h3>
-            <p style={{ color: 'var(--text-soft)', fontSize: "1.2rem", fontWeight: 600, marginBottom: "3rem", textTransform: "uppercase" }}>
+            <p style={{ color: 'var(--text-soft)', fontSize: "0.9375rem", fontWeight: 600, marginBottom: "var(--space-5)", textTransform: "uppercase" }}>
               BASED ON CURRENT SKILLS, ROLES YOU ARE CLOSEST TO.
             </p>
             {Object.entries(all_role_scores).map(([role, score]) => (
@@ -457,24 +459,24 @@ export default function ResultsDashboard({ result, onReset }) {
         {activeTab === 'peers' && (
           <div>
             <h3 style={{
-              fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: "2rem", marginBottom: "1rem",
+              fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: "1.25rem", marginBottom: "0.75rem",
               textTransform: "uppercase"
             }}>PEER POSITION</h3>
-            <p style={{ color: 'var(--text-soft)', fontSize: "1.2rem", fontWeight: 600, marginBottom: "3rem", textTransform: "uppercase" }}>
+            <p style={{ color: 'var(--text-soft)', fontSize: "0.9375rem", fontWeight: 600, marginBottom: "var(--space-5)", textTransform: "uppercase" }}>
               {peerComparison?.peerCount
                 ? `COMPARED WITH ${peerComparison.peerCount} STUDENT${peerComparison.peerCount === 1 ? "" : "S"} FOCUSING ON ${peerComparison.role || displayTargetRole}.`
                 : `NO OTHER STUDENT PROFILES ARE SAVED FOR ${peerComparison?.role || displayTargetRole} YET.`}
             </p>
 
             {peerLoading ? (
-              <div style={{ color: 'var(--text-soft)', fontSize: "1.2rem", fontWeight: 600 }}>LOADING PEER BENCHMARK...</div>
+              <div style={{ color: 'var(--text-soft)', fontSize: "0.9375rem", fontWeight: 600 }}>LOADING PEER BENCHMARK...</div>
             ) : (
               <>
                 <div style={{
                   display: 'grid',
-                  gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
+                  gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))',
                   border: "1px solid var(--border)",
-                  marginBottom: "3rem"
+                  marginBottom: "var(--space-5)"
                 }}>
                   {[
                     { label: 'Peers Ahead', value: peerComparison?.peerCount ? `${peerComparison?.aheadPercent || 0}%` : 'N/A' },
@@ -483,14 +485,14 @@ export default function ResultsDashboard({ result, onReset }) {
                     { label: 'Peer Count', value: peerComparison?.peerCount || 0 }
                   ].map((item, index) => (
                     <div key={item.label} style={{
-                      padding: "1.5rem",
+                      padding: "1rem",
                       borderRight: index < 3 ? "1px solid var(--border)" : "none",
-                      minHeight: 140
+                      minHeight: 110
                     }}>
-                      <div style={{ color: "var(--text-soft)", fontSize: "0.85rem", textTransform: "uppercase", letterSpacing: "0.08em", fontWeight: 700, marginBottom: "1rem" }}>
+                      <div style={{ color: "var(--text-soft)", fontSize: "0.8125rem", textTransform: "uppercase", letterSpacing: "0.08em", fontWeight: 700, marginBottom: "0.75rem" }}>
                         {item.label}
                       </div>
-                      <div style={{ fontFamily: "var(--font-display)", fontSize: "3rem", lineHeight: 1, color: "var(--primary)", fontWeight: 700 }}>
+                      <div style={{ fontFamily: "var(--font-display)", fontSize: "2rem", lineHeight: 1, color: "var(--primary)", fontWeight: 700 }}>
                         {item.value}
                       </div>
                     </div>
@@ -498,25 +500,25 @@ export default function ResultsDashboard({ result, onReset }) {
                 </div>
 
                 <div>
-                  <h4 style={{ fontFamily: 'var(--font-display)', fontSize: "1.4rem", marginBottom: "1.5rem", textTransform: "uppercase" }}>
+                  <h4 style={{ fontFamily: 'var(--font-display)', fontSize: "1.0625rem", marginBottom: "1rem", textTransform: "uppercase" }}>
                     ROLE LEADERBOARD
                   </h4>
                   {(peerComparison?.leaderboard || []).length ? peerComparison.leaderboard.map((item) => (
                     <div key={`${item.rank}-${item.label}`} style={{
                       display: 'grid',
-                      gridTemplateColumns: '64px 1fr auto',
-                      gap: '1rem',
+                      gridTemplateColumns: '48px 1fr auto',
+                      gap: '0.875rem',
                       alignItems: 'center',
-                      padding: '1rem 0',
+                      padding: '0.75rem 0',
                       borderBottom: "1px solid var(--border)",
                       color: item.isCurrent ? "var(--accent)" : "var(--primary)"
                     }}>
-                      <strong style={{ fontFamily: 'var(--font-display)', fontSize: "1.4rem" }}>#{item.rank}</strong>
-                      <span style={{ fontWeight: 700, textTransform: "uppercase" }}>{item.isCurrent ? "You" : item.label}</span>
-                      <strong style={{ fontFamily: 'var(--font-display)', fontSize: "1.6rem" }}>{item.score}%</strong>
+                      <strong style={{ fontFamily: 'var(--font-display)', fontSize: "1.0625rem" }}>#{item.rank}</strong>
+                      <span style={{ fontWeight: 700, textTransform: "uppercase", fontSize: "0.9375rem" }}>{item.isCurrent ? "You" : item.label}</span>
+                      <strong style={{ fontFamily: 'var(--font-display)', fontSize: "1.125rem" }}>{item.score}%</strong>
                     </div>
                   )) : (
-                    <div style={{ color: 'var(--text-soft)', fontSize: "1.15rem", fontWeight: 600 }}>
+                    <div style={{ color: 'var(--text-soft)', fontSize: "0.9375rem", fontWeight: 600 }}>
                       THIS IS THE FIRST SAVED BENCHMARK FOR THIS ROLE. THE LEADERBOARD WILL APPEAR ONLY AFTER OTHER STUDENTS SAVE ANALYSES FOR THE SAME ROLE.
                     </div>
                   )}

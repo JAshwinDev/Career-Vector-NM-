@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useState } from "react";
 import {
   analyzeResume,
@@ -111,32 +113,32 @@ export default function AnalyzeForm({ onResult, onLoading, user, onLoginRequired
 
   return (
     <section id="analyze" className="section container">
-      <div style={{ textAlign: "center", marginBottom: "4rem" }}>
+      <div style={{ textAlign: "center", marginBottom: "var(--space-6)" }}>
         <h2 className="section-title">Start Your Analysis</h2>
         <p>Upload your resume or enter your skills, then pick one target role. Your report is saved to your student profile.</p>
       </div>
 
-      <div className="brutalist-card brutalist-card-accent" style={{ maxWidth: 900, margin: "0 auto", padding: "4rem" }}>
-        <div style={{ marginBottom: "3rem" }}>
-          <div style={{ display: "flex", alignItems: "center", gap: "1rem", marginBottom: "1.5rem" }}>
+      <div className="brutalist-card brutalist-card-accent" style={{ maxWidth: 820, margin: "0 auto", padding: "var(--space-5)" }}>
+        <div style={{ marginBottom: "var(--space-5)" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", marginBottom: "1rem" }}>
             <div style={{
-              width: 40, height: 40, background: "var(--surface)",
+              width: 36, height: 36, background: "var(--surface)",
               display: "flex", alignItems: "center", justifyContent: "center",
-              fontFamily: "var(--font-display)", fontSize: "1.5rem", fontWeight: 700, color: "var(--primary)"
+              fontFamily: "var(--font-display)", fontSize: "1.125rem", fontWeight: 700, color: "var(--primary)"
             }}>1</div>
-            <span style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: "2rem" }}>Your Current Skills</span>
+            <span style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: "var(--text-subheading)" }}>Your Current Skills</span>
           </div>
 
           <div>
-            <p style={{ marginBottom: "1rem" }}>
+            <p style={{ marginBottom: "0.75rem" }}>
               Upload a PDF resume here for extraction, then add any extra skills you want included.
             </p>
             <label style={{
               display: "block",
-              marginBottom: "1.5rem",
-              padding: "2rem",
+              marginBottom: "1rem",
+              padding: "1rem",
               background: "var(--surface)",
-              border: "4px dashed var(--primary)",
+              border: "2px dashed var(--primary)",
               cursor: "pointer",
               transition: "background 0.3s"
             }}
@@ -149,7 +151,7 @@ export default function AnalyzeForm({ onResult, onLoading, user, onLoginRequired
                 onChange={(event) => setResumeFile(event.target.files?.[0] || null)}
                 style={{ display: "none" }}
               />
-              <div style={{ fontSize: "1.25rem", color: "var(--primary)", fontWeight: 500 }}>
+              <div style={{ fontSize: "1rem", color: "var(--primary)", fontWeight: 500 }}>
                 {resumeFile ? `Resume selected: ${resumeFile.name}` : "CHOOSE A PDF RESUME"}
               </div>
             </label>
@@ -160,30 +162,30 @@ export default function AnalyzeForm({ onResult, onLoading, user, onLoginRequired
               style={{
                 width: "100%", background: "var(--bg)", border: "1px solid var(--border)", borderRadius: "var(--radius-sm)",
                 color: "var(--primary)", fontFamily: "var(--font-body)",
-                fontSize: "1.25rem", padding: "1rem", outline: "none",
-                marginBottom: "0.5rem"
+                fontSize: "0.9375rem", padding: "0.7rem 0.875rem", outline: "none",
+                marginBottom: "0.375rem"
               }}
             />
-            <div style={{ fontSize: "1rem", color: "var(--text-soft)" }}>
+            <div style={{ fontSize: "0.875rem", color: "var(--text-soft)" }}>
               Add extra skills here if a tool or technology is missing from the resume.
             </div>
           </div>
         </div>
 
-        <div style={{ height: 4, background: "var(--surface)", margin: "3rem 0" }} />
+        <div style={{ height: 2, background: "var(--surface)", margin: "var(--space-5) 0" }} />
 
-        <div style={{ marginBottom: "3rem" }}>
-          <div style={{ display: "flex", alignItems: "center", gap: "1rem", marginBottom: "1.5rem", flexWrap: "wrap" }}>
+        <div style={{ marginBottom: "var(--space-5)" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", marginBottom: "1rem", flexWrap: "wrap" }}>
             <div style={{
-              width: 40, height: 40, background: "var(--accent)",
+              width: 36, height: 36, background: "var(--accent)",
               display: "flex", alignItems: "center", justifyContent: "center",
-              fontFamily: "var(--font-display)", fontSize: "1.5rem", fontWeight: 700, color: "var(--primary)"
+              fontFamily: "var(--font-display)", fontSize: "1.125rem", fontWeight: 700, color: "var(--primary)"
             }}>2</div>
-            <span style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: "2rem" }}>Target Role</span>
+            <span style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: "var(--text-subheading)" }}>Target Role</span>
             {selectedRole && (
               <span style={{
-                fontFamily: "var(--font-display)", fontSize: "1.25rem", fontWeight: 500, color: "var(--accent)",
-                border: "4px solid var(--accent)", padding: "0.25rem 1rem", textTransform: "uppercase"
+                fontFamily: "var(--font-display)", fontSize: "0.9375rem", fontWeight: 500, color: "var(--accent)",
+                border: "2px solid var(--accent)", padding: "0.15rem 0.75rem", textTransform: "uppercase"
               }}>{selectedRole}</span>
             )}
           </div>
@@ -198,7 +200,7 @@ export default function AnalyzeForm({ onResult, onLoading, user, onLoginRequired
               style={{
                 width: "100%", background: "var(--bg)", border: "1px solid var(--border)", borderRadius: "var(--radius-sm)",
                 color: "var(--primary)", fontFamily: "var(--font-body)",
-                fontSize: "1.25rem", padding: "1rem", outline: "none"
+                fontSize: "0.9375rem", padding: "0.7rem 0.875rem", outline: "none"
               }}
             />
             <datalist id="roles-datalist">
@@ -212,14 +214,14 @@ export default function AnalyzeForm({ onResult, onLoading, user, onLoginRequired
         {error && (
           <div style={{
             background: "var(--accent)", border: "1px solid var(--border)", borderRadius: "var(--radius-sm)",
-            padding: "1rem", marginBottom: "2rem",
-            fontSize: "1.25rem", fontWeight: 600, color: "var(--primary)", textTransform: "uppercase"
+            padding: "0.75rem 1rem", marginBottom: "var(--space-4)",
+            fontSize: "0.9375rem", fontWeight: 600, color: "var(--primary)", textTransform: "uppercase"
           }}>
             ERROR: {error}
           </div>
         )}
 
-        <button className={canSubmit ? "btn-brutal" : "btn-brutal-outline"} onClick={handleSubmit} style={{ width: "100%", fontSize: "1.5rem", padding: "1.5rem" }}>
+        <button className={canSubmit ? "btn-brutal" : "btn-brutal-outline"} onClick={handleSubmit} style={{ width: "100%", fontSize: "1rem", padding: "0.875rem" }}>
           {!user ? "LOGIN TO ANALYZE" : canSubmit ? "GENERATE CAREER ANALYSIS" : "COMPLETE STEPS TO CONTINUE"}
         </button>
       </div>

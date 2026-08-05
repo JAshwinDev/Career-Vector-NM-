@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useState, useEffect } from "react";
 import { logInteraction } from "../../utils/api.js";
 
@@ -298,30 +300,30 @@ const styles = {
   container: {
     maxWidth: "900px",
     margin: "0 auto",
-    padding: "40px 20px",
+    padding: "32px 20px",
     backgroundColor: "#f9fafb",
     minHeight: "100vh"
   },
   quizCard: {
     backgroundColor: "white",
     borderRadius: "12px",
-    padding: "40px",
+    padding: "28px",
     boxShadow: "0 4px 6px rgba(0,0,0,0.1)"
   },
   quizHeader: {
     display: "flex",
     justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: "20px"
+    marginBottom: "16px"
   },
   quizTitle: {
-    fontSize: "24px",
+    fontSize: "20px",
     fontWeight: "bold",
     margin: "0",
     color: "#111827"
   },
   progressInfo: {
-    fontSize: "14px",
+    fontSize: "13px",
     color: "#6b7280"
   },
   progressBarContainer: {
@@ -329,7 +331,7 @@ const styles = {
     height: "6px",
     backgroundColor: "#e5e7eb",
     borderRadius: "4px",
-    marginBottom: "30px",
+    marginBottom: "24px",
     overflow: "hidden"
   },
   progressBar: {
@@ -338,7 +340,7 @@ const styles = {
     transition: "width 0.3s"
   },
   questionBox: {
-    marginBottom: "30px"
+    marginBottom: "24px"
   },
   skillTag: {
     display: "inline-block",
@@ -402,29 +404,29 @@ const styles = {
   resultsCard: {
     backgroundColor: "white",
     borderRadius: "12px",
-    padding: "40px",
+    padding: "28px",
     boxShadow: "0 4px 6px rgba(0,0,0,0.1)",
     textAlign: "center"
   },
   resultsTitle: {
-    fontSize: "28px",
+    fontSize: "22px",
     fontWeight: "bold",
-    marginBottom: "30px",
+    marginBottom: "24px",
     color: "#111827"
   },
   scoreCircle: {
-    width: "150px",
-    height: "150px",
+    width: "120px",
+    height: "120px",
     borderRadius: "50%",
     display: "flex",
     flexDirection: "column",
     alignItems: "center",
     justifyContent: "center",
-    margin: "0 auto 30px",
+    margin: "0 auto 24px",
     color: "white"
   },
   scoreNumber: {
-    fontSize: "48px",
+    fontSize: "36px",
     fontWeight: "bold"
   },
   scoreLabel: {

@@ -10,6 +10,7 @@
   },
   "permissions": ["activeTab", "storage", "tabs", "scripting", "identity"],
   "host_permissions": [
+    "http://localhost:3000/*",
     "http://localhost:5000/*",
     "http://localhost:5001/*",
     "https://www.linkedin.com/*"
@@ -18,6 +19,7 @@
     "extension_pages": "script-src 'self'; object-src 'self'"
   },
   "action": {
+    "default_title": "CareerVector",
     "default_popup": "pages/popup.html",
     "default_icon": {
       "16": "icons/icon16.png",
@@ -36,7 +38,17 @@
         "*://www.linkedin.com/*",
         "*://linkedin.com/*"
       ],
-      "js": ["src/config.js", "src/content.js"],
+      "js": ["src/config.js", "src/jobExtractor.js", "src/content.js"],
+      "run_at": "document_idle"
+    },
+    {
+      "matches": [
+        "http://localhost:3000/*",
+        "http://localhost:5173/*",
+        "http://127.0.0.1:3000/*",
+        "http://127.0.0.1:5173/*"
+      ],
+      "js": ["src/bridge.js"],
       "run_at": "document_idle"
     }
   ]

@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useEffect, useState } from "react";
 import { getWorkflowOverview } from "../../utils/api.js";
 
@@ -42,15 +44,15 @@ function WorkflowStep({ step, accent = "var(--accent)", onNavigate }) {
   const content = (
     <div
       style={{
-        padding: "1.5rem",
+        padding: "1rem",
         background: "var(--surface)",
         border: step.ready ? `4px solid ${accent}` : "4px solid var(--primary)",
         color: "var(--primary)",
-        minHeight: 100,
+        minHeight: 72,
         display: "flex",
         flexDirection: "column",
         justifyContent: "center",
-        gap: 8,
+        gap: 6,
         transition: "transform 0.2s ease, box-shadow 0.2s ease",
         cursor: step.path ? "pointer" : "default"
       }}
@@ -100,11 +102,11 @@ function WorkflowLane({ title, accent, steps, subtitle, onNavigate }) {
       style={{
         background: "var(--surface)",
         border: "1px solid var(--border)", borderRadius: "var(--radius-md)",
-        padding: "2rem",
-        marginBottom: "2rem"
+        padding: "1.25rem",
+        marginBottom: "1.25rem"
       }}
     >
-      <div style={{ marginBottom: 16 }}>
+      <div style={{ marginBottom: 12 }}>
         <div
           style={{
             fontFamily: "var(--font-mono)",
@@ -112,7 +114,7 @@ function WorkflowLane({ title, accent, steps, subtitle, onNavigate }) {
             color: accent,
             letterSpacing: "2px",
             textTransform: "uppercase",
-            marginBottom: 8
+            marginBottom: 6
           }}
         >
           {title}
@@ -127,8 +129,8 @@ function WorkflowLane({ title, accent, steps, subtitle, onNavigate }) {
       <div
         style={{
           display: "grid",
-          gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))",
-          gap: 12
+          gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))",
+          gap: 10
         }}
       >
         {steps.map((step) => (
@@ -173,10 +175,10 @@ export default function WorkflowSection({ standalone = false, onNavigate }) {
       style={{
         maxWidth: 1180,
         margin: "0 auto",
-        padding: standalone ? "110px 24px 80px" : "40px 24px 80px"
+        padding: standalone ? "48px 24px" : "32px 24px"
       }}
     >
-      <div style={{ textAlign: "center", marginBottom: 32 }}>
+      <div style={{ textAlign: "center", marginBottom: 24 }}>
         <div
           style={{
             fontFamily: "var(--font-mono)",
@@ -184,7 +186,7 @@ export default function WorkflowSection({ standalone = false, onNavigate }) {
             color: "var(--teal)",
             letterSpacing: "2px",
             textTransform: "uppercase",
-            marginBottom: 12
+            marginBottom: 8
           }}
         >
           [ End-to-End Workflow ]
@@ -192,7 +194,7 @@ export default function WorkflowSection({ standalone = false, onNavigate }) {
         <h2 className="section-title">
           Career Intelligence System Flow
         </h2>
-        <p style={{ color: "var(--text-soft)", fontSize: "1.2rem", maxWidth: 820, margin: "0 auto", fontWeight: 500 }}>
+        <p style={{ color: "var(--text-soft)", fontSize: "1rem", maxWidth: 760, margin: "0 auto", fontWeight: 500 }}>
           The website, Chrome extension, backend APIs, ML service, and MongoDB are now organized as one guided workflow:
           login, upload, match, search, quiz, roadmap, and dashboard.
         </p>
@@ -269,11 +271,11 @@ export default function WorkflowSection({ standalone = false, onNavigate }) {
         style={{
           background: "var(--surface)",
           border: "1px solid var(--border)", borderRadius: "var(--radius-md)",
-          padding: "2rem",
-          marginBottom: "2rem"
+          padding: "1.25rem",
+          marginBottom: "1.25rem"
         }}
       >
-        <div style={{ marginBottom: 18 }}>
+        <div style={{ marginBottom: 12 }}>
           <div
             style={{
               fontFamily: "var(--font-mono)",

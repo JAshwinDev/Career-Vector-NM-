@@ -14,7 +14,7 @@
   --shadow: 0 18px 50px rgba(11, 15, 18, 0.08);
   --success: #3b7a60;
   --danger: #b24442;
-  --radius: 18px;
+  --radius: 16px;
   --radius-sm: 10px;
   --transition: 220ms ease;
   --font-body: 'Jost', sans-serif;
@@ -43,7 +43,7 @@ body {
   width: 100%;
   background: var(--surface);
   border: 1px solid var(--border);
-  border-radius: 24px;
+  border-radius: 20px;
   box-shadow: var(--shadow);
   overflow: hidden;
 }
@@ -53,7 +53,7 @@ body {
   justify-content: space-between;
   align-items: flex-start;
   gap: 14px;
-  padding: 14px 18px 10px;
+  padding: 12px 16px 8px;
 }
 
 .brand {
@@ -68,7 +68,7 @@ body {
   overflow: hidden;
   min-width: 38px;
   min-height: 38px;
-  border-radius: 14px;
+  border-radius: 12px;
   background: var(--surface-soft);
   display: grid;
   place-items: center;
@@ -136,9 +136,9 @@ body {
 }
 
 .auth-bar {
-  padding: 0 18px 10px;
+  padding: 0 16px 8px;
   display: grid;
-  gap: 8px;
+  gap: 6px;
 }
 
 .auth-bar [hidden] {
@@ -193,25 +193,52 @@ body {
 .auth-session {
   display: flex;
   align-items: center;
-  gap: 8px;
-  border-radius: 999px;
-  padding: 7px 12px;
+  gap: 10px;
+  border-radius: 14px;
+  padding: 8px 12px;
   background: var(--surface-soft);
   border: 1px solid var(--border);
 }
 
-.auth-session-icon {
+.auth-session-avatar {
+  width: 34px;
+  height: 34px;
+  min-width: 34px;
+  border-radius: 50%;
+  background: var(--accent);
+  color: white;
   display: grid;
   place-items: center;
-  color: var(--accent);
+  font-weight: 800;
+  font-size: 13px;
+  background-size: cover;
+  background-position: center;
+}
+
+.auth-session-avatar.has-image {
+  background-color: var(--surface-soft);
+  border: 1px solid var(--border);
+}
+
+.auth-session-meta {
+  flex: 1;
+  min-width: 0;
+  display: grid;
+  gap: 1px;
 }
 
 .auth-session-name {
-  flex: 1;
-  min-width: 0;
   font-size: 12px;
   font-weight: 700;
   color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.auth-session-email {
+  font-size: 11px;
+  color: var(--text-muted);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -245,135 +272,71 @@ body {
   color: var(--accent);
 }
 
-.tabs {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  background: var(--surface-soft);
-}
-
-.tab {
-  border: none;
-  background: transparent;
-  color: var(--text-muted);
-  font-size: 12px;
-  font-weight: 700;
-  padding: 10px 0;
-  cursor: pointer;
-  transition: color var(--transition), background var(--transition);
-}
-
-.tab.active {
-  color: var(--primary);
-  background: white;
-  box-shadow: inset 0 -1px 0 #e9e2db;
-}
-
 .content {
-  padding: 14px;
+  padding: 10px 12px 12px;
   display: grid;
-  gap: 14px;
-}
-
-.panel {
-  display: none;
-}
-
-.panel.active {
-  display: grid;
-  gap: 14px;
-}
-
-.hero-card,
-.upload-card {
-  display: grid;
-  gap: 12px;
-  background: var(--surface-soft);
-  border: 1px solid var(--border);
-  border-radius: 20px;
-  padding: 14px;
-}
-
-.upload-card {
   gap: 10px;
 }
 
-.hero-pretitle {
-  text-transform: uppercase;
-  font-size: 11px;
-  letter-spacing: 0.15em;
-  color: var(--accent);
-  font-weight: 800;
+.card {
+  display: grid;
+  gap: 8px;
+  background: var(--surface-soft);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 12px;
 }
 
-.hero-card h1 {
-  margin: 0;
-  font-family: var(--font-display);
-  font-size: 20px;
-  line-height: 1.2;
+[hidden] {
+  display: none !important;
 }
 
-.hero-card p,
-.upload-card p {
-  margin: 0;
-  font-size: 13px;
-  color: var(--text-muted);
-  line-height: 1.6;
-}
+/* ── Job status card ─────────────────────────────── */
 
-.dropzone {
-  border: 1px dashed var(--border);
-  background: white;
-  border-radius: 14px;
-  padding: 12px 14px;
-  text-align: center;
-  cursor: pointer;
-  transition: border-color var(--transition), background var(--transition), transform var(--transition);
-}
-
-.dropzone:hover,
-.dropzone.drag {
-  border-color: var(--accent);
-  background: rgba(227, 74, 48, 0.06);
-}
-
-.dropzone.success {
-  border-color: var(--success);
-  background: rgba(77, 124, 90, 0.08);
-}
-
-.dropzone-icon {
-  font-size: 20px;
-}
-
-.dropzone-title {
-  margin-top: 6px;
+.job-card-status {
+  font-size: 12px;
   font-weight: 700;
-  font-size: 13px;
-  color: var(--text);
-}
-
-.dropzone-sub {
-  margin-top: 4px;
-  font-size: 11px;
   color: var(--text-muted);
 }
+
+.job-card-status.job-detected {
+  color: var(--success);
+}
+
+.job-card-detail {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+  line-height: 1.4;
+}
+
+/* ── Actions row ─────────────────────────────────── */
+
+.actions-row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 8px;
+}
+
+/* ── Buttons ─────────────────────────────────────── */
 
 .btn {
-  border-radius: 14px;
+  border-radius: 12px;
   border: none;
   padding: 12px 18px;
   min-height: 42px;
   font-weight: 700;
   font-size: 13px;
   letter-spacing: 0.01em;
-  transition: transform var(--transition), box-shadow var(--transition);
+  cursor: pointer;
+  transition: transform var(--transition), box-shadow var(--transition), border-color var(--transition);
 }
 
 .btn-primary {
   width: 100%;
   background: var(--accent);
   color: white;
-  box-shadow: 0 14px 30px rgba(227, 74, 48, 0.18);
+  box-shadow: 0 12px 26px rgba(227, 74, 48, 0.18);
 }
 
 .btn-secondary {
@@ -387,7 +350,7 @@ body {
   min-height: 36px;
   padding: 8px 14px;
   font-size: 12px;
-  border-radius: 10px;
+  border-radius: var(--radius-sm);
 }
 
 .btn-primary:hover:not(:disabled) {
@@ -403,74 +366,164 @@ body {
   cursor: not-allowed;
 }
 
-.modal-overlay {
-  display: none;
-  position: fixed;
-  inset: 0;
-  z-index: 999;
-  background: rgba(11, 15, 18, 0.45);
-  padding: 24px;
-}
+/* ── Skills list ─────────────────────────────────── */
 
-.modal {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 18px;
-  box-shadow: var(--shadow);
-  max-height: 100%;
-  overflow: auto;
-}
-
-.modal-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 14px 16px;
-  border-bottom: 1px solid var(--border);
-}
-
-.modal-title {
-  font-family: var(--font-display);
-  font-size: 15px;
-  font-weight: 800;
-}
-
-.modal-close {
-  border: 0;
-  background: transparent;
+.skills-list-header {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
   color: var(--text-muted);
-  font-size: 18px;
-  line-height: 1;
-  padding: 4px;
-  cursor: pointer;
 }
 
-.modal-close:hover {
+.skills-count {
+  color: var(--accent);
+}
+
+.skills-list-body {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.skills-list-empty {
+  font-size: 12px;
+  color: var(--text-muted);
+  padding: 2px 0;
+}
+
+.skill-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 6px 5px 10px;
+  background: white;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 600;
   color: var(--text);
 }
 
-.modal-body {
-  padding: 16px;
-}
-
-.modal-hint {
-  font-size: 12px;
-  line-height: 1.5;
+.skill-chip-remove {
+  display: grid;
+  place-items: center;
+  width: 16px;
+  height: 16px;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
   color: var(--text-muted);
-  margin-bottom: 14px;
+  font-size: 13px;
+  line-height: 1;
+  padding: 0;
+  cursor: pointer;
 }
 
-.modal-footer {
-  display: flex;
-  justify-content: flex-end;
-  gap: 8px;
-  padding: 12px 16px;
-  border-top: 1px solid var(--border);
+.skill-chip-remove:hover {
+  background: rgba(178, 68, 66, 0.12);
+  color: var(--danger);
 }
+
+.skills-entry-row {
+  display: flex;
+  gap: 8px;
+}
+
+.skills-entry-row input[type="text"] {
+  flex: 1;
+  min-width: 0;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  font-family: inherit;
+  background: white;
+  color: var(--text);
+}
+
+.skills-entry-row input[type="text"]:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+/* ── Result summary card ─────────────────────────── */
+
+.result-header {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.result-score {
+  font-family: var(--font-display);
+  font-size: 34px;
+  font-weight: 900;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.result-meta {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+}
+
+.result-recommendation {
+  font-size: 13px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: var(--primary);
+}
+
+.result-job {
+  font-size: 12px;
+  color: var(--text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.result-section {
+  display: grid;
+  gap: 6px;
+}
+
+.result-section-title {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-muted);
+}
+
+.result-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.result-tag {
+  padding: 5px 9px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 600;
+  background: rgba(59, 122, 96, 0.12);
+  color: #2d4a36;
+}
+
+.result-tag.muted {
+  background: var(--surface-soft);
+  color: var(--text-muted);
+  border: 1px solid var(--border);
+}
+
+/* ── Status ──────────────────────────────────────── */
 
 .status {
-  padding: 14px 16px;
-  border-radius: 16px;
+  padding: 12px 14px;
+  border-radius: 14px;
   font-size: 12px;
   font-weight: 600;
   display: none;
@@ -494,11 +547,150 @@ body {
   color: var(--primary);
 }
 
-@keyframes pulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.55; }
+/* ── Internal views ───────────────────────────────── */
+
+.view[hidden] {
+  display: none !important;
 }
 
-@keyframes spin {
-  to { transform: rotate(360deg); }
+/* ── Skills panel (home view) ─────────────────────── */
+
+.skills-panel {
+  display: grid;
+  gap: 6px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+
+.nav-row {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 10px 14px;
+  background: none;
+  border: none;
+  border-bottom: 1px solid var(--border);
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: 600;
+  text-align: left;
+  cursor: pointer;
+  transition: background var(--transition);
+}
+
+.nav-row:last-child {
+  border-bottom: none;
+}
+
+.nav-row:hover {
+  background: var(--surface-soft);
+}
+
+.nav-row-value {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+.nav-row-value #skillsCount {
+  color: var(--accent);
+}
+
+.nav-row-chevron {
+  color: var(--text-muted);
+  font-size: 16px;
+  line-height: 1;
+}
+
+/* ── Update Skills view ───────────────────────────── */
+
+.skills-view {
+  display: grid;
+  gap: 10px;
+  padding: 12px;
+}
+
+.skills-view-topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+}
+
+.back-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 10px;
+  background: var(--surface-soft);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: border-color var(--transition);
+}
+
+.back-btn:hover {
+  border-color: var(--accent);
+}
+
+.skills-view-title {
+  font-family: var(--font-display);
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--text);
+}
+
+.card-title {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-muted);
+}
+
+.upload-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 12px;
+  background: var(--surface);
+  border: 1px dashed var(--border);
+  border-radius: var(--radius-sm);
+}
+
+.upload-card-text {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text);
+  line-height: 1.5;
+}
+
+.upload-status {
+  min-height: 14px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+.upload-status.error {
+  color: var(--danger);
+}
+
+.upload-status.success {
+  color: var(--success);
+}
+
+.upload-status.loading {
+  color: var(--accent);
 }
