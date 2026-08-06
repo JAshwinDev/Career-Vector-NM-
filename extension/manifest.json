@@ -2,6 +2,7 @@
   "manifest_version": 3,
   "name": "CareerVector",
   "version": "1.0",
+  "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA0GhtXAstUS6fKWCv7bSAPpRt/Hci8hG8p1bz6LZVpgHUl7cht5ZBojFhZGXhaqUTiGOl5Z25Dme/43pznkLiqeYlhQRYdLz+OlGei2ukYhbmXNHCEpQt85v8t9rl69VwDD1HkwewI2doo3DwC7KkKkYwhVRcOZHTd3s5co3AIrC4Y0ygQoVYvQTYZeO+XdeyPOVSynT86kNYf710GBXeud5a2NSm3eWud3WVv3qgFG5i9CaT+c17YaUtskyD0rx7KN32wL/atWN04nFHCj3arQQhmkqPom1OLTWOCqjRRHNfdHv42KGl6jmok6lLu+tES68sK9FdyAiRCdMKkLMt1QIDAQAB",
   "icons": {
     "16": "icons/icon16.png",
     "32": "icons/icon32.png",

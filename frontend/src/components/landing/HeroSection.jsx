@@ -69,14 +69,14 @@ export default function HeroSection({ onGetStarted, isLoggedIn = false }) {
   }, []);
 
   return (
-    <section className="section" ref={containerRef} style={{ height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
+    <section className="relative py-[var(--section-y)]" ref={containerRef} style={{ height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
       {/* Background Shapes */}
-      <div className="bauhaus-interactive-area" style={{ zIndex: 1 }}></div>
+      <div style={{ zIndex: 1 }}></div>
       <div className="bauhaus-shape shape-circle" style={{ top: '-10%', left: '-5%' }}></div>
       <div className="bauhaus-shape shape-arch" style={{ bottom: '0', right: '15%' }}></div>
       <div className="bauhaus-shape shape-triangle" style={{ top: '20%', right: '-5%' }}></div>
 
-      <div className="container" style={{ textAlign: 'center', zIndex: 2, pointerEvents: 'none' }}>
+      <div className="relative mx-auto max-w-[var(--container-max)] px-[clamp(1.25rem,4vw,3rem)]" style={{ textAlign: 'center', zIndex: 2, pointerEvents: 'none' }}>
         <h1 className="massive-title" style={{ marginBottom: '2rem', pointerEvents: 'auto' }}>
           <div className="reveal-wrapper"><span className="reveal-text">Career</span></div>
           <br />
@@ -94,7 +94,7 @@ export default function HeroSection({ onGetStarted, isLoggedIn = false }) {
         <div style={{ pointerEvents: 'auto' }}>
           <div className="reveal-wrapper">
             <div className="reveal-text">
-              <button className="btn-primary" onClick={onGetStarted}>
+              <button className="inline-flex cursor-pointer items-center justify-center gap-2 whitespace-nowrap rounded-[var(--radius-sm)] border border-transparent bg-[var(--primary)] p-[10px_18px] font-body text-[0.9375rem] font-semibold leading-none text-[var(--surface)] no-underline transition-all duration-[0.25s] ease-[cubic-bezier(0.25,0.1,0.25,1)] hover:-translate-y-px hover:bg-[var(--primary-soft)] hover:shadow-[var(--shadow-md)]" onClick={onGetStarted}>
                 {isLoggedIn ? "Analyze My Skills" : "Create Student Profile"}
               </button>
             </div>

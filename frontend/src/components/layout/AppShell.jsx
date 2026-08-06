@@ -26,9 +26,13 @@ export default function AppShell({ children }) {
 
   // Post-login: the application shell — fixed left sidebar + content.
   return (
-    <div className="app-shell">
+    <div className="min-h-screen bg-[var(--bg)]">
       <Sidebar />
-      <main className={`app-content${sidebarCollapsed ? " collapsed" : ""}`}>{children}</main>
+      <main
+        className={`w-full flex-1 min-h-screen py-6 px-[clamp(16px,3vw,32px)] [transition:margin-left_250ms_ease] max-md:ml-0 max-md:pt-16 ${sidebarCollapsed ? "ml-[var(--rail-w)]" : "ml-[var(--sidebar-w)]"}`}
+      >
+        {children}
+      </main>
     </div>
   );
 }

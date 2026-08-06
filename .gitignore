@@ -24,5 +24,8 @@ frontend/src/temp.txt
 temp.txt
 extension/*.zip
 
+# Extension signing key (private) - NEVER commit
+extension/key.pem
+
 # Runtime data (local JSON store fallback)
 backend/data/

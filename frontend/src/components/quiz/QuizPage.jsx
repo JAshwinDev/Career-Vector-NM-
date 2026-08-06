@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import { useIsMobile } from "../../hooks/useMediaQuery.js";
 import { logInteraction } from "../../utils/api.js";
 
 export default function QuizPage({ targetRole = "Software Developer", onQuizComplete }) {
@@ -11,6 +12,7 @@ export default function QuizPage({ targetRole = "Software Developer", onQuizComp
   const [submitted, setSubmitted] = useState(false);
   const [results, setResults] = useState(null);
   const [timeSpent, setTimeSpent] = useState(0);
+  const isMobile = useIsMobile();
 
   useEffect(() => {
     generateQuiz();
@@ -111,7 +113,7 @@ export default function QuizPage({ targetRole = "Software Developer", onQuizComp
   if (submitted && results) {
     return (
       <div style={styles.container}>
-        <div style={styles.resultsCard}>
+        <div style={{ ...styles.resultsCard, padding: isMobile ? "20px" : styles.resultsCard.padding }}>
           <h1 style={styles.resultsTitle}>Quiz Completed!</h1>
 
           <div
@@ -138,7 +140,9 @@ export default function QuizPage({ targetRole = "Software Developer", onQuizComp
           <div style={styles.skillsPerformance}>
             <h3>Skills Performance</h3>
             {Object.entries(results.skillsPerformance).map(([skill, percentage]) => (
-              <div key={skill} style={styles.skillPerformanceItem}>
+              <div key={skill} style={isMobile
+                ? { ...styles.skillPerformanceItem, gridTemplateColumns: "1fr" }
+                : styles.skillPerformanceItem}>
                 <span style={styles.skillName}>{skill}</span>
                 <div style={styles.progressBar}>
                   <div
@@ -216,7 +220,7 @@ export default function QuizPage({ targetRole = "Software Developer", onQuizComp
 
   return (
     <div style={styles.container}>
-      <div style={styles.quizCard}>
+        <div style={{ ...styles.quizCard, padding: isMobile ? "20px" : styles.quizCard.padding }}>
         <div style={styles.quizHeader}>
           <h1 style={styles.quizTitle}>{targetRole} Readiness Check</h1>
           <div style={styles.progressInfo}>
@@ -300,9 +304,9 @@ const styles = {
   container: {
     maxWidth: "900px",
     margin: "0 auto",
-    padding: "32px 20px",
+    padding: "clamp(20px, 4vw, 32px) clamp(12px, 3vw, 16px)",
     backgroundColor: "#f9fafb",
-    minHeight: "100vh"
+    minHeight: "100svh"
   },
   quizCard: {
     backgroundColor: "white",
@@ -314,6 +318,8 @@ const styles = {
     display: "flex",
     justifyContent: "space-between",
     alignItems: "center",
+    flexWrap: "wrap",
+    gap: "12px",
     marginBottom: "16px"
   },
   quizTitle: {
@@ -445,7 +451,7 @@ const styles = {
   },
   skillPerformanceItem: {
     display: "grid",
-    gridTemplateColumns: "150px 1fr 50px",
+    gridTemplateColumns: "minmax(0, 150px) 1fr 50px",
     alignItems: "center",
     gap: "15px",
     marginBottom: "15px"
@@ -474,6 +480,7 @@ const styles = {
   },
   actionsBox: {
     display: "flex",
+    flexWrap: "wrap",
     gap: "15px",
     justifyContent: "center"
   },

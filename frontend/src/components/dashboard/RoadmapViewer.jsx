@@ -1,11 +1,13 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import { useIsMobile } from "../../hooks/useMediaQuery.js";
 import { logInteraction } from "../../utils/api.js";
 
 export default function RoadmapViewer({ roadmap = [], targetRole = "", userSkills = [] }) {
   const [expandedSkill, setExpandedSkill] = useState(null);
   const [completedSkills, setCompletedSkills] = useState({});
+  const isMobile = useIsMobile();
 
   useEffect(() => {
     if (!roadmap || !roadmap.length) {
@@ -57,7 +59,7 @@ export default function RoadmapViewer({ roadmap = [], targetRole = "", userSkill
   }, 0);
 
   return (
-    <div style={styles.container}>
+    <div style={{ ...styles.container, padding: isMobile ? "clamp(20px, 4vw, 32px) clamp(12px, 3vw, 16px)" : styles.container.padding }}>
       <div style={styles.header}>
         <div>
           <h1 style={styles.title}>Learning Roadmap</h1>
@@ -221,10 +223,11 @@ const styles = {
     margin: "0 auto",
     padding: "32px 20px",
     backgroundColor: "#f9fafb",
-    minHeight: "100vh"
+    minHeight: "100svh"
   },
   header: {
     display: "flex",
+    flexWrap: "wrap",
     justifyContent: "space-between",
     alignItems: "flex-start",
     marginBottom: "24px",
@@ -243,6 +246,7 @@ const styles = {
   },
   statsBox: {
     display: "flex",
+    flexWrap: "wrap",
     gap: "12px"
   },
   stat: {
@@ -315,8 +319,10 @@ const styles = {
   },
   skillCardHeader: {
     display: "flex",
+    flexWrap: "wrap",
     justifyContent: "space-between",
     alignItems: "center",
+    gap: "12px",
     marginBottom: "12px"
   },
   skillCardTitleArea: {
@@ -416,12 +422,14 @@ const styles = {
   },
   actionButtons: {
     display: "flex",
+    flexWrap: "wrap",
     gap: "12px",
     marginTop: "24px",
     marginBottom: "20px"
   },
   downloadBtn: {
     flex: 1,
+    minWidth: "220px",
     padding: "10px 20px",
     backgroundColor: "#3b82f6",
     color: "white",
@@ -433,6 +441,7 @@ const styles = {
   },
   shareBtn: {
     flex: 1,
+    minWidth: "220px",
     padding: "10px 20px",
     backgroundColor: "#10b981",
     color: "white",

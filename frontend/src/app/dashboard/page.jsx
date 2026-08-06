@@ -85,11 +85,11 @@ function DashboardContent() {
   return (
     <>
       {savedResultLoading ? (
-        <section style={{ maxWidth: 860, margin: "0 auto", padding: "var(--space-6) 24px", color: "var(--text-secondary)" }}>
+        <section style={{ maxWidth: 860, margin: "0 auto", padding: "var(--space-6) clamp(16px, 4vw, 24px)", color: "var(--text-secondary)" }}>
           Loading saved analysis...
         </section>
       ) : savedResultError ? (
-        <section style={{ maxWidth: 860, margin: "0 auto", padding: "var(--space-6) 24px" }}>
+        <section style={{ maxWidth: 860, margin: "0 auto", padding: "var(--space-6) clamp(16px, 4vw, 24px)" }}>
           <div style={{
             background: "rgba(255,77,109,0.1)",
             border: "1px solid rgba(255,77,109,0.35)",

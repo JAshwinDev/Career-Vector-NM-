@@ -56,7 +56,7 @@ function WorkflowStep({ step, accent = "var(--accent)", onNavigate }) {
         transition: "transform 0.2s ease, box-shadow 0.2s ease",
         cursor: step.path ? "pointer" : "default"
       }}
-      className="brutalist-card"
+      className="mb-4 rounded-[var(--radius-md)] border border-[var(--border)] bg-[var(--surface)] p-4 shadow-[var(--shadow-subtle)] transition-all duration-[0.25s] ease-[cubic-bezier(0.25,0.1,0.25,1)] hover:-translate-y-[2px] hover:shadow-[var(--shadow-hover)] sm:p-6"
     >
       <div
         style={{
@@ -141,7 +141,7 @@ function WorkflowLane({ title, accent, steps, subtitle, onNavigate }) {
   );
 }
 
-export default function WorkflowSection({ standalone = false, onNavigate }) {
+export default function WorkflowSection({ onNavigate }) {
   const [overview, setOverview] = useState(null);
   const [error, setError] = useState("");
 
@@ -175,7 +175,7 @@ export default function WorkflowSection({ standalone = false, onNavigate }) {
       style={{
         maxWidth: 1180,
         margin: "0 auto",
-        padding: standalone ? "48px 24px" : "32px 24px"
+        padding: "clamp(24px, 5vw, 48px) clamp(16px, 4vw, 24px)"
       }}
     >
       <div style={{ textAlign: "center", marginBottom: 24 }}>
@@ -191,7 +191,7 @@ export default function WorkflowSection({ standalone = false, onNavigate }) {
         >
           [ End-to-End Workflow ]
         </div>
-        <h2 className="section-title">
+        <h2 className="mb-5 font-display text-[length:var(--text-subheading)] font-bold text-[var(--primary)]">
           Career Intelligence System Flow
         </h2>
         <p style={{ color: "var(--text-soft)", fontSize: "1rem", maxWidth: 760, margin: "0 auto", fontWeight: 500 }}>
@@ -235,7 +235,7 @@ export default function WorkflowSection({ standalone = false, onNavigate }) {
       <div
         style={{
           display: "grid",
-          gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))",
+          gridTemplateColumns: "repeat(auto-fit, minmax(min(320px, 100%), 1fr))",
           gap: 18,
           marginBottom: 18
         }}

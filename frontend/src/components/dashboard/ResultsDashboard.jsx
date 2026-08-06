@@ -2,7 +2,6 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import gsap from 'gsap';
-import { getPeerComparison } from '../../utils/api.js';
 
 function skillName(item) {
   if (item && typeof item === "object") return item.skill || "";
@@ -205,46 +204,7 @@ export default function ResultsDashboard({ result, onReset }) {
   const displayScore = isRoadmapOnly ? 0 : (compatibility_score || 0);
 
   const [activeTab, setActiveTab] = useState(isRoadmapOnly ? 'roadmap' : 'overview');
-  const [peerComparison, setPeerComparison] = useState(null);
-  const [peerLoading, setPeerLoading] = useState(false);
-  const tabs = isRoadmapOnly ? ['roadmap'] : (hasGeneratedRoadmap ? ['overview', 'roadmap', 'peers'] : ['overview', 'roadmap', 'alternatives', 'peers']);
-
-  useEffect(() => {
-    let cancelled = false;
-
-    async function loadPeers() {
-      if (isRoadmapOnly || !displayTargetRole) return;
-
-      setPeerLoading(true);
-      try {
-        const data = await getPeerComparison({
-          role: displayTargetRole,
-          score: displayScore,
-          entryId: result.historyId
-        });
-        if (!cancelled) setPeerComparison(data);
-      } catch {
-        if (!cancelled) {
-          setPeerComparison({
-            role: displayTargetRole,
-            score: displayScore,
-            peerCount: 0,
-            avgScore: displayScore,
-            aheadPercent: 0,
-            percentile: 100,
-            leaderboard: []
-          });
-        }
-      } finally {
-        if (!cancelled) setPeerLoading(false);
-      }
-    }
-
-    loadPeers();
-    return () => {
-      cancelled = true;
-    };
-  }, [displayTargetRole, displayScore, isRoadmapOnly, result.historyId]);
+  const tabs = isRoadmapOnly ? ['roadmap'] : (hasGeneratedRoadmap ? ['overview', 'roadmap'] : ['overview', 'roadmap', 'alternatives']);
 
   const tabStyle = (active) => ({
     padding: '0.5rem 1.25rem',
@@ -256,14 +216,14 @@ export default function ResultsDashboard({ result, onReset }) {
   });
 
   return (
-    <section className="section container" style={{ maxWidth: 1000 }}>
+    <section className="relative mx-auto max-w-[var(--container-max)] px-[clamp(1.25rem,4vw,3rem)] py-[var(--section-y)]" style={{ maxWidth: 1000 }}>
       {/* Header */}
       <div style={{
         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
         marginBottom: "var(--space-5)", flexWrap: 'wrap', gap: "1rem",
       }}>
         <div>
-          <h2 className="section-title" style={{ fontSize: "var(--text-subheading)", marginBottom: "0.75rem" }}>
+          <h2 className="mb-5 font-display text-[length:var(--text-subheading)] font-bold text-[var(--primary)]" style={{ fontSize: "var(--text-subheading)", marginBottom: "0.75rem" }}>
             {isRoadmapOnly ? 'YOUR LEARNING ROADMAP' : (hasGeneratedRoadmap ? 'ANALYSIS & ROADMAP FOR' : 'YOUR ANALYSIS FOR')} <span style={{ color: 'var(--accent)' }}>{displayTargetRole}</span>
           </h2>
           {(recommendation || summary) && (
@@ -296,18 +256,18 @@ export default function ResultsDashboard({ result, onReset }) {
             </div>
           )}
         </div>
-        <button onClick={onReset} className="btn-primary">
+        <button onClick={onReset} className="inline-flex cursor-pointer items-center justify-center gap-2 whitespace-nowrap rounded-[var(--radius-sm)] border border-transparent bg-[var(--primary)] p-[10px_18px] font-body text-[0.9375rem] font-semibold leading-none text-[var(--surface)] no-underline transition-all duration-[0.25s] ease-[cubic-bezier(0.25,0.1,0.25,1)] hover:-translate-y-px hover:bg-[var(--primary-soft)] hover:shadow-[var(--shadow-md)]">
           ← START OVER
         </button>
       </div>
 
       {!isRoadmapOnly && (
-        <div className="brutalist-card brutalist-card-accent" style={{
+        <div className="mb-4 rounded-[var(--radius-md)] border border-[var(--border)] border-t-[3px] border-t-[var(--accent)] bg-[var(--surface)] p-4 shadow-[var(--shadow-subtle)] transition-all duration-[0.25s] ease-[cubic-bezier(0.25,0.1,0.25,1)] hover:-translate-y-[2px] hover:shadow-[var(--shadow-hover)] sm:p-6" style={{
           display: 'flex', alignItems: 'center', gap: "var(--space-6)", flexWrap: 'wrap',
           marginBottom: "var(--space-5)"
         }}>
           <ScoreRing score={displayScore} />
-          <div style={{ flex: 1, minWidth: 280 }}>
+          <div style={{ flex: 1, minWidth: 0 }}>
             <div style={{
               fontFamily: 'var(--font-display)', fontSize: "1.0625rem", color: 'var(--primary)',
               marginBottom: "0.75rem", textTransform: 'uppercase', fontWeight: 700
@@ -340,7 +300,7 @@ export default function ResultsDashboard({ result, onReset }) {
       )}
 
       {/* Tabs */}
-      <div style={{ display: 'flex', borderBottom: "1px solid var(--border)", marginBottom: "var(--space-5)" }}>
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: "0.5rem", borderBottom: "1px solid var(--border)", marginBottom: "var(--space-5)" }}>
         {tabs.map(tab => (
           <button key={tab} onClick={() => setActiveTab(tab)} style={tabStyle(activeTab === tab)}>
             {tab === 'roadmap' ? 'COURSES' : tab}
@@ -349,7 +309,7 @@ export default function ResultsDashboard({ result, onReset }) {
       </div>
 
       {/* Tab content */}
-      <div className="brutalist-card" style={{ animation: 'fadeIn 0.3s ease' }}>
+      <div className="mb-4 rounded-[var(--radius-md)] border border-[var(--border)] bg-[var(--surface)] p-4 shadow-[var(--shadow-subtle)] transition-all duration-[0.25s] ease-[cubic-bezier(0.25,0.1,0.25,1)] hover:-translate-y-[2px] hover:shadow-[var(--shadow-hover)] sm:p-6" style={{ animation: 'fadeIn 0.3s ease' }}>
         {activeTab === 'overview' && (
           <div>
             <div style={{ marginBottom: "var(--space-5)" }}>
@@ -369,7 +329,7 @@ export default function ResultsDashboard({ result, onReset }) {
               </div>
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: "var(--space-5)" }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: "var(--space-5)" }}>
               <div style={{ background: "var(--bg-soft)", padding: "1.25rem", borderRadius: "var(--radius-md)" }}>
                 <h3 style={{
                   fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: "0.9375rem",
@@ -458,78 +418,6 @@ export default function ResultsDashboard({ result, onReset }) {
             {Object.entries(all_role_scores).map(([role, score]) => (
               <RoleBar key={role} role={role} score={score} isTarget={role === target_role} />
             ))}
-          </div>
-        )}
-
-        {activeTab === 'peers' && (
-          <div>
-            <h3 style={{
-              fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: "1.25rem", marginBottom: "0.75rem",
-              textTransform: "uppercase"
-            }}>PEER POSITION</h3>
-            <p style={{ color: 'var(--text-soft)', fontSize: "0.9375rem", fontWeight: 600, marginBottom: "var(--space-5)", textTransform: "uppercase" }}>
-              {peerComparison?.peerCount
-                ? `COMPARED WITH ${peerComparison.peerCount} STUDENT${peerComparison.peerCount === 1 ? "" : "S"} FOCUSING ON ${peerComparison.role || displayTargetRole}.`
-                : `NO OTHER STUDENT PROFILES ARE SAVED FOR ${peerComparison?.role || displayTargetRole} YET.`}
-            </p>
-
-            {peerLoading ? (
-              <div style={{ color: 'var(--text-soft)', fontSize: "0.9375rem", fontWeight: 600 }}>LOADING PEER BENCHMARK...</div>
-            ) : (
-              <>
-                <div style={{
-                  display: 'grid',
-                  gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))',
-                  border: "1px solid var(--border)",
-                  marginBottom: "var(--space-5)"
-                }}>
-                  {[
-                    { label: 'Peers Ahead', value: peerComparison?.peerCount ? `${peerComparison?.aheadPercent || 0}%` : 'N/A' },
-                    { label: 'Your Score', value: `${displayScore}%` },
-                    { label: 'Peer Average', value: peerComparison?.peerCount ? `${peerComparison?.avgScore || 0}%` : 'N/A' },
-                    { label: 'Peer Count', value: peerComparison?.peerCount || 0 }
-                  ].map((item, index) => (
-                    <div key={item.label} style={{
-                      padding: "1rem",
-                      borderRight: index < 3 ? "1px solid var(--border)" : "none",
-                      minHeight: 110
-                    }}>
-                      <div style={{ color: "var(--text-soft)", fontSize: "0.8125rem", textTransform: "uppercase", letterSpacing: "0.08em", fontWeight: 700, marginBottom: "0.75rem" }}>
-                        {item.label}
-                      </div>
-                      <div style={{ fontFamily: "var(--font-display)", fontSize: "2rem", lineHeight: 1, color: "var(--primary)", fontWeight: 700 }}>
-                        {item.value}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-
-                <div>
-                  <h4 style={{ fontFamily: 'var(--font-display)', fontSize: "1.0625rem", marginBottom: "1rem", textTransform: "uppercase" }}>
-                    ROLE LEADERBOARD
-                  </h4>
-                  {(peerComparison?.leaderboard || []).length ? peerComparison.leaderboard.map((item) => (
-                    <div key={`${item.rank}-${item.label}`} style={{
-                      display: 'grid',
-                      gridTemplateColumns: '48px 1fr auto',
-                      gap: '0.875rem',
-                      alignItems: 'center',
-                      padding: '0.75rem 0',
-                      borderBottom: "1px solid var(--border)",
-                      color: item.isCurrent ? "var(--accent)" : "var(--primary)"
-                    }}>
-                      <strong style={{ fontFamily: 'var(--font-display)', fontSize: "1.0625rem" }}>#{item.rank}</strong>
-                      <span style={{ fontWeight: 700, textTransform: "uppercase", fontSize: "0.9375rem" }}>{item.isCurrent ? "You" : item.label}</span>
-                      <strong style={{ fontFamily: 'var(--font-display)', fontSize: "1.125rem" }}>{item.score}%</strong>
-                    </div>
-                  )) : (
-                    <div style={{ color: 'var(--text-soft)', fontSize: "0.9375rem", fontWeight: 600 }}>
-                      THIS IS THE FIRST SAVED BENCHMARK FOR THIS ROLE. THE LEADERBOARD WILL APPEAR ONLY AFTER OTHER STUDENTS SAVE ANALYSES FOR THE SAME ROLE.
-                    </div>
-                  )}
-                </div>
-              </>
-            )}
           </div>
         )}
       </div>

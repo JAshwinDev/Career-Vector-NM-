@@ -407,12 +407,21 @@ async function handleUploadResume() {
     return;
   }
 
+  // Prevent a second upload while one is already in flight (e.g. a stray
+  // change event or a double-click on the pick confirm button).
+  if (els.uploadResumeBtn.disabled) {
+    return;
+  }
+
   const session = await validateSession();
   if (!session.token) {
     setUploadStatus("Sign in to upload a resume.", "error");
     return;
   }
 
+  // Keep the panel responsive and indicate work is happening.
+  els.uploadResumeBtn.disabled = true;
+  els.uploadResumeBtn.textContent = "Uploading…";
   setUploadStatus("Uploading and extracting skills…", "loading");
 
   try {
@@ -439,6 +448,11 @@ async function handleUploadResume() {
     }
 
     const uploadedSkills = Array.isArray(data.skills) ? data.skills : [];
+    if (!uploadedSkills.length) {
+      setUploadStatus("No skills were extracted from this resume.", "error");
+      return;
+    }
+
     const existing = await new Promise((resolve) => {
       chrome.storage.local.get(["userSkills"], (items) =>
         resolve(Array.isArray(items.userSkills) ? items.userSkills : [])
@@ -466,12 +480,16 @@ async function handleUploadResume() {
     );
 
     renderSkillsList();
+    renderSkillsCount();
     setUploadStatus(
-      `✓ Extracted ${uploadedSkills.length} skill${uploadedSkills.length === 1 ? "" : "s"} from your resume.`,
+      `✓ Extracted ${merged.length} skill${merged.length === 1 ? "" : "s"} from your resume.`,
       "success"
     );
   } catch (err) {
     setUploadStatus(err.message, "error");
+  } finally {
+    els.uploadResumeBtn.disabled = false;
+    els.uploadResumeBtn.textContent = "Upload Resume";
   }
 }
 
@@ -701,6 +719,10 @@ document.addEventListener("DOMContentLoaded", async () => {
     document.getElementById("openDashboardBtn").addEventListener("click", (event) => {
       event.preventDefault();
       openDashboard(`${CONFIG.FRONTEND_URL}/dashboard`);
+    });
+
+    document.getElementById("dismissBtn").addEventListener("click", () => {
+      window.close();
     });
 
     document.getElementById("updateSkillsBtn").addEventListener("click", () => showView("skills"));

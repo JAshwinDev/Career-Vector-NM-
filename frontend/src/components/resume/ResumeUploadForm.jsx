@@ -149,8 +149,8 @@ export default function ResumeUploadForm({ onUploadSuccess }) {
     <section
       style={{
         maxWidth: 800,
-        margin: "48px auto",
-        padding: "var(--space-6) 24px",
+        margin: "clamp(24px, 5vw, 48px) auto",
+        padding: "var(--space-6) clamp(16px, 4vw, 24px)",
         color: "var(--text-primary)"
       }}
     >
@@ -179,7 +179,7 @@ export default function ResumeUploadForm({ onUploadSuccess }) {
         style={{
           border: "2px dashed rgba(99, 102, 241, 0.4)",
           borderRadius: 16,
-          padding: 32,
+          padding: "clamp(20px, 4vw, 32px)",
           textAlign: "center",
           cursor: uploading ? "not-allowed" : "pointer",
           background: "rgba(99, 102, 241, 0.05)",
@@ -379,6 +379,7 @@ export default function ResumeUploadForm({ onUploadSuccess }) {
         style={{
           marginTop: 32,
           display: "flex",
+          flexWrap: "wrap",
           gap: 12,
           justifyContent: "center"
         }}

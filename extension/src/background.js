@@ -559,6 +559,8 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   }
 });
 
+// The toolbar icon opens the action popup defined by manifest "default_popup".
+
 // Initialize extension on install
 chrome.runtime.onInstalled.addListener(() => {
   console.log("Career Vector extension installed");

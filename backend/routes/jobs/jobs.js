@@ -2,6 +2,56 @@ const express = require("express");
 const router = express.Router();
 const Job = require("../../models/Job");
 const { getRemotiveJobs } = require("../../services/remotiveClient");
+const { getJSearchJobs } = require("../../services/jsearchClient");
+
+// Map JSearch job format to our schema
+function mapJSearchJob(job) {
+  return {
+    _id: String(job.job_id || `${job.employer_name || ""}-${job.job_title || ""}`),
+    title: job.job_title || "",
+    company: job.employer_name || "",
+    location: {
+      city: job.job_city || "",
+      state: job.job_state || "",
+      country: job.job_country ? job.job_country.toUpperCase() === "IN" ? "India" : job.job_country : "India",
+      remote: Boolean(job.job_is_remote)
+    },
+    experience_level: normalizeExperience(job.job_required_experience?.required_experience_in_months),
+    jobType: job.job_employment_type || "full-time",
+    salary: {
+      min: job.job_min_salary ?? null,
+      max: job.job_max_salary ?? null,
+      currency: (job.job_salary_currency || "INR").toUpperCase()
+    },
+    skills: Array.isArray(job.job_required_skills) ? job.job_required_skills : [],
+    description: job.job_description || "",
+    requirements: job.job_highlights?.Qualifications || [],
+    url: job.job_apply_link || "",
+    source: "jsearch",
+    postedDate: job.job_posted_at_datetime_utc ? new Date(job.job_posted_at_datetime_utc) : undefined,
+    companyLogo: job.employer_logo || ""
+  };
+}
+
+function normalizeExperience(months) {
+  if (months == null) return "mid";
+  if (months <= 12) return "entry";
+  if (months <= 48) return "mid";
+  if (months <= 96) return "senior";
+  return "lead";
+}
+
+async function fetchJobs({ search, location, limit, country } = {}) {
+  const result = await getJSearchJobs({ query: search, location, country, limit });
+
+  if (result.configured && result.jobs.length) {
+    return { jobs: result.jobs.map(mapJSearchJob), total: result.total, page: 1, pages: 1 };
+  }
+
+  // Fallback: Remotive (remote jobs) when no JSearch key is configured.
+  const remotive = await getRemotiveJobs({ search, limit });
+  return { jobs: remotive.jobs.map(mapRemotiveJob), total: remotive.total, page: 1, pages: 1 };
+}
 
 // Helper to calculate match score
 function calculateMatch(job, userSkills) {
@@ -53,22 +103,20 @@ function mapRemotiveJob(job) {
   };
 }
 
-// GET /jobs - Search jobs with filters from Remotive API
+// GET /jobs - Search jobs with filters (India-first via JSearch, Remotive fallback)
 router.get("/", async (req, res) => {
   try {
-    const { search, limit = 20 } = req.query;
+    const { search, limit = 20, location } = req.query;
 
-    const result = await getRemotiveJobs({ search, limit });
-
-    res.json({
-      jobs: result.jobs.map(mapRemotiveJob),
-      total: result.total,
-      page: 1,
-      limit: Number(limit),
-      pages: 1
+    const result = await fetchJobs({
+      search,
+      location: location || undefined,
+      limit: Number(limit) || 20
     });
+
+    res.json(result);
   } catch (err) {
-    res.status(500).json({ error: "Failed to fetch remote jobs.", details: err.message });
+    res.status(500).json({ error: "Failed to fetch jobs.", details: err.message });
   }
 });
 
@@ -146,12 +194,12 @@ router.post("/search/by-match", async (req, res) => {
       return res.status(400).json({ error: "userSkills array is required." });
     }
     
-    // We can search remotive using the first skill or a general IT category
+    // Search for jobs in the target region (defaults to Tamil Nadu, India).
     const mainSkill = userSkills[0] || "developer";
-    const result = await getRemotiveJobs({ search: mainSkill, limit: 50 });
+    const fetched = await fetchJobs({ search: mainSkill, limit: 50 });
 
-    let jobs = result.jobs.map(mapRemotiveJob);
-    
+    let jobs = fetched.jobs;
+
     // Calculate match scores for all fetched jobs
     jobs = jobs.map(job => {
       const match = calculateMatch(job, userSkills);

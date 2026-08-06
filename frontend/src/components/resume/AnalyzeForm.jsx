@@ -112,13 +112,13 @@ export default function AnalyzeForm({ onResult, onLoading, user, onLoginRequired
   };
 
   return (
-    <section id="analyze" className="section container">
+    <section id="analyze" className="relative mx-auto max-w-[var(--container-max)] px-[clamp(1.25rem,4vw,3rem)] py-[var(--section-y)]">
       <div style={{ textAlign: "center", marginBottom: "var(--space-6)" }}>
-        <h2 className="section-title">Start Your Analysis</h2>
+        <h2 className="mb-5 font-display text-[length:var(--text-subheading)] font-bold text-[var(--primary)]">Start Your Analysis</h2>
         <p>Upload your resume or enter your skills, then pick one target role. Your report is saved to your student profile.</p>
       </div>
 
-      <div className="brutalist-card brutalist-card-accent" style={{ maxWidth: 820, margin: "0 auto", padding: "var(--space-5)" }}>
+      <div className="mb-4 rounded-[var(--radius-md)] border border-[var(--border)] border-t-[3px] border-t-[var(--accent)] bg-[var(--surface)] p-4 shadow-[var(--shadow-subtle)] transition-all duration-[0.25s] ease-[cubic-bezier(0.25,0.1,0.25,1)] hover:-translate-y-[2px] hover:shadow-[var(--shadow-hover)] sm:p-6" style={{ maxWidth: 820, margin: "0 auto", padding: "var(--space-5)" }}>
         <div style={{ marginBottom: "var(--space-5)" }}>
           <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", marginBottom: "1rem" }}>
             <div style={{
@@ -221,7 +221,12 @@ export default function AnalyzeForm({ onResult, onLoading, user, onLoginRequired
           </div>
         )}
 
-        <button className={canSubmit ? "btn-brutal" : "btn-brutal-outline"} onClick={handleSubmit} style={{ width: "100%", fontSize: "1rem", padding: "0.875rem" }}>
+        <button
+          className={canSubmit
+            ? "inline-flex cursor-pointer items-center justify-center gap-2 whitespace-nowrap rounded-[var(--radius-sm)] border border-transparent bg-[var(--primary)] p-[10px_18px] font-body text-[0.9375rem] font-semibold leading-none text-[var(--surface)] no-underline transition-all duration-[0.25s] ease-[cubic-bezier(0.25,0.1,0.25,1)] hover:-translate-y-px hover:bg-[var(--primary-soft)] hover:shadow-[var(--shadow-md)]"
+            : "inline-flex cursor-pointer items-center justify-center gap-2 whitespace-nowrap rounded-[var(--radius-sm)] border border-[var(--border)] bg-transparent p-[10px_18px] font-body text-[0.9375rem] font-semibold leading-none text-[var(--primary)] no-underline transition-all duration-[0.25s] ease-[cubic-bezier(0.25,0.1,0.25,1)] hover:-translate-y-px hover:bg-[var(--bg-soft)] hover:shadow-[var(--shadow-subtle)]"}
+          onClick={handleSubmit} style={{ width: "100%", fontSize: "1rem", padding: "0.875rem" }}
+        >
           {!user ? "LOGIN TO ANALYZE" : canSubmit ? "GENERATE CAREER ANALYSIS" : "COMPLETE STEPS TO CONTINUE"}
         </button>
       </div>

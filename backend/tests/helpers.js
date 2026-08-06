@@ -15,6 +15,10 @@ process.env.REMOTIVE_CACHE_TTL_MS = "60000";
 // always exercise the local fallback path.
 process.env.GEMINI_API_KEY = "";
 
+// Keep tests offline/deterministic: never call the JSearch API, so /jobs
+// falls back to the mocked Remotive source.
+process.env.JSEARCH_API_KEY = "";
+
 // Isolate from any real Mongo in backend/.env so tests never touch a live
 // database (also lets the process exit cleanly after the suite runs).
 process.env.MONGO_URI = "";

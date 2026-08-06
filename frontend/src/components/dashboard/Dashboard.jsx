@@ -85,7 +85,7 @@ export default function Dashboard() {
 
   if (loading) {
     return (
-      <section style={{ padding: "120px 24px 80px", textAlign: "center" }}>
+      <section style={{ padding: "clamp(48px, 8vw, 120px) 16px 80px", textAlign: "center" }}>
         <div style={{ color: "var(--text-secondary)" }}>Loading your dashboard...</div>
       </section>
     );
@@ -93,7 +93,7 @@ export default function Dashboard() {
 
   if (error) {
     return (
-      <section style={{ padding: "120px 24px 80px", maxWidth: 900, margin: "0 auto" }}>
+      <section style={{ padding: "clamp(48px, 8vw, 120px) 16px 80px", maxWidth: 900, margin: "0 auto" }}>
         <div
           style={{
             background: "rgba(255,77,109,0.1)",
@@ -114,7 +114,7 @@ export default function Dashboard() {
       style={{
         maxWidth: 1000,
         margin: "0 auto",
-        padding: "var(--space-7) 24px",
+        padding: "clamp(24px, 5vw, 48px) clamp(16px, 4vw, 24px)",
         color: "var(--text-primary)"
       }}
     >
@@ -122,7 +122,7 @@ export default function Dashboard() {
       <div style={{ marginBottom: 32 }}>
         <h1
           style={{
-            fontSize: 28,
+            fontSize: "clamp(24px, 3vw, 28px)",
             fontWeight: 700,
             marginBottom: 6,
             background: "linear-gradient(135deg, #6366f1, #8b5cf6)",
@@ -256,7 +256,7 @@ export default function Dashboard() {
                     e.currentTarget.style.background = "rgba(99, 102, 241, 0.05)";
                   }}
                 >
-                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "start" }}>
+                  <div style={{ display: "flex", flexWrap: "wrap", gap: 12, justifyContent: "space-between", alignItems: "start" }}>
                     <div style={{ flex: 1 }}>
                       <h3
                         style={{

@@ -30,7 +30,7 @@ body {
   margin: 0;
   min-width: 360px;
   width: 400px;
-  background: var(--bg);
+  background: var(--surface);
   color: var(--text);
   font-family: var(--font-body);
 }
@@ -102,10 +102,32 @@ body {
 
 .header-actions {
   display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  align-items: flex-end;
-  gap: 10px;
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+}
+
+.dismiss-btn {
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 18px;
+  line-height: 1;
+  cursor: pointer;
+  transition: background var(--transition), color var(--transition), border-color var(--transition);
+}
+
+.dismiss-btn:hover {
+  background: var(--surface-soft);
+  color: var(--text-strong);
+  border-color: var(--border-strong);
+}
+
+.dismiss-btn:active {
+  transform: scale(0.94);
 }
 
 .header-badge,

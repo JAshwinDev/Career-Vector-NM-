@@ -285,15 +285,6 @@ export async function getUserProfile(userId) {
   return parseJsonResponse(response, "Failed to fetch user profile");
 }
 
-export async function updateUserProfile(userId, profileData) {
-  const response = await fetch(`${API_BASE_URL}/auth/user/${userId}`, {
-    method: "PUT",
-    headers: { "Content-Type": "application/json", ...authHeaders() },
-    body: JSON.stringify(profileData)
-  });
-  return parseJsonResponse(response, "Failed to update profile");
-}
-
 // ============ Jobs Functions ============
 export async function searchJobs(filters = {}) {
   const params = new URLSearchParams();

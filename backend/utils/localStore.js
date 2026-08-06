@@ -104,19 +104,6 @@ function getUserById(id) {
   });
 }
 
-function updateUser(id, updates) {
-  const data = readStore();
-  const user = data.users.find((item) => item._id === id || item.id === id);
-  if (!user) return null;
-
-  Object.entries(updates).forEach(([key, value]) => {
-    if (value !== undefined) user[key] = value;
-  });
-  user.updatedAt = now();
-  writeStore(data);
-  return clone(user);
-}
-
 function createResumeProfile(input) {
   const data = readStore();
   const profile = {
@@ -185,6 +172,5 @@ module.exports = {
   isMongoReady,
   listHistory,
   readStore,
-  updateUser,
   upsertUser
 };

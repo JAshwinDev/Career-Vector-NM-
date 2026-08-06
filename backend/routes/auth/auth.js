@@ -163,36 +163,6 @@ router.get("/user/:id", requireAuth, async (req, res) => {
   }
 });
 
-// PUT /auth/user/:id - Update user profile (only the authenticated owner)
-router.put("/user/:id", requireAuth, async (req, res) => {
-  try {
-    if (String(req.params.id) !== req.userId) {
-      return res.status(403).json({ error: "You can only update your own profile." });
-    }
-
-    const { name, currentRole, targetRole, preferences } = req.body;
-
-    const updates = {
-      ...(name && { name }),
-      ...(currentRole && { currentRole }),
-      ...(targetRole && { targetRole }),
-      ...(preferences && { preferences })
-    };
-
-    const user = localStore.isMongoReady(mongoose)
-      ? await User.findByIdAndUpdate(req.params.id, updates, { new: true })
-      : localStore.updateUser(req.params.id, updates);
-
-    if (!user) {
-      return res.status(404).json({ error: "User not found." });
-    }
-
-    return res.json(user);
-  } catch (err) {
-    return res.status(500).json({ error: "Failed to update user.", details: err.message });
-  }
-});
-
 // POST /auth/logout - Revoke the presented token (if any) so cached copies of
 // the same session in other clients (e.g. the extension) stop validating.
 router.post("/logout", (req, res) => {
