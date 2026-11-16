@@ -25,8 +25,11 @@ fi
 
 # ── Install deps ──
 echo -e "${YELLOW}[1/4] Python ML dependencies...${RESET}"
-pip install -r ml-service/requirements.txt -q --break-system-packages 2>/dev/null || \
-pip install -r ml-service/requirements.txt -q
+if pip install --help 2>/dev/null | grep -q -- "--break-system-packages"; then
+  pip install -r ml-service/requirements.txt -q --break-system-packages
+else
+  pip install -r ml-service/requirements.txt -q
+fi
 
 echo -e "${YELLOW}[2/4] Backend Node.js dependencies...${RESET}"
 cd backend && npm install --silent && cd ..

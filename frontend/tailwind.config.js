@@ -10,7 +10,7 @@ module.exports = {
         // Career Vector color scheme
         cream: "#FAF9F6",          // background
         ink: "#1a1a1a",            // primary text
-        accent: "#E8472A",         // brand accent (orange-red)
+        accent: "#FF6A3D",         // brand accent — mirrors --accent in src/app/globals.css
         logo: "#000000",           // logo black
         "surface": "#FFFFFF",
         "ink-soft": "#57534E",

@@ -327,6 +327,7 @@ const styles = {
   },
   skillCardTitleArea: {
     display: "flex",
+    flexWrap: "wrap",
     gap: "12px",
     alignItems: "flex-start"
   },

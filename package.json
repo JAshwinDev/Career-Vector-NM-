@@ -9,7 +9,7 @@
     "backend": "cd backend && node server.js",
     "frontend": "cd frontend && npm run dev",
     "build": "cd frontend && npm run build",
-    "start": "concurrently \"npm run ml\" \"npm run backend\""
+    "start": "concurrently \"npm run ml\" \"npm run backend\" \"npm run frontend\""
   },
   "devDependencies": {
     "concurrently": "^8.2.2"

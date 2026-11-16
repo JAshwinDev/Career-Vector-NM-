@@ -229,10 +229,10 @@ export default function LoginPage({ onLoginSuccess }) {
   }
 
   return (
-    <section className="grid min-h-screen place-items-center bg-[radial-gradient(60%_50%_at_0%_0%,rgba(255,106,61,0.08),transparent_70%),radial-gradient(50%_45%_at_100%_100%,rgba(46,139,122,0.08),transparent_70%),var(--bg)] p-6">
-      <div className="grid w-full min-h-[640px] max-w-[1080px] grid-cols-[1.15fr_1fr] overflow-hidden rounded-[28px] border border-[var(--border)] bg-[var(--surface)] shadow-[var(--shadow-lg)] max-[860px]:min-h-0 max-[860px]:max-w-[480px] max-[860px]:grid-cols-1">
-        {/* Left showcase panel */}
-        <aside className="relative flex flex-col gap-8 overflow-hidden bg-[radial-gradient(90%_70%_at_85%_-10%,rgba(255,106,61,0.22),transparent_60%),radial-gradient(70%_60%_at_-10%_110%,rgba(46,139,122,0.18),transparent_60%),linear-gradient(160deg,#2A2824,#1E1C19)] px-11 pb-9 pt-11 text-[#F5F3EE] max-[860px]:gap-6 max-[860px]:px-7 max-[860px]:py-8">
+    <section className="grid min-h-screen place-items-center overflow-y-auto bg-[radial-gradient(60%_50%_at_0%_0%,rgba(255,106,61,0.08),transparent_70%),radial-gradient(50%_45%_at_100%_100%,rgba(46,139,122,0.08),transparent_70%),var(--bg)] p-4 sm:p-6">
+      <div className="my-auto grid w-full min-h-0 max-w-[1080px] lg:min-h-[640px] lg:grid-cols-[1.15fr_1fr] grid-cols-1 overflow-hidden rounded-[28px] border border-[var(--border)] bg-[var(--surface)] shadow-[var(--shadow-lg)]">
+        {/* Left showcase panel - hidden on mobile/tablet */}
+        <aside className="hidden lg:flex flex-col gap-8 overflow-hidden bg-[radial-gradient(90%_70%_at_85%_-10%,rgba(255,106,61,0.22),transparent_60%),radial-gradient(70%_60%_at_-10%_110%,rgba(46,139,122,0.18),transparent_60%),linear-gradient(160deg,#2A2824,#1E1C19)] px-11 pb-9 pt-11 text-[#F5F3EE]">
           <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(40%_30%_at_70%_15%,rgba(255,138,92,0.14),transparent_70%),radial-gradient(35%_30%_at_20%_85%,rgba(46,139,122,0.14),transparent_70%)]" aria-hidden="true" />
 
           <div className="relative z-[1] flex items-center gap-3">
@@ -244,12 +244,12 @@ export default function LoginPage({ onLoginSuccess }) {
 
           <div className="relative z-[1]">
             <span className="mb-[14px] inline-flex items-center gap-2 text-xs font-bold uppercase tracking-[0.14em] text-[var(--accent-soft)] before:h-[2px] before:w-[26px] before:rounded-[2px] before:bg-[var(--accent)] before:content-['']">For students &amp; job seekers</span>
-            <h1 className="mb-4 font-display text-[clamp(2rem,3.4vw,2.75rem)] font-extrabold leading-[1.08] tracking-[-0.02em]">
+            <h1 className="mb-4 font-display text-[clamp(2rem,3.4vw,2.75rem)] font-extrabold leading-[1.08] tracking-[-0.02em] text-white">
               Your career path,
               <br />
               <span className="bg-[linear-gradient(120deg,var(--accent-soft),var(--accent-bright))] bg-clip-text text-transparent [-webkit-text-fill-color:transparent]">mapped out.</span>
             </h1>
-            <p className="m-0 max-w-[400px] text-[16px] font-normal leading-[1.6] text-[rgba(245,243,238,0.72)]">
+            <p className="m-0 max-w-[400px] text-[16px] font-normal leading-[1.6] text-[rgba(245,243,238,0.85)]">
               Go from &quot;where do I start?&quot; to a clear, personalized plan — resume analysis,
               skill gap detection, and job matching powered by AI.
             </p>
@@ -284,8 +284,8 @@ export default function LoginPage({ onLoginSuccess }) {
         </aside>
 
         {/* Right login panel */}
-        <div className="grid place-items-center bg-[var(--surface)] p-[40px_32px] max-[860px]:p-[36px_24px]">
-          <div className="flex w-full max-w-[400px] flex-col items-center gap-4 text-center max-[480px]:p-[32px_24px]">
+        <div className="grid place-items-center bg-[var(--surface)] p-[40px_32px] lg:p-[48px_40px] px-4 py-8 lg:px-0 lg:py-0">
+          <div className="flex w-full max-w-[420px] flex-col items-center gap-4 text-center px-4">
             <div className="grid h-[52px] w-[52px] place-items-center rounded-[16px] border border-[rgba(255,106,61,0.25)] bg-[var(--accent-tint)] text-[var(--accent)] [&_svg]:h-6 [&_svg]:w-6">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M20 6L9 17l-5-5" />

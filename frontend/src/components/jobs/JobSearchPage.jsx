@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { getJobsBySkills, logInteraction, searchJobs } from "../../utils/api";
+import { INDIAN_STATES, STATE_DISTRICTS, formatLocationForAPI } from "../../data/indianStatesDistricts";
 
 const iconProps = {
   viewBox: "0 0 24 24",
@@ -70,7 +71,17 @@ const icons = {
 // no raw HTML tags or unsafe attributes are ever displayed.
 function sanitizeHtml(html) {
   if (!html) return "";
-  if (typeof DOMParser === "undefined") return html;
+  // Server render (no DOMParser): escape the markup instead of passing raw
+  // HTML to dangerouslySetInnerHTML. The client re-sanitizes with DOMParser
+  // below, so rendered output after hydration is unchanged.
+  if (typeof DOMParser === "undefined") {
+    return String(html)
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#39;");
+  }
 
   const doc = new DOMParser().parseFromString(html, "text/html");
   const drop = new Set([
@@ -131,13 +142,16 @@ function skillName(item) {
 
 export default function JobSearchPage({ userSkills: initialUserSkills = [], onJobSelect }) {
   const [userSkills, setUserSkills] = useState(initialUserSkills);
-  const [location, setLocation] = useState("Tamil Nadu, India");
+  const [locationState, setLocationState] = useState("Tamil Nadu");
+  const [locationDistrict, setLocationDistrict] = useState("");
   const [experienceLevel, setExperienceLevel] = useState("mid");
   const [searchQuery, setSearchQuery] = useState("");
   const [jobs, setJobs] = useState([]);
   const [loading, setLoading] = useState(false);
   const [selectedJob, setSelectedJob] = useState(null);
   const [jobMatches, setJobMatches] = useState({});
+
+  const location = formatLocationForAPI(locationState, locationDistrict);
 
   // UI-only presentation state (no data flow / API changes).
   const [remoteOnly, setRemoteOnly] = useState(false);
@@ -181,7 +195,7 @@ export default function JobSearchPage({ userSkills: initialUserSkills = [], onJo
 
   useEffect(() => {
     setUserSkills(Array.isArray(initialUserSkills) ? initialUserSkills : []);
-    handleSearch({ searchQuery: "", location: "Tamil Nadu, India", experienceLevel: "mid" });
+    handleSearch({ searchQuery: "", experienceLevel: "mid" });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [initialUserSkills]);
 
@@ -380,14 +394,35 @@ export default function JobSearchPage({ userSkills: initialUserSkills = [], onJo
         <div className="mt-[14px] flex flex-wrap items-center gap-[10px]">
           <label className="inline-flex h-10 cursor-pointer items-center gap-2 rounded-full border border-[var(--border)] bg-[var(--surface)] px-[14px] font-body text-[13px] font-semibold text-[var(--text-soft)] [transition:all_0.18s_ease] hover:border-[var(--border-dark)] hover:bg-[var(--bg-soft)] [&>svg]:h-[15px] [&>svg]:w-[15px] [&>svg]:shrink-0 [&>svg]:text-[var(--text-muted)]">
             {icons.mapPin}
-            <input
-              type="text"
-              placeholder="Location"
-              value={location}
-              onChange={(e) => setLocation(e.target.value)}
-              className="w-[140px] border-none bg-transparent p-0 font-body text-[13px] font-semibold text-[var(--primary)] outline-none placeholder:text-[var(--text-muted)]"
-            />
+            <select
+              value={locationState}
+              onChange={(e) => {
+                setLocationState(e.target.value);
+                setLocationDistrict("");
+              }}
+              className="cursor-pointer appearance-none border-none bg-transparent p-0 font-body text-[13px] font-semibold text-[var(--primary)] outline-none max-w-[140px]"
+            >
+              {INDIAN_STATES.map((s) => (
+                <option key={s.value} value={s.value}>{s.label}</option>
+              ))}
+            </select>
           </label>
+
+          {locationState && (
+            <label className="inline-flex h-10 cursor-pointer items-center gap-2 rounded-full border border-[var(--border)] bg-[var(--surface)] px-[14px] font-body text-[13px] font-semibold text-[var(--text-soft)] [transition:all_0.18s_ease] hover:border-[var(--border-dark)] hover:bg-[var(--bg-soft)] [&>svg]:h-[15px] [&>svg]:w-[15px] [&>svg]:shrink-0 [&>svg]:text-[var(--text-muted)]">
+              {icons.mapPin}
+              <select
+                value={locationDistrict}
+                onChange={(e) => setLocationDistrict(e.target.value)}
+                className="cursor-pointer appearance-none border-none bg-transparent p-0 font-body text-[13px] font-semibold text-[var(--primary)] outline-none max-w-[140px]"
+              >
+                <option value="">All Districts</option>
+                {STATE_DISTRICTS[locationState]?.map((d) => (
+                  <option key={d} value={d}>{d}</option>
+                ))}
+              </select>
+            </label>
+          )}
 
           <label className="inline-flex h-10 cursor-pointer items-center gap-2 rounded-full border border-[var(--border)] bg-[var(--surface)] px-[14px] font-body text-[13px] font-semibold text-[var(--text-soft)] [transition:all_0.18s_ease] hover:border-[var(--border-dark)] hover:bg-[var(--bg-soft)] [&>svg]:h-[15px] [&>svg]:w-[15px] [&>svg]:shrink-0 [&>svg]:text-[var(--text-muted)]">
             {icons.briefcase}

@@ -168,7 +168,7 @@ export default function ResumeUploadForm({ onUploadSuccess }) {
         Upload Your Resume
       </h2>
       <p style={{ color: "var(--text-secondary)", marginBottom: 20, fontSize: 15 }}>
-        Upload your resume in PDF format. We'll analyze it to extract your skills and provide personalized job matches.
+        Upload your resume in PDF format. We&apos;ll analyze it to extract your skills and provide personalized job matches.
       </p>
 
       {/* Drag and Drop Area */}

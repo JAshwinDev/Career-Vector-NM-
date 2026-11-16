@@ -2,6 +2,8 @@ require("dotenv").config({ path: require("path").join(__dirname, ".env") });
 
 const express = require("express");
 const cors = require("cors");
+const helmet = require("helmet");
+const rateLimit = require("express-rate-limit");
 const mongoose = require("mongoose");
 
 const app = express();
@@ -15,6 +17,34 @@ const allowedOrigins = [
   "http://127.0.0.1:5173"
 ];
 
+// Chrome extension CORS allowlist: comma-separated extension IDs (see
+// .env.example). Empty = accept any chrome-extension:// origin (legacy dev
+// behavior, unchanged until the operator configures it).
+const allowedExtensionIds = (process.env.ALLOWED_EXTENSION_IDS || "")
+  .split(",")
+  .map((id) => id.trim())
+  .filter(Boolean);
+
+// Security headers for API responses. CSP is off (JSON only, no HTML is
+// served) and CORP is cross-origin so the frontend and Chrome extension
+// can still read responses cross-origin.
+app.use(helmet({
+  contentSecurityPolicy: false,
+  crossOriginResourcePolicy: { policy: "cross-origin" }
+}));
+
+// Basic abuse protection: 300 requests / 15 min / IP (tunable via
+// RATE_LIMIT_MAX). Skipped under NODE_ENV=test so the test suite never
+// trips its own limiter.
+if (process.env.NODE_ENV !== "test") {
+  app.use(rateLimit({
+    windowMs: 15 * 60 * 1000,
+    limit: Number(process.env.RATE_LIMIT_MAX) || 300,
+    standardHeaders: true,
+    legacyHeaders: false
+  }));
+}
+
 app.use(cors({
   origin(origin, callback) {
     // Allow non-browser clients (curl, ML service, server-to-server calls).
@@ -23,9 +53,15 @@ app.use(cors({
     // Allow the known web frontend origins.
     if (allowedOrigins.includes(origin)) return callback(null, true);
 
-    // Allow the Chrome extension (origin is chrome-extension://<random-id>,
-    // stable per install, so match by scheme).
-    if (origin.startsWith("chrome-extension://")) return callback(null, true);
+    // Allow the Chrome extension. Origin is chrome-extension://<id>.
+    // When ALLOWED_EXTENSION_IDS is configured, only those IDs pass;
+    // otherwise any extension is accepted (previous behavior).
+    if (origin.startsWith("chrome-extension://")) {
+      const extId = origin.slice("chrome-extension://".length);
+      if (allowedExtensionIds.length === 0 || allowedExtensionIds.includes(extId)) {
+        return callback(null, true);
+      }
+    }
 
     return callback(new Error(`Origin ${origin} not allowed by CORS`));
   }

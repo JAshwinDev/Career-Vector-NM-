@@ -263,7 +263,7 @@ export default function ResultsDashboard({ result, onReset }) {
 
       {!isRoadmapOnly && (
         <div className="mb-4 rounded-[var(--radius-md)] border border-[var(--border)] border-t-[3px] border-t-[var(--accent)] bg-[var(--surface)] p-4 shadow-[var(--shadow-subtle)] transition-all duration-[0.25s] ease-[cubic-bezier(0.25,0.1,0.25,1)] hover:-translate-y-[2px] hover:shadow-[var(--shadow-hover)] sm:p-6" style={{
-          display: 'flex', alignItems: 'center', gap: "var(--space-6)", flexWrap: 'wrap',
+          display: 'flex', alignItems: 'center', gap: "clamp(16px, 3vw, 32px)", flexWrap: 'wrap',
           marginBottom: "var(--space-5)"
         }}>
           <ScoreRing score={displayScore} />
@@ -329,7 +329,7 @@ export default function ResultsDashboard({ result, onReset }) {
               </div>
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: "var(--space-5)" }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(260px, 100%), 1fr))', gap: "var(--space-5)" }}>
               <div style={{ background: "var(--bg-soft)", padding: "1.25rem", borderRadius: "var(--radius-md)" }}>
                 <h3 style={{
                   fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: "0.9375rem",

@@ -20,3 +20,8 @@ export function useMediaQuery(query) {
 export function useIsMobile() {
   return useMediaQuery("(max-width: 768px)");
 }
+
+// Matches the sidebar drawer breakpoint (Tailwind max-lg = <1025px).
+export function useIsBelowLg() {
+  return useMediaQuery("(max-width: 1024px)");
+}

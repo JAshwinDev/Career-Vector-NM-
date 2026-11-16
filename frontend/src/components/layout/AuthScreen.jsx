@@ -19,7 +19,7 @@ export default function AuthScreen() {
     );
     const redirectPath = new URLSearchParams(window.location.search).get("redirect");
     const target = redirectPath && redirectPath.startsWith("/") ? redirectPath : window.location.pathname;
-    navigate(target === "/login" ? "/" : target);
+    navigate(target === "/login" ? "/dashboard" : target);
   };
 
   return <LoginPage onLoginSuccess={handleSuccess} />;

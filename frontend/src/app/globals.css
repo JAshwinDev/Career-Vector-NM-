@@ -247,6 +247,59 @@ label {
   }
 }
 
+/* Prevent horizontal overflow */
+html, body {
+  max-width: 100vw;
+  overflow-x: hidden;
+}
+
+/* Ensure chips and inline elements wrap */
+[class*="flex-wrap"],
+[class*="flex-wrap"] * {
+  flex-wrap: wrap;
+}
+
+/* Responsive images */
+img, video, canvas {
+  max-width: 100%;
+  height: auto;
+}
+
+/* Cards and grids wrap properly */
+[class*="grid-cols"] {
+  grid-auto-flow: dense;
+}
+
+/* Touch target minimum */
+@media (max-width: 768px) {
+  button,
+  [role="button"],
+  a.button,
+  input[type="button"],
+  input[type="submit"],
+  input[type="reset"],
+  label[style*="cursor: pointer"] {
+    min-height: 44px;
+    min-width: 44px;
+  }
+}
+
+/* Ensure form inputs don't cause zoom on iOS */
+@media (max-width: 768px) {
+  input,
+  textarea,
+  select {
+    font-size: 1rem !important;
+  }
+}
+
+/* Better tap highlights */
+@media (max-width: 768px) {
+  * {
+    -webkit-tap-highlight-color: rgba(255, 106, 61, 0.2);
+  }
+}
+
 /* ============================================================
    JOB DESCRIPTION (sanitized HTML typography - kept in CSS)
    ============================================================ */

@@ -7,6 +7,9 @@ const path = require("path");
 const DATA_DIR = fs.mkdtempSync(path.join(os.tmpdir(), "careervector-test-"));
 process.env.DATA_DIR = DATA_DIR;
 
+// Keep the app's rate limiter (see app.js) out of the test path.
+process.env.NODE_ENV = "test";
+
 // Speed up tests that touch the Remotive client.
 process.env.REMOTIVE_RATE_LIMIT_MS = "0";
 process.env.REMOTIVE_CACHE_TTL_MS = "60000";

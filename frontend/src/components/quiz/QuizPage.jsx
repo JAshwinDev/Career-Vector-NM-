@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { useIsMobile } from "../../hooks/useMediaQuery.js";
-import { logInteraction } from "../../utils/api.js";
+import { logInteraction, API_BASE_URL } from "../../utils/api.js";
 
 export default function QuizPage({ targetRole = "Software Developer", onQuizComplete }) {
   const [quiz, setQuiz] = useState(null);
@@ -30,7 +30,7 @@ export default function QuizPage({ targetRole = "Software Developer", onQuizComp
 
   const generateQuiz = async () => {
     try {
-      const response = await fetch("http://localhost:5000/quiz/generate", {
+      const response = await fetch(`${API_BASE_URL}/quiz/generate`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -75,7 +75,7 @@ export default function QuizPage({ targetRole = "Software Developer", onQuizComp
     }));
 
     try {
-      const response = await fetch(`http://localhost:5000/quiz/${quiz.quizId}/submit`, {
+      const response = await fetch(`${API_BASE_URL}/quiz/${quiz.quizId}/submit`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -359,7 +359,7 @@ const styles = {
     fontWeight: "500"
   },
   questionText: {
-    fontSize: "20px",
+    fontSize: "clamp(17px, 4vw, 20px)",
     fontWeight: "bold",
     margin: "15px 0",
     color: "#111827"
@@ -421,8 +421,8 @@ const styles = {
     color: "#111827"
   },
   scoreCircle: {
-    width: "120px",
-    height: "120px",
+    width: "clamp(100px, 30vw, 120px)",
+    height: "clamp(100px, 30vw, 120px)",
     borderRadius: "50%",
     display: "flex",
     flexDirection: "column",

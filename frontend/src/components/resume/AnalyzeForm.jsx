@@ -118,9 +118,9 @@ export default function AnalyzeForm({ onResult, onLoading, user, onLoginRequired
         <p>Upload your resume or enter your skills, then pick one target role. Your report is saved to your student profile.</p>
       </div>
 
-      <div className="mb-4 rounded-[var(--radius-md)] border border-[var(--border)] border-t-[3px] border-t-[var(--accent)] bg-[var(--surface)] p-4 shadow-[var(--shadow-subtle)] transition-all duration-[0.25s] ease-[cubic-bezier(0.25,0.1,0.25,1)] hover:-translate-y-[2px] hover:shadow-[var(--shadow-hover)] sm:p-6" style={{ maxWidth: 820, margin: "0 auto", padding: "var(--space-5)" }}>
+      <div className="mb-4 rounded-[var(--radius-md)] border border-[var(--border)] border-t-[3px] border-t-[var(--accent)] bg-[var(--surface)] p-4 shadow-[var(--shadow-subtle)] transition-all duration-[0.25s] ease-[cubic-bezier(0.25,0.1,0.25,1)] hover:-translate-y-[2px] hover:shadow-[var(--shadow-hover)] sm:p-6" style={{ maxWidth: 820, margin: "0 auto", padding: "clamp(16px, 3vw, 24px)" }}>
         <div style={{ marginBottom: "var(--space-5)" }}>
-          <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", marginBottom: "1rem" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", marginBottom: "1rem", flexWrap: "wrap" }}>
             <div style={{
               width: 36, height: 36, background: "var(--surface)",
               display: "flex", alignItems: "center", justifyContent: "center",
@@ -136,7 +136,8 @@ export default function AnalyzeForm({ onResult, onLoading, user, onLoginRequired
             <label style={{
               display: "block",
               marginBottom: "1rem",
-              padding: "1rem",
+              padding: "1rem 1.25rem",
+              minHeight: "52px",
               background: "var(--surface)",
               border: "2px dashed var(--primary)",
               cursor: "pointer",
@@ -162,8 +163,8 @@ export default function AnalyzeForm({ onResult, onLoading, user, onLoginRequired
               style={{
                 width: "100%", background: "var(--bg)", border: "1px solid var(--border)", borderRadius: "var(--radius-sm)",
                 color: "var(--primary)", fontFamily: "var(--font-body)",
-                fontSize: "0.9375rem", padding: "0.7rem 0.875rem", outline: "none",
-                marginBottom: "0.375rem"
+                fontSize: "1rem", padding: "1rem 1rem", outline: "none",
+                marginBottom: "0.375rem", minHeight: "48px"
               }}
             />
             <div style={{ fontSize: "0.875rem", color: "var(--text-soft)" }}>
@@ -200,7 +201,7 @@ export default function AnalyzeForm({ onResult, onLoading, user, onLoginRequired
               style={{
                 width: "100%", background: "var(--bg)", border: "1px solid var(--border)", borderRadius: "var(--radius-sm)",
                 color: "var(--primary)", fontFamily: "var(--font-body)",
-                fontSize: "0.9375rem", padding: "0.7rem 0.875rem", outline: "none"
+                fontSize: "1rem", padding: "1rem 1rem", outline: "none", minHeight: "48px"
               }}
             />
             <datalist id="roles-datalist">
@@ -225,7 +226,7 @@ export default function AnalyzeForm({ onResult, onLoading, user, onLoginRequired
           className={canSubmit
             ? "inline-flex cursor-pointer items-center justify-center gap-2 whitespace-nowrap rounded-[var(--radius-sm)] border border-transparent bg-[var(--primary)] p-[10px_18px] font-body text-[0.9375rem] font-semibold leading-none text-[var(--surface)] no-underline transition-all duration-[0.25s] ease-[cubic-bezier(0.25,0.1,0.25,1)] hover:-translate-y-px hover:bg-[var(--primary-soft)] hover:shadow-[var(--shadow-md)]"
             : "inline-flex cursor-pointer items-center justify-center gap-2 whitespace-nowrap rounded-[var(--radius-sm)] border border-[var(--border)] bg-transparent p-[10px_18px] font-body text-[0.9375rem] font-semibold leading-none text-[var(--primary)] no-underline transition-all duration-[0.25s] ease-[cubic-bezier(0.25,0.1,0.25,1)] hover:-translate-y-px hover:bg-[var(--bg-soft)] hover:shadow-[var(--shadow-subtle)]"}
-          onClick={handleSubmit} style={{ width: "100%", fontSize: "1rem", padding: "0.875rem" }}
+          onClick={handleSubmit} style={{ width: "100%", fontSize: "1rem", padding: "1rem", minHeight: "48px" }}
         >
           {!user ? "LOGIN TO ANALYZE" : canSubmit ? "GENERATE CAREER ANALYSIS" : "COMPLETE STEPS TO CONTINUE"}
         </button>

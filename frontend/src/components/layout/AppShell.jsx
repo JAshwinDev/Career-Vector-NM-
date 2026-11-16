@@ -29,7 +29,7 @@ export default function AppShell({ children }) {
     <div className="min-h-screen bg-[var(--bg)]">
       <Sidebar />
       <main
-        className={`w-full flex-1 min-h-screen py-6 px-[clamp(16px,3vw,32px)] [transition:margin-left_250ms_ease] max-md:ml-0 max-md:pt-16 ${sidebarCollapsed ? "ml-[var(--rail-w)]" : "ml-[var(--sidebar-w)]"}`}
+        className={`min-h-screen py-6 px-[clamp(16px,3vw,32px)] [transition:margin-left_250ms_ease] max-lg:ml-0 max-lg:pt-16 ${sidebarCollapsed ? "ml-[var(--rail-w)]" : "ml-[var(--sidebar-w)]"}`}
       >
         {children}
       </main>

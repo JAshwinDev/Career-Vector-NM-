@@ -21,7 +21,7 @@ export default function LoginRoute() {
       })
     );
     const redirectPath = new URLSearchParams(window.location.search).get("redirect");
-    navigate(redirectPath && redirectPath.startsWith("/") ? redirectPath : "/");
+    navigate(redirectPath && redirectPath.startsWith("/") ? redirectPath : "/dashboard");
   };
 
   return <LoginPage onLoginSuccess={handleSuccess} />;

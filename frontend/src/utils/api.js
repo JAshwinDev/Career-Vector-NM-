@@ -1,4 +1,5 @@
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:5000";
+export const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:5000";
+export const ML_SERVICE_URL = process.env.NEXT_PUBLIC_ML_SERVICE_URL || "http://localhost:5001";
 
 function authHeaders() {
   const token = localStorage.getItem("authToken");
@@ -115,7 +116,7 @@ export async function getPeerComparison({ role, score, entryId } = {}) {
 }
 
 export async function generateRoadmap({ userSkills, jobSkills, targetRole, jobRequirements = [] }) {
-  const response = await fetch("http://localhost:5001/generate-roadmap", {
+  const response = await fetch(`${ML_SERVICE_URL}/generate-roadmap`, {
     method: "POST",
     headers: { "Content-Type": "application/json", ...authHeaders() },
     body: JSON.stringify({

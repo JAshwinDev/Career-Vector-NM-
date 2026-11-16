@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useApp } from "./SidebarProvider.jsx";
-import { useIsMobile } from "../../hooks/useMediaQuery.js";
+import { useIsBelowLg } from "../../hooks/useMediaQuery.js";
 
 const svgProps = {
   viewBox: "0 0 24 24",
@@ -78,20 +78,12 @@ export default function Sidebar() {
     closeMobile
   } = useApp();
 
-  const isMobile = useIsMobile();
-
-  // Read the ?tab= param only after mount so SSR and client markup match on
-  // the first render.
-  const [tab, setTab] = useState(null);
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    setTab(new URLSearchParams(window.location.search).get("tab"));
-  }, [pathname]);
+  const isMobile = useIsBelowLg();
 
   const mainItems = [
-    { label: "Dashboard", icon: icons.dashboard, path: "/dashboard", active: pathname === "/dashboard" && tab !== "history" },
+    { label: "Dashboard", icon: icons.dashboard, path: "/dashboard", active: pathname === "/dashboard" },
     { label: "Skill Analysis", icon: icons.analysis, path: "/", active: pathname === "/" },
-    { label: "Job History", icon: icons.history, path: "/dashboard?tab=history", active: pathname === "/dashboard" && tab === "history" },
+    { label: "Job History", icon: icons.history, path: "/history", active: pathname === "/history" },
     { label: "Recommendations", icon: icons.recommend, path: "/jobs", active: pathname === "/jobs" }
   ];
 
@@ -177,7 +169,7 @@ export default function Sidebar() {
     <>
       <button
         type="button"
-        className="hidden max-md:fixed max-md:left-3 max-md:top-3 max-md:z-[90] max-md:grid max-md:h-[42px] max-md:w-[42px] max-md:cursor-pointer max-md:place-items-center max-md:rounded-[12px] max-md:border max-md:border-[var(--border)] max-md:bg-[var(--surface)] max-md:text-[var(--primary)] max-md:shadow-[var(--shadow-sm)]"
+        className="hidden max-lg:fixed max-lg:left-3 max-lg:top-3 max-lg:z-[90] max-lg:grid max-lg:h-[42px] max-lg:w-[42px] max-lg:cursor-pointer max-lg:place-items-center max-lg:rounded-[12px] max-lg:border max-lg:border-[var(--border)] max-lg:bg-[var(--surface)] max-lg:text-[var(--primary)] max-lg:shadow-[var(--shadow-sm)]"
         onClick={openMobile}
         aria-label="Open navigation menu"
         aria-expanded={mobileOpen}
@@ -196,8 +188,8 @@ export default function Sidebar() {
           "fixed inset-y-0 left-0 z-[100] flex h-screen flex-col overflow-hidden border-r border-[var(--border)] bg-[var(--surface)]",
           "[transition:width_250ms_ease]",
           sidebarCollapsed ? "w-[var(--rail-w)]" : "w-[var(--sidebar-w)]",
-          "max-md:w-[var(--sidebar-w)] max-md:-translate-x-full max-md:shadow-[var(--shadow-lg)] max-md:[transition:transform_0.3s_ease]",
-          mobileOpen && "max-md:translate-x-0"
+          "max-lg:w-[var(--sidebar-w)] max-lg:-translate-x-full max-lg:shadow-[var(--shadow-lg)] max-lg:[transition:transform_0.3s_ease]",
+          mobileOpen && "max-lg:translate-x-0"
         ]
           .filter(Boolean)
           .join(" ")}
@@ -228,7 +220,7 @@ export default function Sidebar() {
               CV
             </span>
             <span
-              className={`whitespace-nowrap font-display text-base font-bold tracking-tight text-[var(--primary)]${sidebarCollapsed ? " hidden max-md:inline" : ""}`}
+              className={`whitespace-nowrap font-display text-base font-bold tracking-tight text-[var(--primary)]${sidebarCollapsed ? " hidden max-lg:inline" : ""}`}
             >
               Career<em className="not-italic text-[var(--accent)]">Vector</em>
             </span>
@@ -240,7 +232,7 @@ export default function Sidebar() {
           aria-label="Main navigation"
         >
           <span
-            className={`shrink-0 whitespace-nowrap px-3 pb-2 pt-5 text-[11px] font-semibold uppercase tracking-[0.06em] text-[var(--text-muted)]${sidebarCollapsed ? " hidden max-md:block" : ""}`}
+            className={`shrink-0 whitespace-nowrap px-3 pb-2 pt-5 text-[11px] font-semibold uppercase tracking-[0.06em] text-[var(--text-muted)]${sidebarCollapsed ? " hidden max-lg:block" : ""}`}
           >
             Main
           </span>
@@ -249,7 +241,7 @@ export default function Sidebar() {
 
         <div className="shrink-0 border-t border-[var(--border)] p-3">
           <div
-            className={`flex items-center gap-3 rounded-[12px] [transition:background_160ms_ease] hover:bg-[var(--hover-bg)]${sidebarCollapsed ? " justify-center px-0 py-2 max-md:justify-start max-md:p-2" : " p-[10px]"}`}
+            className={`flex items-center gap-3 rounded-[12px] [transition:background_160ms_ease] hover:bg-[var(--hover-bg)]${sidebarCollapsed ? " justify-center px-0 py-2 max-lg:justify-start max-lg:p-2" : " p-[10px]"}`}
           >
             <span className="grid h-[38px] w-[38px] shrink-0 place-items-center overflow-hidden rounded-full bg-[linear-gradient(135deg,var(--accent),var(--accent-bright))] text-sm font-bold text-white">
               {avatarContent}
@@ -258,7 +250,7 @@ export default function Sidebar() {
             {user ? (
               <>
                 <span
-                  className={`flex min-w-0 flex-1 flex-col${sidebarCollapsed ? " hidden max-md:flex" : ""}`}
+                  className={`flex min-w-0 flex-1 flex-col${sidebarCollapsed ? " hidden max-lg:flex" : ""}`}
                 >
                   <span className="overflow-hidden whitespace-nowrap text-[13px] font-semibold text-ellipsis text-[var(--primary)]">
                     {user.name || user.email}
@@ -271,7 +263,7 @@ export default function Sidebar() {
                 </span>
                 <button
                   type="button"
-                  className={`grid h-[34px] w-[34px] shrink-0 cursor-pointer place-items-center rounded-[8px] border-none bg-transparent text-[var(--text-muted)] [transition:background_160ms_ease,color_160ms_ease] hover:bg-[var(--bg-soft)] hover:text-[var(--danger)] [&_svg]:h-[18px] [&_svg]:w-[18px]${sidebarCollapsed ? " hidden max-md:flex" : ""}`}
+                  className={`grid h-[34px] w-[34px] shrink-0 cursor-pointer place-items-center rounded-[8px] border-none bg-transparent text-[var(--text-muted)] [transition:background_160ms_ease,color_160ms_ease] hover:bg-[var(--bg-soft)] hover:text-[var(--danger)] [&_svg]:h-[18px] [&_svg]:w-[18px]${sidebarCollapsed ? " hidden max-lg:flex" : ""}`}
                   onClick={() => setLogoutConfirmOpen(true)}
                   aria-label="Sign out"
                 >
@@ -281,13 +273,13 @@ export default function Sidebar() {
             ) : (
               <>
                 <span
-                  className={`flex-1 text-[13px] font-medium text-[var(--text-soft)]${sidebarCollapsed ? " hidden max-md:flex" : ""}`}
+                  className={`flex-1 text-[13px] font-medium text-[var(--text-soft)]${sidebarCollapsed ? " hidden max-lg:flex" : ""}`}
                 >
                   Not signed in
                 </span>
                 <button
                   type="button"
-                  className={`cursor-pointer rounded-[8px] border-none bg-[var(--accent)] px-3 py-1.5 font-body text-xs font-semibold text-white [transition:background_160ms_ease] hover:bg-[var(--accent-bright)]${sidebarCollapsed ? " hidden max-md:flex" : ""}`}
+                  className={`cursor-pointer rounded-[8px] border-none bg-[var(--accent)] px-3 py-1.5 font-body text-xs font-semibold text-white [transition:background_160ms_ease] hover:bg-[var(--accent-bright)]${sidebarCollapsed ? " hidden max-lg:flex" : ""}`}
                   onClick={() => {
                     closeMobile();
                     navigate("/login");

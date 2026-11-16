@@ -257,7 +257,7 @@ export default function Dashboard() {
                   }}
                 >
                   <div style={{ display: "flex", flexWrap: "wrap", gap: 12, justifyContent: "space-between", alignItems: "start" }}>
-                    <div style={{ flex: 1 }}>
+                    <div style={{ flex: "1 1 200px", minWidth: 0 }}>
                       <h3
                         style={{
                           fontSize: 16,
